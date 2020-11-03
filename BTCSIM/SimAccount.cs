@@ -92,7 +92,7 @@ namespace BTCSIM
     public class LogData
     {
         public DataSet log_data_set { get; set; }
-        public DataTable log_data_table { get; set; }
+        public DataTable log_data_table { get; set; }   
         public List<double> total_pl_log { get; set; } 
 
 
@@ -190,6 +190,7 @@ namespace BTCSIM
             check_cancel(i, dt);
             check_execution(i, dt, open, high, low);
             if (holding_data.holding_side != "")
+                //performance_data.unrealized_pl = holding_data.holding_side == "buy" ? (close - holding_data.holding_price) / holding_data.holding_price * holding_data.holding_size : (holding_data.holding_price - close) / holding_data.holding_price * holding_data.holding_size;
                 performance_data.unrealized_pl = holding_data.holding_side == "buy" ? (close - holding_data.holding_price) * holding_data.holding_size : (holding_data.holding_price - close) * holding_data.holding_size;
             else
                 performance_data.unrealized_pl = 0;
@@ -239,7 +240,7 @@ namespace BTCSIM
 
         private void del_order(int order_serial_num, int i)
         {
-            if (order_data.order_serial_list.Contains(order_serial_num) && order_data.order_i[order_serial_num] < i)
+            if (order_data.order_serial_list.Contains(order_serial_num))
             {
                 order_data.order_serial_list.Remove(order_serial_num);
                 order_data.order_side.Remove(order_serial_num);
@@ -255,11 +256,11 @@ namespace BTCSIM
 
         public void cancel_order(int order_serial_num, int i, string dt)
         {
-            if (order_data.order_cancel[order_serial_num] != true)
+            if (order_data.order_serial_list.Contains(order_serial_num))
             {
-                if (order_data.order_serial_list.Contains(order_serial_num))
+                if (order_data.order_cancel[order_serial_num] != true)
                 {
-                    order_data.order_cancel[order_serial_num] = true;
+                    order_data.order_cancel[order_serial_num] = true;   
                     //order_data.order_i[order_serial_num] = i;
                 }
                 else
@@ -285,12 +286,11 @@ namespace BTCSIM
         {
             if (maker_taker == "maker")
             {
-                performance_data.total_fee += size * price * maker_fee;
-                performance_data.num_maker_order++;
+                performance_data.total_fee += size * maker_fee;
             }
             else if (maker_taker == "taker")
             {
-                performance_data.total_fee += size * price * taker_fee;
+                performance_data.total_fee += size * taker_fee;
             }
             else
             {
@@ -307,6 +307,7 @@ namespace BTCSIM
                 if (order_data.order_cancel[s] == true)
                 {
                     del_order(s, i);
+                    log_data.add_log_data(i, dt, "cancelled", holding_data, order_data, performance_data);
                 }
             }
         }
@@ -324,7 +325,7 @@ namespace BTCSIM
                 }
                 else if (order_data.order_i[s] < i)
                 {
-                    if (order_data.order_type[s] == "limit" && ((order_data.order_side[s] == "buy" && order_data.order_price[s] > low) || (order_data.order_side[s] == "sell" && order_data.order_price[s] < high)))
+                    if (order_data.order_type[s] == "limit" && ((order_data.order_side[s] == "buy" && order_data.order_price[s] > low+0.5) || (order_data.order_side[s] == "sell" && order_data.order_price[s] < high-0.5)))
                     {
                         process_execution(order_data.order_price[s], s, i, dt);
                         del_order(s, i);
@@ -335,6 +336,7 @@ namespace BTCSIM
 
         private void process_execution(double exec_price, int order_serial_num, int i, string dt)
         {
+            calc_fee(order_data.order_size[order_serial_num], exec_price, order_data.order_type[order_serial_num] == "limit" ? "maker" : "taker");
             if (holding_data.holding_side == "")
             {
                 holding_data.update_holding(order_data.order_side[order_serial_num], exec_price, order_data.order_size[order_serial_num], i);
@@ -361,8 +363,8 @@ namespace BTCSIM
             }
             else if (holding_data.holding_size < order_data.order_size[order_serial_num])
             {
-                calc_executed_pl(exec_price, order_data.order_size[order_serial_num], i);
-                holding_data.update_holding(order_data.order_side[order_serial_num], order_data.order_price[order_serial_num], order_data.order_size[order_serial_num] - holding_data.holding_size, i);
+                calc_executed_pl(exec_price, holding_data.holding_size, i);
+                holding_data.update_holding(order_data.order_side[order_serial_num], exec_price, order_data.order_size[order_serial_num] - holding_data.holding_size, i);
                 log_data.add_log_data(i, dt, "'Exit & Entry Order (h<o)", holding_data, order_data, performance_data);
             }
             else
@@ -373,6 +375,7 @@ namespace BTCSIM
 
         private void calc_executed_pl(double exec_price, double size, int i)
         {
+            //var pl = holding_data.holding_side == "buy" ? (exec_price - holding_data.holding_price) / holding_data.holding_price * size : (holding_data.holding_price - exec_price) / holding_data.holding_price * size;
             var pl = holding_data.holding_side == "buy" ? (exec_price - holding_data.holding_price) * size : (holding_data.holding_price - exec_price) * size;
             performance_data.realized_pl += Math.Round(pl, 6);
             performance_data.num_trade++;

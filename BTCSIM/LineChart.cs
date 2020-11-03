@@ -8,9 +8,9 @@ namespace BTCSIM
 {
     static public class LineChart
     {
-        static public void DisplayLineChart(List<double> data)
+        static public void DisplayLineChart(List<double> data, int opt_win_size, double kijun_val)
         {
-
+            Console.WriteLine("displaying line chart...");
             Encoding enc = Encoding.GetEncoding("UTF-8");
             StreamWriter writer = new StreamWriter(@"./line_chart.html", false, enc);
             writer.WriteLine(@"<!DOCTYPE html>"+ "\r\n" +
@@ -20,7 +20,7 @@ namespace BTCSIM
                 @"<title> グラフ </title>" + "\r\n" +
                 @"</head>" + "\r\n" +
                 @"<body>" + "\r\n" +
-                @"<h1> 折れ線グラフ </h1>" + "\r\n"+
+                @"<h1>" + "win_size=" + opt_win_size.ToString()+ ", kijun_val="+kijun_val.ToString()+"</h1>" + "\r\n"+
                 @"<canvas id=""myLineChart""></canvas>" + "\r\n" +
                 @"<script src=""https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.js""></script>" + "\r\n" +
                 @"<script>" + "\r\n" +
