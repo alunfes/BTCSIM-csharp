@@ -14,7 +14,7 @@ namespace BTCSIM
 
         private double sigmoid(double input_val)
         {
-            return 1.0 / (1 + Math.Exp(-input_val));
+            return 1.0 / (1.0 + Math.Exp(-input_val));
         }
 
         public double[] calcNN(double[] input_vals, int[] num_units, double[] weight1, double[] weight2, double[] bias1, double[] bias2, int activation)
@@ -53,7 +53,6 @@ namespace BTCSIM
                 Console.WriteLine("# of input vals and units in first layer is not matched!");
                 return new double[0];
             }
-            return new double[0];
         }
 
         public int getActivatedUnit(double[] output_vals)

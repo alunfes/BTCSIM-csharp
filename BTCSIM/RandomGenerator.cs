@@ -4,25 +4,31 @@ using System.Linq;
 
 namespace BTCSIM
 {
-    static public class RandomGenerator
+    public static class RandomSeed
     {
-        static Random rnd;
+        public static Random rnd { get; set; }
+
         public static void initialize()
         {
-            rnd = new System.Random();
+            rnd = new Random();
         }
-
-        public static double[] getRandomArray(int num)
+    }
+    
+    
+    class RandomGenerator
+    {
+        public double[] getRandomArray(int num)
         {
             double[] res = new double[num];
             for (int i = 0; i < num; i++)
-                res[i] = (rnd.NextDouble() * 2.0) - 1.0;
+                res[i] = (RandomSeed.rnd.Next(-10000,10000)) /10000.0;
+                //res[i] = (RandomSeed.rnd.NextDouble() * 2.0) - 1.0;
             return res;
         }
 
-        public static double getRandomArrayRange(int minv, int maxv)
+        public double getRandomArrayRange(int minv, int maxv)
         {
-            double res = (rnd.Next(minv * 1000, maxv * 1000)) / 1000.0;
+            double res = (RandomSeed.rnd.Next(minv * 1000, maxv * 1000)) / 1000.0;
             return res;
         }
     }

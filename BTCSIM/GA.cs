@@ -20,15 +20,16 @@ namespace BTCSIM
         
         public Gene(int[] units)
         {
+            var random_generator = new RandomGenerator();
             this.num_units = units;
             weight_gene1 = new double[units[0] * units[1]];
             bias_gene1 = new double[units[1]];
             weight_gene2 = new double[units[1] * units[2]];
             bias_gene2 = new double[units[2]];
-            weight_gene1 = RandomGenerator.getRandomArray(units[0] * units[1]);
-            bias_gene1 = RandomGenerator.getRandomArray(units[1]);
-            weight_gene2 = RandomGenerator.getRandomArray(units[1] * units[2]);
-            bias_gene2 = RandomGenerator.getRandomArray(units[2]);
+            weight_gene1 = random_generator.getRandomArray(units[0] * units[1]);
+            bias_gene1 = random_generator.getRandomArray(units[1]);
+            weight_gene2 = random_generator.getRandomArray(units[1] * units[2]);
+            bias_gene2 = random_generator.getRandomArray(units[2]);
         }
     }
 
@@ -50,20 +51,65 @@ namespace BTCSIM
 
         public List<int> best_chromo_gene { get; set; }
 
+        private RandomGenerator random_generator { get; set; }
+
 
         public GA()
         {
+            RandomSeed.initialize();
             generation_time_log = new List<int>();
             estimated_time_to_completion = -1;
             best_chromo_log = new List<int>();
             best_eva_log = new List<double>();
             best_ac_log = new List<SimAccount>();
+            random_generator = new RandomGenerator();
+        }
+
+
+        public Gene readWeights()
+        {
+            using(StreamReader sr =new StreamReader(@"./best_weight.csv", Encoding.UTF8, false))
+            {
+                var data = new List<string>();
+                while(true)
+                {
+                    data.Add(sr.ReadLine());
+                    if (data.Last()==null)
+                        break;
+                }
+                data.RemoveAt(data.Count - 1); //remove null
+                var units = new int[3] { Convert.ToInt32(data[data.IndexOf("units") + 1]), Convert.ToInt32(data[data.IndexOf("units") + 2]), Convert.ToInt32(data[data.IndexOf("units") + 3]) };
+                var chrom = new Gene(units);
+
+
+                for (int i=Convert.ToInt32(data.IndexOf("bias1"))+1; i< Convert.ToInt32(data.IndexOf("weight1")); i++)
+                    chrom.bias_gene1[i- Convert.ToInt32(data.IndexOf("bias1")) - 1] = Convert.ToDouble(data[i]);
+                for (int i = Convert.ToInt32(data.IndexOf("weight1")) + 1; i < Convert.ToInt32(data.IndexOf("bias2")); i++)
+                    chrom.weight_gene1[i- Convert.ToInt32(data.IndexOf("weight1")) - 1] = Convert.ToDouble(data[i]);
+                for (int i = Convert.ToInt32(data.IndexOf("bias2")) + 1; i < Convert.ToInt32(data.IndexOf("weight2")); i++)
+                    chrom.bias_gene2[i- Convert.ToInt32(data.IndexOf("bias2")) - 1] = Convert.ToDouble(data[i]);
+                for (int i = Convert.ToInt32(data.IndexOf("weight2")) + 1; i < data.Count; i++)
+                    chrom.weight_gene2[i- Convert.ToInt32(data.IndexOf("weight2")) - 1] = Convert.ToDouble(data[i]);
+                return chrom;
+            }
+        }
+
+        public SimAccount sim_ga(int from, int to, Gene chromo)
+        {
+            var sim = new Sim();
+            var ac = new SimAccount();
+            ac = sim.sim_ga(from, to, chromo, ac);
+            Console.WriteLine("pl=" + ac.performance_data.total_pl);
+            Console.WriteLine("num trade=" + ac.performance_data.num_trade);
+            Console.WriteLine("win rate=" + ac.performance_data.win_rate);
+            Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
+            LineChart.DisplayLineChart(ac.log_data.total_pl_log,0,0);
+            return ac;
         }
 
         public void start_ga(int from, int to, int num_chromos, int num_generations, int[] units, double mutation_rate)
         {
             //initialize chromos
-            
             Console.WriteLine("started GA");
             generate_chromos(num_chromos, units);
             for (int i = 0; i < num_generations; i++)
@@ -73,27 +119,36 @@ namespace BTCSIM
                 //evaluation chromos
                 var eva_dic = new ConcurrentDictionary<int, double>();
                 var ac_dic = new ConcurrentDictionary<int, SimAccount>();
-                Parallel.For(0, chromos.Length, j =>
+
+                /*Parallel.For(0, chromos.Length, j =>
                 {
                     (double total_pl, SimAccount ac) res = evaluation(from, to, j, chromos[j]);
                     eva_dic.GetOrAdd(j, res.total_pl);
                     ac_dic.GetOrAdd(j, res.ac);
-                });
+                });*/
+
+                for (int k =0; k<chromos.Length; k++)
+                {
+                    (double total_pl, SimAccount ac) res = evaluation(from, to, k, chromos[k]);
+                    eva_dic.GetOrAdd(k, res.total_pl);
+                    ac_dic.GetOrAdd(k, res.ac);
+                }
+
+
                 //check best eva
                 check_best_eva(eva_dic, ac_dic);
                 //roulette selection
                 var selected_chro_ind_list = roulette_selection(eva_dic);
+                //cross over
+                crossover(selected_chro_ind_list, 0.3);
                 //mutation
                 mutation(mutation_rate);
-                //cross over
-                crossover(selected_chro_ind_list, 0.3);                
                 generationWatch.Stop();
                 generation_time_log.Add(generationWatch.Elapsed.Seconds);
                 calc_time_to_complete_from_generation_time(i, num_generations);
                 display_generation(i);
+                write_best_chromo();
             }
-            //write_best_chromo();
-            
             Console.WriteLine("Completed GA.");
         }
 
@@ -135,6 +190,7 @@ namespace BTCSIM
 
         /*eva.valueにminを加算して、合計値を10000に置き換えてそれぞれの値を計算。
          * roulette boardを作成。
+         * 自分と同じidが選択されないようにすべき
          */
         private List<int> roulette_selection(ConcurrentDictionary<int, double> eva)
         {
@@ -154,7 +210,7 @@ namespace BTCSIM
                 roulette_board.Add(tmp_val);
             }
 
-            Random rnd = new Random();
+            Random rnd = new Random(DateTime.Now.Millisecond);
             for(int i=0; i<chromos.Count(); i++)
             {
                 var selected = rnd.Next(0, roulette_board.Last() + 1);
@@ -168,6 +224,11 @@ namespace BTCSIM
                             selected_chro_ind.Add(j);
                     }
                 }
+                if (selected_chro_ind.Last() == i) //選択したidが自身のidと同じときはやり直し
+                {
+                    i--;
+                    selected_chro_ind.RemoveAt(selected_chro_ind.Count - 1);
+                }
             }
             if (selected_chro_ind.Count != chromos.Count())
                 Console.WriteLine("selected ind is not matched with num chromo in roulette selection!");
@@ -176,42 +237,87 @@ namespace BTCSIM
 
         private void mutation(double mutation_ratio)
         {
-            Random rnd = new Random();
+            Random rnd = new Random(DateTime.Now.Millisecond);
             for (int i=0; i<chromos.Count(); i++)
             {
                 if (i != best_chromo)
                 {
                     for (int j = 0; j < chromos[i].bias_gene1.Length; j++)
-                        chromos[i].bias_gene1[j] = rnd.NextDouble() > (1-mutation_ratio) ?  RandomGenerator.getRandomArrayRange(-10,10) : chromos[i].bias_gene1[j];
+                        chromos[i].bias_gene1[j] = rnd.NextDouble() > (1-mutation_ratio) ? random_generator.getRandomArrayRange(-1,1) : chromos[i].bias_gene1[j];
                     for (int j = 0; j < chromos[i].weight_gene1.Length; j++)
-                        chromos[i].weight_gene1[j] = rnd.NextDouble() > (1 - mutation_ratio) ? RandomGenerator.getRandomArrayRange(-10, 10) : chromos[i].weight_gene1[j];
+                        chromos[i].weight_gene1[j] = rnd.NextDouble() > (1 - mutation_ratio) ? random_generator.getRandomArrayRange(-1, 1) : chromos[i].weight_gene1[j];
                     for (int j = 0; j < chromos[i].bias_gene2.Length; j++)
-                        chromos[i].bias_gene2[j] = rnd.NextDouble() > (1 - mutation_ratio) ? RandomGenerator.getRandomArrayRange(-10, 10) : chromos[i].bias_gene2[j];
+                        chromos[i].bias_gene2[j] = rnd.NextDouble() > (1 - mutation_ratio) ? random_generator.getRandomArrayRange(-1, 1) : chromos[i].bias_gene2[j];
                     for (int j = 0; j < chromos[i].weight_gene2.Length; j++)
-                        chromos[i].weight_gene2[j] = rnd.NextDouble() > (1 - mutation_ratio) ? RandomGenerator.getRandomArrayRange(-10, 10) : chromos[i].weight_gene2[j];
+                        chromos[i].weight_gene2[j] = rnd.NextDouble() > (1 - mutation_ratio) ? random_generator.getRandomArrayRange(-1, 1) : chromos[i].weight_gene2[j];
                 }
             }
         }
 
         private void crossover(List<int> selected, double cross_over_ratio)
         {
-            var rnd = new Random();
+            var rnd = new Random(DateTime.Now.Millisecond);
             var new_chromos = new Gene[chromos.Count()];
-            chromos.CopyTo(new_chromos, 0);
+
+            //deep copy chromos
+            for (int i = 0; i < new_chromos.Length; i++)
+                new_chromos[i] = new Gene(chromos[0].num_units);
+            for(int i=0; i<new_chromos.Length; i++)
+            {
+                for (int j = 0; j < chromos[i].bias_gene1.Length; j++)
+                    new_chromos[i].bias_gene1[j] = chromos[i].bias_gene1[j];
+                for (int j = 0; j < chromos[i].bias_gene2.Length; j++)
+                    new_chromos[i].bias_gene2[j] = chromos[i].bias_gene2[j];
+                for (int j = 0; j < chromos[i].weight_gene1.Length; j++)
+                    new_chromos[i].weight_gene1[j] = chromos[i].weight_gene1[j];
+                for (int j = 0; j < chromos[i].weight_gene2.Length; j++)
+                    new_chromos[i].weight_gene2[j] = chromos[i].weight_gene2[j];
+            }
+
+
             for (int i=0; i<chromos.Count(); i++)
             {
                 if (i != best_chromo)
                 {
                     //bias1/2, weight1/2からそれぞれからランダムにratio %のweightを選択して交配
-                    var ratio = cross_over_ratio;
                     for (int j = 0; j < chromos[i].weight_gene1.Length; j++)
-                        new_chromos[i].weight_gene1[j] = rnd.NextDouble() > (1-ratio) ? chromos[selected[i]].weight_gene1[j] : chromos[i].weight_gene1[j];
+                    {
+                        if (rnd.NextDouble() > (1 - cross_over_ratio))
+                            new_chromos[i].weight_gene1[j] = chromos[selected[i]].weight_gene1[j];
+                        else
+                            new_chromos[i].weight_gene1[j] = chromos[i].weight_gene1[j];
+                    }
                     for (int j = 0; j < chromos[i].bias_gene1.Length; j++)
-                        new_chromos[i].bias_gene1[j] = rnd.NextDouble() > (1 - ratio) ? chromos[selected[i]].bias_gene1[j] : chromos[i].bias_gene1[j];
+                    {
+                        if (rnd.NextDouble() > (1 - cross_over_ratio))
+                            new_chromos[i].bias_gene1[j] = chromos[selected[i]].bias_gene1[j];
+                        else
+                            new_chromos[i].bias_gene1[j] = chromos[i].bias_gene1[j];
+                    }
                     for (int j = 0; j < chromos[i].weight_gene2.Length; j++)
-                        new_chromos[i].weight_gene2[j] = rnd.NextDouble() > (1 - ratio) ? chromos[selected[i]].weight_gene2[j] : chromos[i].weight_gene2[j];
+                    {
+                        if (rnd.NextDouble() > (1 - cross_over_ratio))
+                            new_chromos[i].weight_gene2[j] = chromos[selected[i]].weight_gene2[j];
+                        else
+                            new_chromos[i].weight_gene2[j] = chromos[i].weight_gene2[j];
+                    }
                     for (int j = 0; j < chromos[i].bias_gene2.Length; j++)
-                        new_chromos[i].bias_gene2[j] = rnd.NextDouble() > (1 - ratio) ? chromos[selected[i]].bias_gene2[j] : chromos[i].bias_gene2[j];
+                    {
+                        if (rnd.NextDouble() > (1 - cross_over_ratio))
+                            new_chromos[i].bias_gene2[j] = chromos[selected[i]].bias_gene2[j];
+                        else
+                            new_chromos[i].bias_gene2[j] = chromos[i].bias_gene2[j];
+                    }
+                        
+                    /*
+                    for (int j = 0; j < chromos[i].weight_gene1.Length; j++)
+                        new_chromos[i].weight_gene1[j] = rnd.NextDouble() > (1- cross_over_ratio) ? chromos[selected[i]].weight_gene1[j] : chromos[i].weight_gene1[j];
+                    for (int j = 0; j < chromos[i].bias_gene1.Length; j++)
+                        new_chromos[i].bias_gene1[j] = rnd.NextDouble() > (1 - cross_over_ratio) ? chromos[selected[i]].bias_gene1[j] : chromos[i].bias_gene1[j];
+                    for (int j = 0; j < chromos[i].weight_gene2.Length; j++)
+                        new_chromos[i].weight_gene2[j] = rnd.NextDouble() > (1 - cross_over_ratio) ? chromos[selected[i]].weight_gene2[j] : chromos[i].weight_gene2[j];
+                    for (int j = 0; j < chromos[i].bias_gene2.Length; j++)
+                        new_chromos[i].bias_gene2[j] = rnd.NextDouble() > (1 - cross_over_ratio) ? chromos[selected[i]].bias_gene2[j] : chromos[i].bias_gene2[j];*/
                 }
             }
             chromos = new Gene[chromos.Count()];
@@ -223,7 +329,7 @@ namespace BTCSIM
         private void display_generation(int generation)
         {
             Console.WriteLine("Generation No." + generation.ToString() + " : " + " Best Chromo ID=" + best_chromo.ToString() + ", Estimated completion hour="+estimated_time_to_completion.ToString() + ", Best eva=" + best_eva.ToString());
-            Console.WriteLine("Best num trade=" + best_ac.performance_data.num_trade.ToString() + " : " + "Best win rate=" + best_ac.performance_data.win_rate.ToString() + " : " + "Best total pl=" + best_ac.performance_data.total_pl.ToString());
+            Console.WriteLine("Best num trade=" + best_ac.performance_data.num_trade.ToString() + " : " + "Best win rate=" + best_ac.performance_data.win_rate.ToString() + " : " + "Best total pl=" + best_ac.performance_data.total_pl.ToString() + " : "+ "Best sharp ratio="+best_ac.performance_data.sharp_ratio.ToString());
             Console.WriteLine("---------------------------------------------------------------------------");
         }
 
@@ -237,18 +343,31 @@ namespace BTCSIM
 
         private void write_best_chromo()
         {
-            Console.WriteLine("Writing Best Chromo...");
-            StreamWriter sw = new StreamWriter(@"./best_weight.csv", false, Encoding.UTF8);
-            sw.WriteLine("weight1,bias1,weight2,bias2");  // ヘッダ部出力
-            /*
-            for (int i = 0; i < chromos[best_chromo].position_gene.Count; i++)
+            //Console.WriteLine("Writing Best Chromo...");
+            using (StreamWriter sw = new StreamWriter(@"./best_weight.csv", false, Encoding.UTF8))
             {
-                sw.WriteLine(string.Format("{0},{1},{2},{3},{4},{5},{6},{7}", MarketData.Dt[i], MarketData.Open[i], MarketData.High[i], MarketData.Low[i], MarketData.Close[i], MarketData.Size[i],
-                    MarketData.UnixTime[i], chromos[best_chromo].position_gene[i]));
+                //units
+                sw.WriteLine("units");
+                foreach(var v in chromos[best_chromo].num_units)
+                    sw.WriteLine(v);
+                //bias1
+                sw.WriteLine("bias1");
+                foreach (var v in chromos[best_chromo].bias_gene1)
+                    sw.WriteLine(v);
+                //weight1
+                sw.WriteLine("weight1");
+                foreach (var v in chromos[best_chromo].weight_gene1)
+                    sw.WriteLine(v);
+                //bias2
+                sw.WriteLine("bias2");
+                foreach (var v in chromos[best_chromo].bias_gene2)
+                    sw.WriteLine(v);
+                //weight2
+                sw.WriteLine("weight2");
+                foreach (var v in chromos[best_chromo].weight_gene2)
+                    sw.WriteLine(v);
             }
-            */
-            sw.Close();
-            Console.WriteLine("Completed write best chromo.");
+            //Console.WriteLine("Completed write best chromo.");
         }
 
 

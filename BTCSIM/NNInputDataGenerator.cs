@@ -5,15 +5,15 @@ using System.Collections.Generic;
 namespace BTCSIM
 {
     /*market indicies, holding side, holding period, unrealized pl, */
-    public static class NNInputDataGenerator
+    public class NNInputDataGenerator
     {
-        public static double[] generateNNInputData(SimAccount ac, int i)
+        public double[] generateNNInputData(SimAccount ac, int i)
         {
             var input_data = new List<double>();
 
             //Divergence_minmax_scale
-            input_data = MarketData.Divergence_minmax_scale[i];
-            
+            foreach (var d in MarketData.Divergence_minmax_scale[i])
+                input_data.Add(d);
             //vola_kyori
 
             //ac holding side
@@ -47,19 +47,17 @@ namespace BTCSIM
             }
             else if (ac.performance_data.unrealized_pl > 0)
             {
-                //unrealized_pl = amount * (price - holding_price) / holding_price
-                //(price - holding_price) / holding_price
+                //unrealized_pl = amount * (price - holding_price)
+                //(price - holding_price) / holding_price  <-目的式
                 //(unrealized_pl / amount) / holding_price
-                input_data.Add( 100.0 * (ac.performance_data.unrealized_pl / ac.holding_data.holding_size) / (ac.holding_data.holding_price) );
+                input_data.Add((ac.performance_data.unrealized_pl / ac.holding_data.holding_size) / (ac.holding_data.holding_price) );
                 input_data.Add(0);
             }
             else
             {
                 input_data.Add(0);
-                input_data.Add(-100.0 * (ac.performance_data.unrealized_pl / ac.holding_data.holding_size) / (ac.holding_data.holding_price));
+                input_data.Add(-1.0 * (ac.performance_data.unrealized_pl / ac.holding_data.holding_size) / (ac.holding_data.holding_price));
             }
-
-            
             return input_data.ToArray();
         }
     }

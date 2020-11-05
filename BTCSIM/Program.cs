@@ -9,24 +9,34 @@ namespace BTCSIM
     {
         public static void Main(string[] args)
         {
-         
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
             Console.WriteLine("started program.");
             List<int> terms = new List<int>();
             for(int i=100; i<1000; i = i + 100) { terms.Add(i); }
 
             MarketData.initializer(terms);
+            
+            //Read Weight Sim
+            /*
+            Console.WriteLine("Started Read Weight SIM");
+            var ga = new GA();
+            var chromo = ga.readWeights();
+            //var ac = ga.sim_ga(Convert.ToInt32(MarketData.Close.Count * 0.8), MarketData.Close.Count-1, chromo);
+            var ac = ga.sim_ga(1000, Convert.ToInt32(MarketData.Close.Count * 0.8), chromo);
+            */
 
+            //GA
+            
             Console.WriteLine("Started GA SIM");
-            RandomGenerator.initialize();
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
+            RandomSeed.initialize();
             //var chromo = new Gene(new int[] { 14, 50, 3 });
             var sim = new Sim();
             var ac = new SimAccount();
             int from = 1000;
-            int num_chromos = 10;
-            int num_generations = 30;
-            var units = new int[] {14, 50, 3 };
+            int num_chromos = 100;
+            int num_generations = 10;
+            var units = new int[] {14, 50, 3};
             var mutation_rate = 0.8;
             int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8));
             var ga = new GA();

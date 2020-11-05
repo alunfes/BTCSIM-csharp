@@ -16,10 +16,11 @@ namespace BTCSIM
             var nn = new NN();
             var strategy = new Strategy();
             int amount = 1;
+            var nn_input_data_generator = new NNInputDataGenerator();
             
             for (int i =from; i< to; i++)
             {
-                var nn_inputs = NNInputDataGenerator.generateNNInputData(ac, i);
+                var nn_inputs = nn_input_data_generator.generateNNInputData(ac, i);
                 var nn_outputs = nn.calcNN(nn_inputs, chromo.num_units, chromo.weight_gene1, chromo.weight_gene2, chromo.bias_gene1, chromo.bias_gene2, 1);
                 var pred = nn.getActivatedUnit(nn_outputs);
                 var actions = strategy.GAStrategy(pred, amount, ac);
