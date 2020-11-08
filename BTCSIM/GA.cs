@@ -50,11 +50,13 @@ namespace BTCSIM
         public double estimated_time_to_completion { get; set; }
 
         public List<int> best_chromo_gene { get; set; }
+        public int island_id { get; set; }
 
         private RandomGenerator random_generator { get; set; }
 
 
-        public GA()
+
+        public GA(int island_id)
         {
             RandomSeed.initialize();
             generation_time_log = new List<int>();
@@ -63,12 +65,13 @@ namespace BTCSIM
             best_eva_log = new List<double>();
             best_ac_log = new List<SimAccount>();
             random_generator = new RandomGenerator();
+            this.island_id = island_id;
         }
 
 
         public Gene readWeights()
         {
-            using(StreamReader sr =new StreamReader(@"./best_weight.csv", Encoding.UTF8, false))
+            using(StreamReader sr =new StreamReader(@"./best_weight_ID-0.csv", Encoding.UTF8, false))
             {
                 var data = new List<string>();
                 while(true)
@@ -107,7 +110,36 @@ namespace BTCSIM
             return ac;
         }
 
-        public void start_ga(int from, int to, int num_chromos, int num_generations, int[] units, double mutation_rate)
+        
+
+
+        public void start_island_ga(int from, int to, int num_chromos, int generation_ind, int[] units, double mutation_rate)
+        {
+            if (generation_ind == 0)
+                generate_chromos(num_chromos, units);
+            var eva_dic = new ConcurrentDictionary<int, double>();
+            var ac_dic = new ConcurrentDictionary<int, SimAccount>();
+            var option = new ParallelOptions();
+            option.MaxDegreeOfParallelism = System.Environment.ProcessorCount;
+            Parallel.For(0, chromos.Length, option, j =>
+            {
+                (double total_pl, SimAccount ac) res = evaluation(from, to, j, chromos[j]);
+                eva_dic.GetOrAdd(j, res.total_pl);
+                ac_dic.GetOrAdd(j, res.ac);
+            });
+            //check best eva
+            check_best_eva(eva_dic, ac_dic);
+            //roulette selection
+            var selected_chro_ind_list = roulette_selection(eva_dic);
+            //cross over
+            crossover(selected_chro_ind_list, 0.3);
+            //mutation
+            mutation(mutation_rate);
+            write_best_chromo();
+        }
+
+
+        public void start_ga(int from, int to, int num_chromos, int num_generations, int[] units, double mutation_rate, bool display_info)
         {
             //initialize chromos
             Console.WriteLine("started GA");
@@ -120,19 +152,21 @@ namespace BTCSIM
                 var eva_dic = new ConcurrentDictionary<int, double>();
                 var ac_dic = new ConcurrentDictionary<int, SimAccount>();
 
-                /*Parallel.For(0, chromos.Length, j =>
+                var option = new ParallelOptions();
+                option.MaxDegreeOfParallelism = System.Environment.ProcessorCount;
+                Parallel.For(0, chromos.Length, option, j =>
                 {
                     (double total_pl, SimAccount ac) res = evaluation(from, to, j, chromos[j]);
                     eva_dic.GetOrAdd(j, res.total_pl);
                     ac_dic.GetOrAdd(j, res.ac);
-                });*/
-
+                });
+                /*
                 for (int k =0; k<chromos.Length; k++)
                 {
                     (double total_pl, SimAccount ac) res = evaluation(from, to, k, chromos[k]);
                     eva_dic.GetOrAdd(k, res.total_pl);
                     ac_dic.GetOrAdd(k, res.ac);
-                }
+                }*/
 
 
                 //check best eva
@@ -146,7 +180,8 @@ namespace BTCSIM
                 generationWatch.Stop();
                 generation_time_log.Add(generationWatch.Elapsed.Seconds);
                 calc_time_to_complete_from_generation_time(i, num_generations);
-                display_generation(i);
+                if (display_info)
+                    display_generation(i, generationWatch);
                 write_best_chromo();
             }
             Console.WriteLine("Completed GA.");
@@ -326,9 +361,9 @@ namespace BTCSIM
 
         
 
-        private void display_generation(int generation)
+        private void display_generation(int generation, Stopwatch watch)
         {
-            Console.WriteLine("Generation No." + generation.ToString() + " : " + " Best Chromo ID=" + best_chromo.ToString() + ", Estimated completion hour="+estimated_time_to_completion.ToString() + ", Best eva=" + best_eva.ToString());
+            Console.WriteLine("Generation No." + generation.ToString() + " : " + " Best Chromo ID=" + best_chromo.ToString() + ", Estimated completion hour="+estimated_time_to_completion.ToString() + ", Best eva=" + best_eva.ToString() + ", time elapsed:"+watch.Elapsed.Minutes.ToString());
             Console.WriteLine("Best num trade=" + best_ac.performance_data.num_trade.ToString() + " : " + "Best win rate=" + best_ac.performance_data.win_rate.ToString() + " : " + "Best total pl=" + best_ac.performance_data.total_pl.ToString() + " : "+ "Best sharp ratio="+best_ac.performance_data.sharp_ratio.ToString());
             Console.WriteLine("---------------------------------------------------------------------------");
         }
@@ -344,7 +379,7 @@ namespace BTCSIM
         private void write_best_chromo()
         {
             //Console.WriteLine("Writing Best Chromo...");
-            using (StreamWriter sw = new StreamWriter(@"./best_weight.csv", false, Encoding.UTF8))
+            using (StreamWriter sw = new StreamWriter(@"./best_weight_ID-" +island_id.ToString()+".csv", false, Encoding.UTF8))
             {
                 //units
                 sw.WriteLine("units");

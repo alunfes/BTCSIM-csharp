@@ -15,7 +15,7 @@ namespace BTCSIM
             foreach (var d in MarketData.Divergence_minmax_scale[i])
                 input_data.Add(d);
             //vola_kyori
-
+            
             //ac holding side
             if (ac.holding_data.holding_side == "buy")
             {

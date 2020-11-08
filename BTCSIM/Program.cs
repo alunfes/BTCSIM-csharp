@@ -9,6 +9,7 @@ namespace BTCSIM
     {
         public static void Main(string[] args)
         {
+            Console.WriteLine("# of CPU cores="+System.Environment.ProcessorCount.ToString());
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
             Console.WriteLine("started program.");
@@ -16,32 +17,48 @@ namespace BTCSIM
             for(int i=100; i<1000; i = i + 100) { terms.Add(i); }
 
             MarketData.initializer(terms);
-            
+
+
             //Read Weight Sim
             /*
             Console.WriteLine("Started Read Weight SIM");
-            var ga = new GA();
+            var ga = new GA(0);
             var chromo = ga.readWeights();
-            //var ac = ga.sim_ga(Convert.ToInt32(MarketData.Close.Count * 0.8), MarketData.Close.Count-1, chromo);
-            var ac = ga.sim_ga(1000, Convert.ToInt32(MarketData.Close.Count * 0.8), chromo);
+            var ac = ga.sim_ga(Convert.ToInt32(MarketData.Close.Count * 0.8), MarketData.Close.Count-1, chromo);
+            //var ac = ga.sim_ga(1000, Convert.ToInt32(MarketData.Close.Count * 0.8), chromo);
             */
 
+            //Island GA
+            Console.WriteLine("Started Island GA SIM");
+            RandomSeed.initialize();
+            int from = 1000;
+            int num_island = 10;
+            int num_chromos = 10;
+            int num_generations = 10;
+            int banned_move_period = 3;
+            var units = new int[] { 14, 10, 3 };
+            var mutation_rate = 0.8;
+            var move_ratio = 0.1;
+            int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8));
+            var ga_island = new GAIsland();
+            ga_island.start_ga_island(from, to, num_island, banned_move_period, move_ratio, num_chromos, num_generations, units, mutation_rate);
+
+
             //GA
-            
+            /*
             Console.WriteLine("Started GA SIM");
             RandomSeed.initialize();
             //var chromo = new Gene(new int[] { 14, 50, 3 });
-            var sim = new Sim();
-            var ac = new SimAccount();
+            
             int from = 1000;
             int num_chromos = 100;
             int num_generations = 10;
-            var units = new int[] {14, 50, 3};
+            var units = new int[] {14, 10, 3};
             var mutation_rate = 0.8;
             int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8));
-            var ga = new GA();
-            ga.start_ga(from, to, num_chromos, num_generations, units, mutation_rate);
-            
+            var ga = new GA(0);
+            ga.start_ga(from, to, num_chromos, num_generations, units, mutation_rate, true);
+            */
 
             stopWatch.Stop();
             /*Console.WriteLine(stopWatch.Elapsed.Seconds.ToString() + " seconds.");

@@ -97,6 +97,7 @@
     <Compile Include="RandomGenerator.cs" />
     <Compile Include="NNInputDataGenerator.cs" />
     <Compile Include="SImGA.cs" />
+    <Compile Include="GAIsland.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
