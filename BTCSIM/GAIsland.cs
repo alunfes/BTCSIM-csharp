@@ -59,6 +59,7 @@ namespace BTCSIM
                 for (int j = 0; j < num_island; j++)
                 {
                     gas[j].start_island_ga(from, to, num_chromos, i, units, mutation_rate);
+                    //gas[j].resetChromos();
                 }
                 checkBestIsland();
                 sw.Stop();

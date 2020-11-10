@@ -176,14 +176,23 @@ namespace BTCSIM
                 else
                     change.Add(0);
             }
-            var ave = change.Sum() / Convert.ToDouble(change.Count);
-            List<double> sa = new List<double>();
-            for (int i=0; i<change.Count; i++)
-            { sa.Add(Math.Pow(change[i] - ave,2)); }
-            var co = Convert.ToDouble(sa.Count - 1);
-            var s = sa.Sum();
-            var wari = (log_data.total_pl_log.Sum() - MarketData.Close[start_ind]) / MarketData.Close[start_ind];
-            performance_data.sharp_ratio = ((log_data.total_pl_log.Sum() - MarketData.Close[start_ind]) / MarketData.Close[start_ind]) / Math.Sqrt(sa.Sum() / Convert.ToDouble(sa.Count - 1));
+
+
+            var doubleList = change.Select(a => Convert.ToDouble(a)).ToArray();
+
+            //平均値算出
+            double mean = doubleList.Average();
+            //自乗和算出
+            double sum2 = doubleList.Select(a => a * a).Sum();
+            //分散 = 自乗和 / 要素数 - 平均値^2
+            double variance = sum2 / Convert.ToDouble(doubleList.Length) - mean * mean;
+            //標準偏差 = 分散の平方根
+            var stdv = Math.Sqrt(variance);
+
+            if (stdv != 0)
+                performance_data.sharp_ratio = performance_data.total_pl / stdv;
+            else
+                performance_data.sharp_ratio = 0;
         }
 
 

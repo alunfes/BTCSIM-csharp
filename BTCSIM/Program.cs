@@ -20,16 +20,16 @@ namespace BTCSIM
 
 
             //Read Weight Sim
-            
+            /*
             Console.WriteLine("Started Read Weight SIM");
             var ga = new GA(0);
-            var chromo = ga.readWeights(9);
+            var chromo = ga.readWeights(6);
             var ac = ga.sim_ga(Convert.ToInt32(MarketData.Close.Count * 0.05), MarketData.Close.Count-1, chromo);
             //var ac = ga.sim_ga(1000, Convert.ToInt32(MarketData.Close.Count * 0.05), chromo);
-            
+            */
 
             //Island GA
-            /*
+            
             Console.WriteLine("Started Island GA SIM");
             RandomSeed.initialize();
             int from = 1000;
@@ -37,14 +37,15 @@ namespace BTCSIM
             int num_chromos = 10;
             int num_generations = 10;
             int banned_move_period = 3;
-            var units = new int[] { 16, 10, 3 };
+            var units = new int[] { 7, 10, 3 };
             var mutation_rate = 0.9;
-            var move_ratio = 0.1;
+            var move_ratio = 0.2;
             //int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8));
             int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.05));
             var ga_island = new GAIsland();
             ga_island.start_ga_island(from, to, num_island, banned_move_period, move_ratio, num_chromos, num_generations, units, mutation_rate);
-            */
+            
+
 
             //GA
             /*

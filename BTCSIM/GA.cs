@@ -200,6 +200,7 @@ namespace BTCSIM
             var sim = new Sim();
             ac = sim.sim_ga(from, to, chro, ac);
             return (ac.performance_data.total_pl, ac);
+            //return (ac.performance_data.sharp_ratio * ac.performance_data.num_trade, ac);
         }
 
         private void check_best_eva(ConcurrentDictionary<int, double> eva, ConcurrentDictionary<int, SimAccount> ac)
@@ -278,16 +279,27 @@ namespace BTCSIM
                 if (i != best_chromo)
                 {
                     for (int j = 0; j < chromos[i].bias_gene1.Length; j++)
-                        chromos[i].bias_gene1[j] = rnd.NextDouble() > (1-mutation_ratio) ? random_generator.getRandomArrayRange(-1,1) : chromos[i].bias_gene1[j];
+                        chromos[i].bias_gene1[j] = rnd.NextDouble() > (1-mutation_ratio) ? random_generator.getRandomArrayRange(-5,5) : chromos[i].bias_gene1[j];
                     for (int j = 0; j < chromos[i].weight_gene1.Length; j++)
-                        chromos[i].weight_gene1[j] = rnd.NextDouble() > (1 - mutation_ratio) ? random_generator.getRandomArrayRange(-1, 1) : chromos[i].weight_gene1[j];
+                        chromos[i].weight_gene1[j] = rnd.NextDouble() > (1 - mutation_ratio) ? random_generator.getRandomArrayRange(-5, 5) : chromos[i].weight_gene1[j];
                     for (int j = 0; j < chromos[i].bias_gene2.Length; j++)
-                        chromos[i].bias_gene2[j] = rnd.NextDouble() > (1 - mutation_ratio) ? random_generator.getRandomArrayRange(-1, 1) : chromos[i].bias_gene2[j];
+                        chromos[i].bias_gene2[j] = rnd.NextDouble() > (1 - mutation_ratio) ? random_generator.getRandomArrayRange(-5, 5) : chromos[i].bias_gene2[j];
                     for (int j = 0; j < chromos[i].weight_gene2.Length; j++)
-                        chromos[i].weight_gene2[j] = rnd.NextDouble() > (1 - mutation_ratio) ? random_generator.getRandomArrayRange(-1, 1) : chromos[i].weight_gene2[j];
+                        chromos[i].weight_gene2[j] = rnd.NextDouble() > (1 - mutation_ratio) ? random_generator.getRandomArrayRange(-5, 5) : chromos[i].weight_gene2[j];
                 }
             }
         }
+
+        //reset chromos with random weigths except best chromo
+        public void resetChromos()
+        {
+            for (int i = 0; i < chromos.Length; i++)
+            {
+                if (i != best_chromo)
+                    chromos[i] = new Gene(chromos[i].num_units);
+            }
+        }
+
 
         private void crossover(List<int> selected, double cross_over_ratio)
         {

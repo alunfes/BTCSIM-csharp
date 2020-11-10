@@ -12,8 +12,8 @@ namespace BTCSIM
             var input_data = new List<double>();
 
             //Divergence_minmax_scale
-            foreach (var d in MarketData.Divergence_minmax_scale[i])
-                input_data.Add(d);
+            //foreach (var d in MarketData.Divergence_minmax_scale[i])
+             //   input_data.Add(d);
             //vola_kyori
             
             //ac holding side
@@ -68,6 +68,8 @@ namespace BTCSIM
                 input_data.Add(0);
             else
                 input_data.Add(ac.performance_data.unrealized_pl / ac.holding_data.holding_period);
+
+            //unrealize pl change
 
 
             return input_data.ToArray();
