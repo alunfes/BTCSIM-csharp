@@ -69,9 +69,9 @@ namespace BTCSIM
         }
 
 
-        public Gene readWeights()
+        public Gene readWeights(int island_id)
         {
-            using(StreamReader sr =new StreamReader(@"./best_weight_ID-0.csv", Encoding.UTF8, false))
+            using(StreamReader sr =new StreamReader(@"./best_weight_ID-"+ island_id.ToString()+".csv", Encoding.UTF8, false))
             {
                 var data = new List<string>();
                 while(true)

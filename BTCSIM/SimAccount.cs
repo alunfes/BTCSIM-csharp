@@ -12,6 +12,7 @@ namespace BTCSIM
         public double total_pl { get; set; }
         public double realized_pl { get; set; }
         public double unrealized_pl { get; set; }
+        public List<double> unrealized_pl_list { get; set; } //record unrealided pl during holding period for NN input data
         public int num_trade { get; set; }
         public int num_buy { get; set; }
         public int num_sell { get; set; }
@@ -26,6 +27,7 @@ namespace BTCSIM
             total_pl = 0;
             realized_pl = 0;
             unrealized_pl = 0;
+            unrealized_pl_list = new List<double>();
             num_trade = 0;
             num_buy = 0;
             num_sell = 0;
@@ -71,10 +73,12 @@ namespace BTCSIM
         public double holding_price { get; set; }
         public double holding_size { get; set; }
         public int holding_i { get; set; }
+        public int holding_period { get; set; }
 
         public HoldingData()
         {
             holding_i = -1;
+            holding_period = 0;
             holding_price = 0;
             holding_size = 0;
             holding_side = "";
@@ -86,6 +90,7 @@ namespace BTCSIM
             holding_price = price;
             holding_size = size;
             holding_i = i;
+            holding_period = 0;
         }
     }
 
@@ -93,7 +98,7 @@ namespace BTCSIM
     {
         public DataSet log_data_set { get; set; }
         public DataTable log_data_table { get; set; }   
-        public List<double> total_pl_log { get; set; } 
+        public List<double> total_pl_log { get; set; }
 
 
         public LogData()
@@ -189,11 +194,18 @@ namespace BTCSIM
             end_ind = i;
             check_cancel(i, dt);
             check_execution(i, dt, open, high, low);
+            holding_data.holding_period = holding_data.holding_i > 0 ? i - holding_data.holding_i : 0;
             if (holding_data.holding_side != "")
+            {
                 //performance_data.unrealized_pl = holding_data.holding_side == "buy" ? (close - holding_data.holding_price) / holding_data.holding_price * holding_data.holding_size : (holding_data.holding_price - close) / holding_data.holding_price * holding_data.holding_size;
                 performance_data.unrealized_pl = holding_data.holding_side == "buy" ? (close - holding_data.holding_price) * holding_data.holding_size : (holding_data.holding_price - close) * holding_data.holding_size;
+                performance_data.unrealized_pl_list.Add(performance_data.unrealized_pl);
+            }
             else
+            {
                 performance_data.unrealized_pl = 0;
+                performance_data.unrealized_pl_list = new List<double>();
+            }
             performance_data.total_pl = performance_data.realized_pl + performance_data.unrealized_pl - performance_data.total_fee;
             if (performance_data.num_trade > 0)
                 performance_data.win_rate = Math.Round(Convert.ToDouble(performance_data.num_win) / Convert.ToDouble(performance_data.num_trade), 4);

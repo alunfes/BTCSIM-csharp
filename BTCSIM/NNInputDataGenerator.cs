@@ -36,8 +36,6 @@ namespace BTCSIM
                 input_data.Add(0);
             }
 
-            //ac holding period
-
 
             //ac pl, 損益率を2unitにわけて表現する
             if (ac.performance_data.unrealized_pl == 0)
@@ -58,6 +56,20 @@ namespace BTCSIM
                 input_data.Add(0);
                 input_data.Add(-1.0 * (ac.performance_data.unrealized_pl / ac.holding_data.holding_size) / (ac.holding_data.holding_price));
             }
+
+            //holding period
+            if (ac.holding_data.holding_period == 0)
+                input_data.Add(0);
+            else
+                input_data.Add(1.0 / ac.holding_data.holding_period);
+
+            //unrealized pl / holding period
+            if (ac.holding_data.holding_period == 0)
+                input_data.Add(0);
+            else
+                input_data.Add(ac.performance_data.unrealized_pl / ac.holding_data.holding_period);
+
+
             return input_data.ToArray();
         }
     }
