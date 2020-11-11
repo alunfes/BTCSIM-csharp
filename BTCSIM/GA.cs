@@ -225,33 +225,43 @@ namespace BTCSIM
         }
 
         /*eva.valueにminを加算して、合計値を10000に置き換えてそれぞれの値を計算。
-         * roulette boardを作成。
-         * 自分と同じidが選択されないようにすべき
-         * 0番目の染色体の評価が圧倒的に高い場合は、
          */
         private List<int> roulette_selection(ConcurrentDictionary<int, double> eva)
         {
-            if(eva.Values.Sum() == 0)
-            {
-                for (int i = 0; i < eva.Count; i++)
-                    eva[i] = 1;
-            }
-
-
             var selected_chro_ind = new List<int>();
             List<int> roulette_board = new List<int>();
-            List<double> vals = new List<double>();
-            var min = eva.Values.Min();
-            for (int i=0; i<eva.Count; i++)
-                vals.Add(eva[i] - min);//evaのkeyが0-count-1までの連続値になっていることが前提
-            
-            List<double> con_vals = new List<double>();
-            var sumv = vals.Sum();
-            var tmp_val = 0;
-            foreach (var v in vals)
+
+            //全部の値が同じときは同じ割合でroulette boardを作る
+            var flg_same = true;
+            for(int i=1; i<eva.Count; i++)
             {
-                tmp_val += Convert.ToInt32(Math.Round(10000 * v / sumv));
-                roulette_board.Add(tmp_val);
+                if(eva[0] != eva[i])
+                {
+                    flg_same = false;
+                    break;
+                }
+            }
+            if (flg_same)
+            {
+                var ave_val = Convert.ToInt32(Math.Round(10000.0 / eva.Count));
+                for (int i = 0; i < eva.Count; i++)
+                    roulette_board.Add((i+1) * ave_val);
+            }
+            else
+            {
+                List<double> vals = new List<double>();
+                var min = eva.Values.Min();
+                for (int i = 0; i < eva.Count; i++)
+                    vals.Add(eva[i] - min);//evaのkeyが0-count-1までの連続値になっていることが前提
+
+                List<double> con_vals = new List<double>();
+                var sumv = vals.Sum();
+                var tmp_val = 0;
+                foreach (var v in vals)
+                {
+                    tmp_val += Convert.ToInt32(Math.Round(10000 * v / sumv));
+                    roulette_board.Add(tmp_val);
+                }
             }
 
             Random rnd = new Random(DateTime.Now.Millisecond);
