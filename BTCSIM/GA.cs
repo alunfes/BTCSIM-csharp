@@ -199,8 +199,8 @@ namespace BTCSIM
             var ac = new SimAccount();
             var sim = new Sim();
             ac = sim.sim_ga(from, to, chro, ac);
-            return (ac.performance_data.total_pl, ac);
-            //return (ac.performance_data.sharp_ratio * ac.performance_data.num_trade, ac);
+            //return (ac.performance_data.total_pl, ac);
+            return (ac.performance_data.sharp_ratio * ac.performance_data.num_trade, ac);
         }
 
         private void check_best_eva(ConcurrentDictionary<int, double> eva, ConcurrentDictionary<int, SimAccount> ac)
@@ -227,9 +227,17 @@ namespace BTCSIM
         /*eva.valueにminを加算して、合計値を10000に置き換えてそれぞれの値を計算。
          * roulette boardを作成。
          * 自分と同じidが選択されないようにすべき
+         * 0番目の染色体の評価が圧倒的に高い場合は、
          */
         private List<int> roulette_selection(ConcurrentDictionary<int, double> eva)
         {
+            if(eva.Values.Sum() == 0)
+            {
+                for (int i = 0; i < eva.Count; i++)
+                    eva[i] = 1;
+            }
+
+
             var selected_chro_ind = new List<int>();
             List<int> roulette_board = new List<int>();
             List<double> vals = new List<double>();
@@ -249,21 +257,29 @@ namespace BTCSIM
             Random rnd = new Random(DateTime.Now.Millisecond);
             for(int i=0; i<chromos.Count(); i++)
             {
-                var selected = rnd.Next(0, roulette_board.Last() + 1);
-                if (selected <= roulette_board[0])
-                    selected_chro_ind.Add(0);
+                
+                if (i == best_chromo)
+                {
+                    selected_chro_ind.Add(-1); //best chromoはroulette selectしなくて良い
+                }
                 else
                 {
-                    for (int j=1; j<roulette_board.Count; j++)
+                    var selected = rnd.Next(0, roulette_board.Last() + 1);
+                    if (selected <= roulette_board[0])
+                        selected_chro_ind.Add(0);
+                    else
                     {
-                        if (selected > roulette_board[j - 1] && selected <= roulette_board[j])
-                            selected_chro_ind.Add(j);
+                        for (int j = 1; j < roulette_board.Count; j++)
+                        {
+                            if (selected > roulette_board[j - 1] && selected <= roulette_board[j])
+                                selected_chro_ind.Add(j);
+                        }
                     }
-                }
-                if (selected_chro_ind.Last() == i) //選択したidが自身のidと同じときはやり直し
-                {
-                    i--;
-                    selected_chro_ind.RemoveAt(selected_chro_ind.Count - 1);
+                    if (selected_chro_ind.Last() == i) //選択したidが自身のidと同じときはやり直し
+                    {
+                        i--;
+                        selected_chro_ind.RemoveAt(selected_chro_ind.Count - 1);
+                    }
                 }
             }
             if (selected_chro_ind.Count != chromos.Count())
