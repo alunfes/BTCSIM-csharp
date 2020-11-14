@@ -65,6 +65,42 @@ namespace BTCSIM
             order_cancel = new Dictionary<int, bool>();
             order_message = new Dictionary<int, string>();
         }
+
+        public string getLastOrderSide()
+        {
+            if (order_serial_list.Count > 0)
+                return order_side[order_serial_list.Last()];
+            else
+                return "";
+        }
+        public double getLastOrderSize()
+        {
+            if (order_serial_list.Count > 0)
+                return order_size[order_serial_list.Last()];
+            else
+                return 0;
+        }
+        public double getLastOrderPrice()
+        {
+            if (order_serial_list.Count > 0)
+                return order_price[order_serial_list.Last()];
+            else
+                return 0;
+        }
+        public int getNumOrders()
+        {
+            if (order_serial_list.Count > 0)
+                return order_serial_list.Count;
+            else
+                return 0;
+        }
+        public int getLastSerialNum()
+        {
+            if (order_serial_list.Count() > 0)
+                return order_serial_list.Last();
+            else
+                return -1;
+        }
     }
 
     public class HoldingData
@@ -223,7 +259,7 @@ namespace BTCSIM
 
         public void entry_order(string type, string side, double size, double price, int i, string dt, string message)
         {
-            if (size > 0)
+            if (size > 0 && (side =="buy" || side=="sell"))
             {
                 order_data.order_serial_num++;
                 order_data.order_serial_list.Add(order_data.order_serial_num);
@@ -239,8 +275,16 @@ namespace BTCSIM
             }
             else
             {
-                Console.WriteLine("entry order failed due to order size = 0 !");
-                log_data.add_log_data(i, dt, "entry order failed due to order size = 0 !", holding_data, order_data, performance_data);
+                if (size <= 0)
+                {
+                    Console.WriteLine("entry order failed due to order size = 0 !");
+                    log_data.add_log_data(i, dt, "entry order failed due to order size = 0 !", holding_data, order_data, performance_data);
+                }
+                else
+                {
+                    Console.WriteLine("entry order failed due to order side is "+side+ " !");
+                    log_data.add_log_data(i, dt, "entry order failed due to order side is " + side + " !", holding_data, order_data, performance_data);
+                }
             }
         }
 
@@ -257,6 +301,20 @@ namespace BTCSIM
             {
                 Console.WriteLine("invalid update price or order_serial_num in update_order_price !");
             }
+        }
+
+        public void update_order_amount(double update_amount, int order_serial_num, int i, string dt)
+        {
+            if (update_amount > 0 && order_data.order_serial_list.Contains(order_serial_num))
+            {
+                order_data.order_size[order_serial_num] = update_amount;
+                log_data.add_log_data(i, dt, "update order amount", holding_data, order_data, performance_data);
+            }
+            else
+            {
+                Console.WriteLine("invalid update amount or order_serial_num in update_order_amount !");
+            }
+
         }
 
         private void del_order(int order_serial_num, int i)
@@ -307,11 +365,11 @@ namespace BTCSIM
         {
             if (maker_taker == "maker")
             {
-                performance_data.total_fee += size * maker_fee;
+                performance_data.total_fee += price * size * maker_fee;
             }
             else if (maker_taker == "taker")
             {
-                performance_data.total_fee += size * taker_fee;
+                performance_data.total_fee += price * size * taker_fee;
             }
             else
             {

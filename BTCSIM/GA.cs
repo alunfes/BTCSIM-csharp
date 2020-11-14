@@ -110,10 +110,23 @@ namespace BTCSIM
             return ac;
         }
 
-        
+        public SimAccount sim_ga_limit(int from, int to, Gene chromo)
+        {
+            var sim = new Sim();
+            var ac = new SimAccount();
+            ac = sim.sim_ga_limit(from, to, chromo, ac);
+            Console.WriteLine("pl=" + ac.performance_data.total_pl);
+            Console.WriteLine("num trade=" + ac.performance_data.num_trade);
+            Console.WriteLine("win rate=" + ac.performance_data.win_rate);
+            Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
+            LineChart.DisplayLineChart(ac.log_data.total_pl_log, 0, 0);
+            return ac;
+        }
 
 
-        public void start_island_ga(int from, int to, int num_chromos, int generation_ind, int[] units, double mutation_rate)
+
+
+            public void start_island_ga(int from, int to, int num_chromos, int generation_ind, int[] units, double mutation_rate)
         {
             if (generation_ind == 0)
                 generate_chromos(num_chromos, units);
@@ -121,12 +134,18 @@ namespace BTCSIM
             var ac_dic = new ConcurrentDictionary<int, SimAccount>();
             var option = new ParallelOptions();
             option.MaxDegreeOfParallelism = System.Environment.ProcessorCount;
-            Parallel.For(0, chromos.Length, option, j =>
+            /*Parallel.For(0, chromos.Length, option, j =>
             {
                 (double total_pl, SimAccount ac) res = evaluation(from, to, j, chromos[j]);
                 eva_dic.GetOrAdd(j, res.total_pl);
                 ac_dic.GetOrAdd(j, res.ac);
-            });
+            });*/
+            for (int k = 0; k < chromos.Length; k++)
+            {
+                (double total_pl, SimAccount ac) res = evaluation(from, to, k, chromos[k]);
+                eva_dic.GetOrAdd(k, res.total_pl);
+                ac_dic.GetOrAdd(k, res.ac);
+            }
             //check best eva
             check_best_eva(eva_dic, ac_dic);
             //roulette selection
@@ -198,8 +217,9 @@ namespace BTCSIM
         {
             var ac = new SimAccount();
             var sim = new Sim();
-            ac = sim.sim_ga(from, to, chro, ac);
-            //return (ac.performance_data.total_pl, ac);
+            //ac = sim.sim_ga(from, to, chro, ac);
+            ac = sim.sim_ga_limit(from, to, chro, ac);
+            //return (ac.performance_data.total_pl * ac.performance_data.num_trade, ac);
             return (ac.performance_data.sharp_ratio * ac.performance_data.num_trade, ac);
         }
 
