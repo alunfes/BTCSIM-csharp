@@ -18,36 +18,50 @@ namespace BTCSIM
 
             MarketData.initializer(terms);
 
+            var key = "";
+            while (true)
+            {
+                Console.WriteLine("\"ga\" : island GA");
+                Console.WriteLine("\"sim\" : read sim");
+
+                key = Console.ReadLine();
+                if (key == "ga" || key == "sim")
+                    break;
+            }
 
             //Read Weight Sim
-            /*
-            Console.WriteLine("Started Read Weight SIM");
-            var ga = new GA(0);
-            var chromo = ga.readWeights(7);
-            //var ac = ga.sim_ga_limit(Convert.ToInt32(MarketData.Close.Count * 0.05), MarketData.Close.Count - 1, chromo);
-            var ac = ga.sim_ga_limit(1000, Convert.ToInt32(MarketData.Close.Count * 0.05), chromo);
-            //var ac = ga.sim_ga(Convert.ToInt32(MarketData.Close.Count * 0.05), MarketData.Close.Count-1, chromo);
-            //var ac = ga.sim_ga(1000, Convert.ToInt32(MarketData.Close.Count * 0.05), chromo);
-            */
+            if (key == "sim")
+            {
+                Console.WriteLine("Started Read Weight SIM");
+                var ga = new GA(0);
+                var chromo = ga.readWeights(1);
+                var from = 1000 + Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8));
+                var to = MarketData.Close.Count -1;
+                var ac = ga.sim_ga_limit(from, to, chromo);
+                //var ac = ga.sim_ga_limit(Convert.ToInt32(MarketData.Close.Count * 0.05), MarketData.Close.Count - 1, chromo);
+                //var ac = ga.sim_ga(Convert.ToInt32(MarketData.Close.Count * 0.05), MarketData.Close.Count-1, chromo);
+                //var ac = ga.sim_ga(1000, Convert.ToInt32(MarketData.Close.Count * 0.05), chromo);
+            }
 
 
             //Island GA
-            
-            Console.WriteLine("Started Island GA SIM");
-            RandomSeed.initialize();
-            int from = 1000;
-            int num_island = 10;
-            int num_chromos = 10;
-            int num_generations = 10;
-            int banned_move_period = 3;
-            var units = new int[] { 19, 20, 4 };
-            var mutation_rate = 0.9;
-            var move_ratio = 0.2;
-            //int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8));
-            int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.05));
-            var ga_island = new GAIsland();
-            ga_island.start_ga_island(from, to, num_island, banned_move_period, move_ratio, num_chromos, num_generations, units, mutation_rate);
-            
+            if (key == "ga")
+            {
+                Console.WriteLine("Started Island GA SIM");
+                RandomSeed.initialize();
+                int from = 1000;
+                int num_island = 15;
+                int num_chromos = 8;
+                int num_generations = 8;
+                int banned_move_period = 3;
+                var units = new int[] { 19, 20, 4 };
+                var mutation_rate = 0.9;
+                var move_ratio = 0.2;
+                int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8)) + from;
+                //int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.05)) + from;
+                var ga_island = new GAIsland();
+                ga_island.start_ga_island(from, to, num_island, banned_move_period, move_ratio, num_chromos, num_generations, units, mutation_rate);
+            }
 
             //GA
             /*

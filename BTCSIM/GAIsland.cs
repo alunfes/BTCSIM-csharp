@@ -33,28 +33,28 @@ namespace BTCSIM
          */
         public void start_ga_island(int from, int to, int num_island, int move_ban_period, double move_ratio, int num_chromos, int num_generations, int[] units, double mutation_rate)
         {
-            var sw = new Stopwatch();
+            var sww = new Stopwatch();
             //initialize GS in each island
             for (int i = 0; i < num_island; i++)
                 gas.Add(new GA(i));
             //do GA calc for move_ban_period
             for(int i=0; i<move_ban_period; i++)
             {
-                sw.Start();
+                sww.Start();
                 for(int j=0; j<num_island; j++)
                 {
                     gas[j].start_island_ga(from, to, num_chromos, i, units, mutation_rate);
                 }
                 checkBestIsland();
-                sw.Stop();
-                display_info(i, sw);
-                sw.Reset();
+                sww.Stop();
+                display_info(i, sww);
+                sww.Reset();
             }
             Console.WriteLine("Move banned period has been finished.");
             //do GA calc for remaining generations
             for (int i = move_ban_period; i < num_generations; i++)
             {
-                sw.Start();
+                sww.Start();
                 moveBetweenIsland(move_ratio);
                 for (int j = 0; j < num_island; j++)
                 {
@@ -62,9 +62,9 @@ namespace BTCSIM
                     //gas[j].resetChromos();
                 }
                 checkBestIsland();
-                sw.Stop();
-                display_info(i, sw);
-                sw.Reset();
+                sww.Stop();
+                display_info(i, sww);
+                sww.Reset();
             }
             Console.WriteLine("Completed GA");
         }
