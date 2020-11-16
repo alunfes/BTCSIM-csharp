@@ -23,9 +23,10 @@ namespace BTCSIM
             {
                 Console.WriteLine("\"ga\" : island GA");
                 Console.WriteLine("\"sim\" : read sim");
+                Console.WriteLine("\"conti_ga\" : conti island GA and SIM");
 
                 key = Console.ReadLine();
-                if (key == "ga" || key == "sim")
+                if (key == "ga" || key == "sim" || key == "conti_ga")
                     break;
             }
 
@@ -61,6 +62,37 @@ namespace BTCSIM
                 //int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.05)) + from;
                 var ga_island = new GAIsland();
                 ga_island.start_ga_island(from, to, num_island, banned_move_period, move_ratio, num_chromos, num_generations, units, mutation_rate);
+            }
+            if (key == "conti_ga")
+            {
+                Console.WriteLine("Started Island GA SIM");
+                RandomSeed.initialize();
+                int sim_window = 2000;
+                int ga_window = 50000;
+                int num_island = 10;
+                int num_chromos = 8;
+                int num_generations = 5;
+                int banned_move_period = 3;
+                var units = new int[] { 19, 20, 4 };
+                var mutation_rate = 0.9;
+                var move_ratio = 0.2;
+                var ac = new SimAccount();
+                for (int i = 0; i < 10; i++)
+                {
+                    Console.WriteLine("Conti GA SIM i="+i.ToString());
+                    int ga_from = i * ga_window + 1000;
+                    int ga_to = ga_from + ga_window;
+                    var ga_island = new GAIsland();
+                    ga_island.start_ga_island(ga_from, ga_to, num_island, banned_move_period, move_ratio, num_chromos, num_generations, units, mutation_rate);
+                    int sim_from = ga_to;
+                    int sim_to = sim_from + sim_window;
+                    var ga = new GA(0);
+                    var chromo = ga.readWeights(ga_island.best_island);
+                    ac = ga.sim_ga_limit(sim_from, sim_to, chromo);
+                }
+                Console.WriteLine("*************************************************************************");
+                Console.WriteLine("total pl=" + ac.performance_data.total_pl.ToString() + ", num trade=" + ac.performance_data.num_trade.ToString() + ", win rate="+ac.performance_data.win_rate.ToString() + ", sharp ratio="+ac.performance_data.sharp_ratio.ToString());
+                Console.WriteLine("*************************************************************************")
             }
 
             //GA

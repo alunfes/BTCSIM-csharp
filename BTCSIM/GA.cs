@@ -135,16 +135,13 @@ namespace BTCSIM
             var option = new ParallelOptions();
             option.MaxDegreeOfParallelism = System.Environment.ProcessorCount;
 
-            var sw = new Stopwatch();
-            sw.Start();
             Parallel.For(0, chromos.Length, option, j =>
             {
                 (double total_pl, SimAccount ac) res = evaluation(from, to, j, chromos[j]);
                 eva_dic.GetOrAdd(j, res.total_pl);
                 ac_dic.GetOrAdd(j, res.ac);
             });
-            sw.Stop();
-            Console.WriteLine("island No."+island_id.ToString() + ", eva time="+sw.Elapsed.Seconds.ToString());
+            //Console.WriteLine("island No."+island_id.ToString() + ", eva time="+sw.Elapsed.Seconds.ToString());
             /*
             for (int k = 0; k < chromos.Length; k++)
             {
@@ -154,29 +151,13 @@ namespace BTCSIM
             }
             */
             //check best eva
-            sw.Reset();
-            sw.Start();
             check_best_eva(eva_dic, ac_dic);
-            sw.Stop();
-            Console.WriteLine("island No." + island_id.ToString() + ", check eva time=" + sw.Elapsed.Seconds.ToString());
             //roulette selection
-            sw.Reset();
-            sw.Start();
             var selected_chro_ind_list = roulette_selection(eva_dic);
-            sw.Stop();
-            Console.WriteLine("island No." + island_id.ToString() + ", roulette selection time=" + sw.Elapsed.Seconds.ToString());
             //cross over
-            sw.Reset();
-            sw.Start();
             crossover(selected_chro_ind_list, 0.3);
-            sw.Stop();
-            Console.WriteLine("island No." + island_id.ToString() + ", crossover time=" + sw.Elapsed.Seconds.ToString());
             //mutation
-            sw.Reset();
-            sw.Start();
             mutation(mutation_rate);
-            sw.Stop();
-            Console.WriteLine("island No." + island_id.ToString() + ", mutation time=" + sw.Elapsed.Seconds.ToString());
             write_best_chromo();
         }
 

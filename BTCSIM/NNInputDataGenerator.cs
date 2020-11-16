@@ -157,7 +157,7 @@ namespace BTCSIM
 
             //holding period
             if (ac.holding_data.holding_period == 0)
-                input_data.Add(0);
+                input_data.Add(-1);
             else
                 input_data.Add(1.0 / ac.holding_data.holding_period);
 
