@@ -10,13 +10,6 @@ namespace BTCSIM
         public static void Main(string[] args)
         {
             Console.WriteLine("# of CPU cores="+System.Environment.ProcessorCount.ToString());
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
-            Console.WriteLine("started program.");
-            List<int> terms = new List<int>();
-            for(int i=100; i<1000; i = i + 100) { terms.Add(i); }
-
-            MarketData.initializer(terms);
 
             var key = "";
             while (true)
@@ -30,15 +23,26 @@ namespace BTCSIM
                     break;
             }
 
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+            Console.WriteLine("started program.");
+            List<int> terms = new List<int>();
+            for(int i=100; i<1000; i = i + 100) { terms.Add(i); }
+
+            MarketData.initializer(terms);
+
+            
             //Read Weight Sim
             if (key == "sim")
             {
                 Console.WriteLine("Started Read Weight SIM");
                 var ga = new GA(0);
-                var chromo = ga.readWeights(1);
-                var from = 1000 + Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8));
-                var to = MarketData.Close.Count -1;
-                var ac = ga.sim_ga_limit(from, to, chromo);
+                var chromo = ga.readWeights(0);
+                //var from = 1000 + Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8));
+                var from = 130000;
+                var to = from + 10000;
+                //var to = MarketData.Close.Count -1;
+                var ac = ga.sim_ga_limit(from, to, chromo, from.ToString() + " - " + to.ToString());
                 //var ac = ga.sim_ga_limit(Convert.ToInt32(MarketData.Close.Count * 0.05), MarketData.Close.Count - 1, chromo);
                 //var ac = ga.sim_ga(Convert.ToInt32(MarketData.Close.Count * 0.05), MarketData.Close.Count-1, chromo);
                 //var ac = ga.sim_ga(1000, Convert.ToInt32(MarketData.Close.Count * 0.05), chromo);
@@ -50,18 +54,23 @@ namespace BTCSIM
             {
                 Console.WriteLine("Started Island GA SIM");
                 RandomSeed.initialize();
-                int from = 1000;
-                int num_island = 15;
+                int from = 100000;
+                int num_island = 10;
                 int num_chromos = 8;
                 int num_generations = 8;
                 int banned_move_period = 3;
-                var units = new int[] { 19, 20, 4 };
+                var units = new int[] { 20, 50, 4 };
                 var mutation_rate = 0.9;
                 var move_ratio = 0.2;
-                int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8)) + from;
-                //int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.05)) + from;
+                //int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8)) + from;
+                int to = 30000 + from;
                 var ga_island = new GAIsland();
                 ga_island.start_ga_island(from, to, num_island, banned_move_period, move_ratio, num_chromos, num_generations, units, mutation_rate);
+
+                var ga = new GA(0);
+                var chromo = ga.readWeights(ga_island.best_island);
+                var ac = ga.sim_ga_limit(from, to, chromo, from.ToString() + " - " + to.ToString());
+
             }
             if (key == "conti_ga")
             {
@@ -79,20 +88,21 @@ namespace BTCSIM
                 var ac = new SimAccount();
                 for (int i = 0; i < 10; i++)
                 {
-                    Console.WriteLine("Conti GA SIM i="+i.ToString());
                     int ga_from = i * ga_window + 1000;
                     int ga_to = ga_from + ga_window;
-                    var ga_island = new GAIsland();
-                    ga_island.start_ga_island(ga_from, ga_to, num_island, banned_move_period, move_ratio, num_chromos, num_generations, units, mutation_rate);
                     int sim_from = ga_to;
                     int sim_to = sim_from + sim_window;
+                    Console.WriteLine("Conti GA SIM i=" + i.ToString() + ", ga period=" + ga_from.ToString() + " - " + ga_to.ToString() + ", sim period=" + sim_from.ToString() + " - " + sim_to.ToString());
+                    var ga_island = new GAIsland();
+                    ga_island.start_ga_island(ga_from, ga_to, num_island, banned_move_period, move_ratio, num_chromos, num_generations, units, mutation_rate);
+                    
                     var ga = new GA(0);
                     var chromo = ga.readWeights(ga_island.best_island);
-                    ac = ga.sim_ga_limit(sim_from, sim_to, chromo);
+                    ac = ga.sim_ga_limit(sim_from, sim_to, chromo, sim_from.ToString() + " - " + sim_to.ToString());
                 }
                 Console.WriteLine("*************************************************************************");
                 Console.WriteLine("total pl=" + ac.performance_data.total_pl.ToString() + ", num trade=" + ac.performance_data.num_trade.ToString() + ", win rate="+ac.performance_data.win_rate.ToString() + ", sharp ratio="+ac.performance_data.sharp_ratio.ToString());
-                Console.WriteLine("*************************************************************************")
+                Console.WriteLine("*************************************************************************");
             }
 
             //GA

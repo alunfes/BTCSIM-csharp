@@ -13,6 +13,7 @@ namespace BTCSIM
         public double realized_pl { get; set; }
         public double unrealized_pl { get; set; }
         public List<double> unrealized_pl_list { get; set; } //record unrealided pl during holding period for NN input data
+
         public int num_trade { get; set; }
         public int num_buy { get; set; }
         public int num_sell { get; set; }

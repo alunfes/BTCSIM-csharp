@@ -97,7 +97,7 @@ namespace BTCSIM
             }
         }
 
-        public SimAccount sim_ga(int from, int to, Gene chromo)
+        public SimAccount sim_ga(int from, int to, Gene chromo, string title)
         {
             var sim = new Sim();
             var ac = new SimAccount();
@@ -106,11 +106,11 @@ namespace BTCSIM
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
             Console.WriteLine("win rate=" + ac.performance_data.win_rate);
             Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
-            LineChart.DisplayLineChart(ac.log_data.total_pl_log,0,0);
+            LineChart.DisplayLineChart(ac.log_data.total_pl_log,title);
             return ac;
         }
 
-        public SimAccount sim_ga_limit(int from, int to, Gene chromo)
+        public SimAccount sim_ga_limit(int from, int to, Gene chromo, string title)
         {
             var sim = new Sim();
             var ac = new SimAccount();
@@ -119,7 +119,7 @@ namespace BTCSIM
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
             Console.WriteLine("win rate=" + ac.performance_data.win_rate);
             Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
-            LineChart.DisplayLineChart(ac.log_data.total_pl_log, 0, 0);
+            LineChart.DisplayLineChart(ac.log_data.total_pl_log, title);
             return ac;
         }
 
@@ -208,6 +208,8 @@ namespace BTCSIM
                 write_best_chromo();
             }
             Console.WriteLine("Completed GA.");
+
+
         }
 
         private void generate_chromos(int num_chrom, int[] num_units_layer)
@@ -224,7 +226,9 @@ namespace BTCSIM
             //ac = sim.sim_ga(from, to, chro, ac);
             ac = sim.sim_ga_limit(from, to, chro, ac);
             //return (ac.performance_data.total_pl * ac.performance_data.num_trade, ac);
-            return (ac.performance_data.sharp_ratio * ac.performance_data.num_trade, ac);
+            //return (ac.performance_data.unrealized_pl_list.Sum(), ac);
+
+            return (ac.performance_data.sharp_ratio * 0.1 * ac.performance_data.num_trade, ac);
         }
 
         private void check_best_eva(ConcurrentDictionary<int, double> eva, ConcurrentDictionary<int, SimAccount> ac)
