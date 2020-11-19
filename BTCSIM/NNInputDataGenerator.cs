@@ -80,9 +80,8 @@ namespace BTCSIM
             var input_data = new List<double>();
 
             //Divergence_minmax_scale
-            foreach (var d in MarketData.Divergence_minmax_scale[i])
-                input_data.Add(d);
-
+            //foreach (var d in MarketData.Divergence_minmax_scale[i])
+             //   input_data.Add(d);
 
             if (ac.order_data.order_side.Count > 0)
             {
@@ -174,7 +173,7 @@ namespace BTCSIM
                 input_data.Add(ac.holding_data.holding_size / 10.0);
 
             //unrealize pl change
-
+            
 
             return input_data.ToArray();
         }

@@ -59,7 +59,7 @@ namespace BTCSIM
                 int num_chromos = 8;
                 int num_generations = 8;
                 int banned_move_period = 3;
-                var units = new int[] { 20, 50, 4 };
+                var units = new int[] { 11, 30, 4 };
                 var mutation_rate = 0.9;
                 var move_ratio = 0.2;
                 //int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8)) + from;

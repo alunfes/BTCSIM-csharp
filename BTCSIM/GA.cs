@@ -159,6 +159,8 @@ namespace BTCSIM
             //mutation
             mutation(mutation_rate);
             write_best_chromo();
+            eva_dic = null;
+            ac_dic = null;
         }
 
 
@@ -244,7 +246,7 @@ namespace BTCSIM
                     best_eva_key = k;
                 }
             }
-            best_ac_log.Add(ac[best_eva_key]);
+            //best_ac_log.Add(ac[best_eva_key]);  may cause memory leake
             best_ac = ac[best_eva_key];
             best_chromo = best_eva_key;
             best_chromo_log.Add(best_eva_key);
