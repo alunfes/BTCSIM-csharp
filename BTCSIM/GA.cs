@@ -110,11 +110,11 @@ namespace BTCSIM
             return ac;
         }
 
-        public SimAccount sim_ga_limit(int from, int to, Gene chromo, string title)
+        public SimAccount sim_ga_limit(int from, int to, int max_amount, Gene chromo, string title)
         {
             var sim = new Sim();
             var ac = new SimAccount();
-            ac = sim.sim_ga_limit(from, to, chromo, ac);
+            ac = sim.sim_ga_limit(from, to, max_amount, chromo, ac);
             Console.WriteLine("pl=" + ac.performance_data.total_pl);
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
             Console.WriteLine("win rate=" + ac.performance_data.win_rate);
@@ -126,7 +126,7 @@ namespace BTCSIM
 
 
 
-        public void start_island_ga(int from, int to, int num_chromos, int generation_ind, int[] units, double mutation_rate)
+        public void start_island_ga(int from, int to, int max_amount, int num_chromos, int generation_ind, int[] units, double mutation_rate)
         {
             if (generation_ind == 0)
                 generate_chromos(num_chromos, units);
@@ -137,7 +137,7 @@ namespace BTCSIM
 
             Parallel.For(0, chromos.Length, option, j =>
             {
-                (double total_pl, SimAccount ac) res = evaluation(from, to, j, chromos[j]);
+                (double total_pl, SimAccount ac) res = evaluation(from, to, max_amount, j, chromos[j]);
                 eva_dic.GetOrAdd(j, res.total_pl);
                 ac_dic.GetOrAdd(j, res.ac);
             });
@@ -164,7 +164,7 @@ namespace BTCSIM
         }
 
 
-        public void start_ga(int from, int to, int num_chromos, int num_generations, int[] units, double mutation_rate, bool display_info)
+        public void start_ga(int from, int to, int max_amount, int num_chromos, int num_generations, int[] units, double mutation_rate, bool display_info)
         {
             //initialize chromos
             Console.WriteLine("started GA");
@@ -181,7 +181,7 @@ namespace BTCSIM
                 option.MaxDegreeOfParallelism = System.Environment.ProcessorCount;
                 Parallel.For(0, chromos.Length, option, j =>
                 {
-                    (double total_pl, SimAccount ac) res = evaluation(from, to, j, chromos[j]);
+                    (double total_pl, SimAccount ac) res = evaluation(from, to, max_amount, j, chromos[j]);
                     eva_dic.GetOrAdd(j, res.total_pl);
                     ac_dic.GetOrAdd(j, res.ac);
                 });
@@ -221,12 +221,12 @@ namespace BTCSIM
                 chromos[i] = new Gene(num_units_layer);
         }
 
-        private (double, SimAccount) evaluation(int from, int to, int chro_id, Gene chro)
+        private (double, SimAccount) evaluation(int from, int to, int max_amount, int chro_id, Gene chro)
         {
             var ac = new SimAccount();
             var sim = new Sim();
             //ac = sim.sim_ga(from, to, chro, ac);
-            ac = sim.sim_ga_limit(from, to, chro, ac);
+            ac = sim.sim_ga_limit(from, to, max_amount, chro, ac);
             //return (ac.performance_data.total_pl * ac.performance_data.num_trade, ac);
             //return (ac.performance_data.unrealized_pl_list.Sum(), ac);
 

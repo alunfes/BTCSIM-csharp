@@ -35,12 +35,11 @@ namespace BTCSIM
             return ac;
         }
 
-        public SimAccount sim_ga_limit(int from, int to, Gene chromo, SimAccount ac)
+        public SimAccount sim_ga_limit(int from, int to, int max_amount, Gene chromo, SimAccount ac)
         {
             var nn = new NN();
             var strategy = new Strategy();
             int amount = 1;
-            int max_amount = 10;
             var nn_input_data_generator = new NNInputDataGenerator();
 
             for (int i = from; i < to; i++)

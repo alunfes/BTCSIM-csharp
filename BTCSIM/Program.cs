@@ -41,8 +41,9 @@ namespace BTCSIM
                 //var from = 1000 + Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8));
                 var from = 130000;
                 var to = from + 10000;
+                int max_amount = 10;
                 //var to = MarketData.Close.Count -1;
-                var ac = ga.sim_ga_limit(from, to, chromo, from.ToString() + " - " + to.ToString());
+                var ac = ga.sim_ga_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString());
                 //var ac = ga.sim_ga_limit(Convert.ToInt32(MarketData.Close.Count * 0.05), MarketData.Close.Count - 1, chromo);
                 //var ac = ga.sim_ga(Convert.ToInt32(MarketData.Close.Count * 0.05), MarketData.Close.Count-1, chromo);
                 //var ac = ga.sim_ga(1000, Convert.ToInt32(MarketData.Close.Count * 0.05), chromo);
@@ -59,17 +60,18 @@ namespace BTCSIM
                 int num_chromos = 8;
                 int num_generations = 8;
                 int banned_move_period = 3;
+                int max_amount = 10;
                 var units = new int[] { 11, 30, 4 };
                 var mutation_rate = 0.9;
                 var move_ratio = 0.2;
                 //int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8)) + from;
                 int to = 30000 + from;
                 var ga_island = new GAIsland();
-                ga_island.start_ga_island(from, to, num_island, banned_move_period, move_ratio, num_chromos, num_generations, units, mutation_rate);
+                ga_island.start_ga_island(from, to, max_amount, num_island, banned_move_period, move_ratio, num_chromos, num_generations, units, mutation_rate);
 
                 var ga = new GA(0);
                 var chromo = ga.readWeights(ga_island.best_island);
-                var ac = ga.sim_ga_limit(from, to, chromo, from.ToString() + " - " + to.ToString());
+                var ac = ga.sim_ga_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString());
 
             }
             if (key == "conti_ga")
@@ -82,6 +84,7 @@ namespace BTCSIM
                 int num_chromos = 8;
                 int num_generations = 5;
                 int banned_move_period = 3;
+                int max_amount = 10;
                 var units = new int[] { 19, 20, 4 };
                 var mutation_rate = 0.9;
                 var move_ratio = 0.2;
@@ -94,11 +97,11 @@ namespace BTCSIM
                     int sim_to = sim_from + sim_window;
                     Console.WriteLine("Conti GA SIM i=" + i.ToString() + ", ga period=" + ga_from.ToString() + " - " + ga_to.ToString() + ", sim period=" + sim_from.ToString() + " - " + sim_to.ToString());
                     var ga_island = new GAIsland();
-                    ga_island.start_ga_island(ga_from, ga_to, num_island, banned_move_period, move_ratio, num_chromos, num_generations, units, mutation_rate);
+                    ga_island.start_ga_island(ga_from, ga_to, max_amount, num_island, banned_move_period, move_ratio, num_chromos, num_generations, units, mutation_rate);
                     
                     var ga = new GA(0);
                     var chromo = ga.readWeights(ga_island.best_island);
-                    ac = ga.sim_ga_limit(sim_from, sim_to, chromo, sim_from.ToString() + " - " + sim_to.ToString());
+                    ac = ga.sim_ga_limit(sim_from, sim_to, max_amount, chromo, sim_from.ToString() + " - " + sim_to.ToString());
                 }
                 Console.WriteLine("*************************************************************************");
                 Console.WriteLine("total pl=" + ac.performance_data.total_pl.ToString() + ", num trade=" + ac.performance_data.num_trade.ToString() + ", win rate="+ac.performance_data.win_rate.ToString() + ", sharp ratio="+ac.performance_data.sharp_ratio.ToString());
