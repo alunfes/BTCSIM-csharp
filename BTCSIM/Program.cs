@@ -101,7 +101,7 @@ namespace BTCSIM
                     
                     var ga = new GA(0);
                     var chromo = ga.readWeights(ga_island.best_island);
-                    ac = ga.sim_ga_limit(sim_from, sim_to, max_amount, chromo, sim_from.ToString() + " - " + sim_to.ToString());
+                    ac = ga.sim_ga_limit_conti(sim_from, sim_to, max_amount, chromo, sim_from.ToString() + " - " + sim_to.ToString(), ac);
                 }
                 Console.WriteLine("*************************************************************************");
                 Console.WriteLine("total pl=" + ac.performance_data.total_pl.ToString() + ", num trade=" + ac.performance_data.num_trade.ToString() + ", win rate="+ac.performance_data.win_rate.ToString() + ", sharp ratio="+ac.performance_data.sharp_ratio.ToString());

@@ -123,7 +123,17 @@ namespace BTCSIM
             return ac;
         }
 
-
+        public SimAccount sim_ga_limit_conti(int from, int to, int max_amount, Gene chromo, string title, SimAccount ac)
+        {
+            var sim = new Sim();
+            ac = sim.sim_ga_limit(from, to, max_amount, chromo, ac);
+            Console.WriteLine("pl=" + ac.performance_data.total_pl);
+            Console.WriteLine("num trade=" + ac.performance_data.num_trade);
+            Console.WriteLine("win rate=" + ac.performance_data.win_rate);
+            Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
+            LineChart.DisplayLineChart(ac.log_data.total_pl_log, title);
+            return ac;
+        }
 
 
         public void start_island_ga(int from, int to, int max_amount, int num_chromos, int generation_ind, int[] units, double mutation_rate)
