@@ -197,12 +197,15 @@ namespace BTCSIM
         public HoldingData holding_data;
         public LogData log_data;
 
+        public List<double> total_pl_list = new List<double>();
+
         public SimAccount()
         {
             log_data = new LogData();
             performance_data = new PerformanceData();
             order_data = new OrderData();
             holding_data = new HoldingData();
+            total_pl_list = new List<double>();
         }
 
         /*should be called after all sim calc*/
@@ -259,6 +262,7 @@ namespace BTCSIM
             if (performance_data.num_trade > 0)
                 performance_data.win_rate = Math.Round(Convert.ToDouble(performance_data.num_win) / Convert.ToDouble(performance_data.num_trade), 4);
             log_data.add_log_data(i, dt, "move to next", holding_data, order_data, performance_data);
+            total_pl_list.Add(performance_data.total_pl);
         }
 
         public void entry_order(string type, string side, double size, double price, int i, string dt, string message)

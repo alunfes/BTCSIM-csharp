@@ -106,7 +106,7 @@ namespace BTCSIM
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
             Console.WriteLine("win rate=" + ac.performance_data.win_rate);
             Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
-            LineChart.DisplayLineChart(ac.log_data.total_pl_log,title);
+            LineChart.DisplayLineChart(ac.total_pl_list,title);
             return ac;
         }
 
@@ -119,7 +119,7 @@ namespace BTCSIM
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
             Console.WriteLine("win rate=" + ac.performance_data.win_rate);
             Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
-            LineChart.DisplayLineChart(ac.log_data.total_pl_log, title);
+            LineChart.DisplayLineChart(ac.total_pl_list, title);
             return ac;
         }
 
@@ -131,7 +131,7 @@ namespace BTCSIM
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
             Console.WriteLine("win rate=" + ac.performance_data.win_rate);
             Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
-            LineChart.DisplayLineChart(ac.log_data.total_pl_log, title);
+            LineChart.DisplayLineChart(ac.total_pl_list, title);
             return ac;
         }
 

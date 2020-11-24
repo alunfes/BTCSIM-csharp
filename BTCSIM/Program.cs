@@ -18,9 +18,9 @@ namespace BTCSIM
             double current_pl = 0;
             for (int i = 0; i < ac_list.Count; i++)
             {
-                for (int j = 0; j < ac_list[i].log_data.total_pl_log.Count; j++)
+                for (int j = 0; j < ac_list[i].total_pl_list.Count; j++)
                 {
-                    combined_total_pl.Add(ac_list[i].log_data.total_pl_log[j] + current_pl);
+                    combined_total_pl.Add(ac_list[i].total_pl_list[j] + current_pl);
                 }
                 current_pl = combined_total_pl.Last();
                 combined_num_trade += ac_list[i].performance_data.num_trade;
@@ -162,6 +162,7 @@ namespace BTCSIM
                 Console.WriteLine("term total pl=" + ac_list.Last().performance_data.total_pl.ToString() + ", term num trade=" + ac_list.Last().performance_data.num_trade.ToString() + ", term win rate="+ ac_list.Last().performance_data.win_rate.ToString() + ", term sharp ratio="+ ac_list.Last().performance_data.sharp_ratio.ToString());
                 Console.WriteLine("combined total pl=" + res.combined_total_pl.Last().ToString() + ", combined num trade=" + res.comined_num_trade.ToString() + ", combined win rate=" + res.combined_win_rate.ToString() + ", combined sharp ratio=" + res.combined_sharp_ratio.ToString());
                 Console.WriteLine("*************************************************************************");
+                System.Threading.Thread.Sleep(3);
                 LineChart.DisplayLineChart(res.combined_total_pl, "Conti sim: "+ ga_window + start_ind +", combined num trade=" + res.comined_num_trade.ToString() + ", combined win rate=" + res.combined_win_rate.ToString());
             }
             stopWatch.Stop();
