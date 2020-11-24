@@ -1,10 +1,61 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 
 namespace BTCSIM
 {
+    class CombinedAC
+    {
+        public static (List<double>, int, double, double) calcCombinedAC(List<SimAccount> ac_list) //totla_pl_log, num_trade, win_rate, sharp ratio
+        {
+            var combined_total_pl = new List<double>();
+            double combined_num_trade = 0;
+            double combined_num_win = 0;
+            double combined_win_rate = 0;
+            double combined_sharp_ratio = 0;
+            double current_pl = 0;
+            for (int i = 0; i < ac_list.Count; i++)
+            {
+                for (int j = 0; j < ac_list[i].log_data.total_pl_log.Count; j++)
+                {
+                    combined_total_pl.Add(ac_list[i].log_data.total_pl_log[j] + current_pl);
+                }
+                current_pl = combined_total_pl.Last();
+                combined_num_trade += ac_list[i].performance_data.num_trade;
+                combined_num_win = ac_list[i].performance_data.num_win;
+            }
+            combined_win_rate = Math.Round(combined_num_win / combined_num_trade, 4);
+
+            List<double> change = new List<double>();
+            for (int i = 1; i < combined_total_pl.Count; i++)
+            {
+                if (combined_total_pl[i - 1] != 0)
+                    change.Add((combined_total_pl[i] - combined_total_pl[i - 1]) / combined_total_pl[i - 1]);
+                else
+                    change.Add(0);
+            }
+            var doubleList = change.Select(a => Convert.ToDouble(a)).ToArray();
+
+            //平均値算出
+            double mean = doubleList.Average();
+            //自乗和算出
+            double sum2 = doubleList.Select(a => a * a).Sum();
+            //分散 = 自乗和 / 要素数 - 平均値^2
+            double variance = sum2 / Convert.ToDouble(doubleList.Length) - mean * mean;
+            //標準偏差 = 分散の平方根
+            var stdv = Math.Sqrt(variance);
+            if (stdv != 0)
+                combined_sharp_ratio = Math.Round(combined_total_pl.Last() / stdv, 4);
+            else
+                combined_sharp_ratio = 0;
+
+            return (combined_total_pl, Convert.ToInt32(combined_num_trade), combined_win_rate, combined_sharp_ratio);
+        }
+    }
+
+
     class MainClass
     {
         public static void Main(string[] args)
@@ -79,19 +130,20 @@ namespace BTCSIM
                 Console.WriteLine("Started Island GA SIM");
                 RandomSeed.initialize();
                 int sim_window = 2000;
-                int ga_window = 50000;
-                int num_island = 10;
+                int ga_window = 30000;
+                int start_ind = 1000;
+                int num_island = 5;
                 int num_chromos = 8;
                 int num_generations = 5;
                 int banned_move_period = 3;
                 int max_amount = 10;
-                var units = new int[] { 19, 20, 4 };
+                var units = new int[] { 20, 20, 4 };
                 var mutation_rate = 0.9;
                 var move_ratio = 0.2;
-                var ac = new SimAccount();
-                for (int i = 0; i < 10; i++)
+                var ac_list = new List<SimAccount>();
+                for (int i = 0; i < 3; i++)
                 {
-                    int ga_from = i * ga_window + 1000;
+                    int ga_from = i * ga_window + start_ind;
                     int ga_to = ga_from + ga_window;
                     int sim_from = ga_to;
                     int sim_to = sim_from + sim_window;
@@ -101,112 +153,24 @@ namespace BTCSIM
                     
                     var ga = new GA(0);
                     var chromo = ga.readWeights(ga_island.best_island);
+                    var ac = new SimAccount();
                     ac = ga.sim_ga_limit_conti(sim_from, sim_to, max_amount, chromo, sim_from.ToString() + " - " + sim_to.ToString(), ac);
+                    ac_list.Add(ac);
                 }
+                (List<double> combined_total_pl, int comined_num_trade, double combined_win_rate, double combined_sharp_ratio) res = CombinedAC.calcCombinedAC(ac_list);
                 Console.WriteLine("*************************************************************************");
-                Console.WriteLine("total pl=" + ac.performance_data.total_pl.ToString() + ", num trade=" + ac.performance_data.num_trade.ToString() + ", win rate="+ac.performance_data.win_rate.ToString() + ", sharp ratio="+ac.performance_data.sharp_ratio.ToString());
+                Console.WriteLine("term total pl=" + ac_list.Last().performance_data.total_pl.ToString() + ", term num trade=" + ac_list.Last().performance_data.num_trade.ToString() + ", term win rate="+ ac_list.Last().performance_data.win_rate.ToString() + ", term sharp ratio="+ ac_list.Last().performance_data.sharp_ratio.ToString());
+                Console.WriteLine("combined total pl=" + res.combined_total_pl.Last().ToString() + ", combined num trade=" + res.comined_num_trade.ToString() + ", combined win rate=" + res.combined_win_rate.ToString() + ", combined sharp ratio=" + res.combined_sharp_ratio.ToString());
                 Console.WriteLine("*************************************************************************");
+                LineChart.DisplayLineChart(res.combined_total_pl, "Conti sim: "+ ga_window + start_ind +", combined num trade=" + res.comined_num_trade.ToString() + ", combined win rate=" + res.combined_win_rate.ToString());
             }
-
-            //GA
-            /*
-            Console.WriteLine("Started GA SIM");
-            RandomSeed.initialize();
-            //var chromo = new Gene(new int[] { 14, 50, 3 });
-            
-            int from = 1000;
-            int num_chromos = 100;
-            int num_generations = 10;
-            var units = new int[] {14, 10, 3};
-            var mutation_rate = 0.8;
-            int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8));
-            var ga = new GA(0);
-            ga.start_ga(from, to, num_chromos, num_generations, units, mutation_rate, true);
-            */
-
             stopWatch.Stop();
-            /*Console.WriteLine(stopWatch.Elapsed.Seconds.ToString() + " seconds.");
-            Console.WriteLine("pl=" + ac.performance_data.total_pl);
-            Console.WriteLine("num trade=" + ac.performance_data.num_trade);
-            Console.WriteLine("win rate=" + ac.performance_data.win_rate);
-            Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
-            */
-
-            /*
-            RandomGenerator.initialize();
-            var units = new int[3] { 10, 50, 3 };
-            var gene = new Gene(units);
-            var nn = new NN();
-            var inputs = RandomGenerator.getRandomArray(10);
-            var res = nn.calcNN(inputs, units, gene.weight_gene1, gene.weight_gene2, gene.bias_gene1, gene.bias_gene2, 1);
-            foreach (var r in res)
-                Console.WriteLine(r);
-            Console.WriteLine(nn.getActivatedUnit(res));
-            */
-
-
-
-
-            /*   
-            var simopt = new SimOptimizer();
-            int opt_win_size = 50;
-            int kijun_val = 1;
-            int num_conti = 0;
-            Console.WriteLine("opt_win_size=" + opt_win_size.ToString() + ", kijun_val = " + kijun_val.ToString());
-            var ac = simopt.start_optimization(opt_win_size, kijun_val, num_conti, MarketData.Close.Count - opt_win_size - 1, 0.0, num_conti);
-            */
-            /*
-            int k = 0;
-            using (var sw = new System.IO.StreamWriter(@"result_conti_random.csv", false))
-            {
-                sw.WriteLine("opt_win_size,kijun_val,num_conti,total_pl,num_trade,win_rate,fee to pl ratio,sharp ratio");
-                for (int i = 0; i < 100; i++)
-                {
-                    for (int j = 0; j < 10; j++)
-                    {
-                        Console.WriteLine("No." + k.ToString());
-                        k++;
-                        var simopt = new SimOptimizer();
-                        int opt_win_size = (i + 1) * 5;
-                        int kijun_val = 1;
-                        int num_conti = j + 1;
-                        //Console.WriteLine("opt_win_size=" + opt_win_size.ToString() + ", kijun_val = " + kijun_val.ToString());
-                        var ac = simopt.start_optimization(opt_win_size, kijun_val, 10, MarketData.Close.Count - opt_win_size - 1, 0.3, num_conti);
-                        Console.WriteLine("opt_win_size=" + opt_win_size.ToString() + ", " + "kijun_val=" + kijun_val.ToString()+", "+"num_conti="+num_conti.ToString()+", "+ac.performance_data.total_pl.ToString()+
-                            ", "+ac.performance_data.num_trade.ToString()+", "+ac.performance_data.win_rate.ToString()+", "+(ac.performance_data.total_fee / ac.performance_data.total_pl).ToString());
-                        sw.WriteLine("{0},{1},{2},{3},{4},{5},{6},{7}", opt_win_size, kijun_val, num_conti, ac.performance_data.total_pl, ac.performance_data.num_trade, ac.performance_data.win_rate, ac.performance_data.total_fee / ac.performance_data.total_pl, ac.performance_data.sharp_ratio.ToString());
-                    }
-                }
-            }*/
-
-            Console.WriteLine("Completed");
-
-
-
-            /*
-            var ga = new GA();
-            ga.start_ga(30, 300, 0.1, 10000);
-            */
-
-            /*
-            for (int i = 0; i < 10; i++)
-            {
-                Stopwatch stopWatch = new Stopwatch();
-                stopWatch.Start();
-                var ac = new SimAccount();
-                var sim = new Sim();
-                ac = sim.sim_trendfollow_limit(10000, MarketData.Close.Count-1, (i + 1) * 1000, 0.01, -0.01, 0.99, 0.99, ac);
-                ac.calc_sharp_ratio();
-                stopWatch.Stop();
-                Console.WriteLine("Completed sim. " + i.ToString());
-                Console.WriteLine(stopWatch.Elapsed.Seconds.ToString() + " seconds.");
-                Console.WriteLine("pl=" + ac.performance_data.total_pl);
-                Console.WriteLine("num trade=" + ac.performance_data.num_trade);
-                Console.WriteLine("win rate=" + ac.performance_data.win_rate);
-                Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
-                TableToCSV.LogDataToCSV(ac.log_data.log_data_table, "./ac.csv");
-            }
-            */
+            Console.WriteLine("Completed all processes.");
+            Console.WriteLine("Time Elapsed (min)=" + stopWatch.Elapsed.Minutes.ToString());
         }
+
+
+        
+
     }
 }

@@ -5,8 +5,11 @@ using System.Numerics;
 using System.Linq;
 using System.IO;
 
+
+
 namespace BTCSIM
 {
+
     public class PerformanceData
     {
         public double total_pl { get; set; }
@@ -455,7 +458,6 @@ namespace BTCSIM
 
         private void calc_executed_pl(double exec_price, double size, int i)
         {
-            //var pl = holding_data.holding_side == "buy" ? (exec_price - holding_data.holding_price) / holding_data.holding_price * size : (holding_data.holding_price - exec_price) / holding_data.holding_price * size;
             var pl = holding_data.holding_side == "buy" ? (exec_price - holding_data.holding_price) * size : (holding_data.holding_price - exec_price) * size;
             performance_data.realized_pl += Math.Round(pl, 6);
             performance_data.num_trade++;
