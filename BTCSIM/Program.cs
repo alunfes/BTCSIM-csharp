@@ -131,13 +131,13 @@ namespace BTCSIM
                 RandomSeed.initialize();
                 int sim_window = 2000;
                 int ga_window = 30000;
-                int start_ind = 1000;
+                int start_ind = 10000;
                 int num_island = 5;
                 int num_chromos = 8;
                 int num_generations = 5;
                 int banned_move_period = 3;
                 int max_amount = 10;
-                var units = new int[] { 20, 20, 4 };
+                var units = new int[] { 11, 20, 4 };
                 var mutation_rate = 0.9;
                 var move_ratio = 0.2;
                 var ac_list = new List<SimAccount>();
@@ -162,7 +162,7 @@ namespace BTCSIM
                 Console.WriteLine("term total pl=" + ac_list.Last().performance_data.total_pl.ToString() + ", term num trade=" + ac_list.Last().performance_data.num_trade.ToString() + ", term win rate="+ ac_list.Last().performance_data.win_rate.ToString() + ", term sharp ratio="+ ac_list.Last().performance_data.sharp_ratio.ToString());
                 Console.WriteLine("combined total pl=" + res.combined_total_pl.Last().ToString() + ", combined num trade=" + res.comined_num_trade.ToString() + ", combined win rate=" + res.combined_win_rate.ToString() + ", combined sharp ratio=" + res.combined_sharp_ratio.ToString());
                 Console.WriteLine("*************************************************************************");
-                System.Threading.Thread.Sleep(3);
+                System.Threading.Thread.Sleep(3000);
                 LineChart.DisplayLineChart(res.combined_total_pl, "Conti sim: "+ ga_window + start_ind +", combined num trade=" + res.comined_num_trade.ToString() + ", combined win rate=" + res.combined_win_rate.ToString());
             }
             stopWatch.Stop();

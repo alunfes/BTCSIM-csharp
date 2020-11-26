@@ -60,7 +60,9 @@ namespace BTCSIM
         1. pred_side == order_sideのときは、max_amountに達するまでamountを追加してupdate price
         2. pred_side != order_sideのときは、cancel all orders, pred_sideにamountのlimit orderを出す。
         3. pred_side == holding_sideのときは、max_amountに達するまでamountのlimit orderを出す。
-        4. pred_side != holding_sideのときは、amount + holding_sizeのlimit orderを出す*/
+        4. pred_side != holding_sideのときは、amount + holding_sizeのlimit orderを出す
+        
+         */
         public StrategyActionData GALimitStrategy(int i, int nn_output, int amount, int max_amount, SimAccount ac)
         {
             var ad = new StrategyActionData();
@@ -76,10 +78,11 @@ namespace BTCSIM
             }
             else
             {
-                if (pred_side == ac.order_data.getLastOrderSide() && ac.holding_data.holding_size + ac.order_data.getLastOrderSize() < max_amount) //1.
+                if (pred_side == ac.order_data.getLastOrderSide()) //1.
                 {
-                    ad.add_action("update amount", pred_side, "limit", 0, ac.order_data.getLastOrderSize() + amount, ac.order_data.order_serial_list.Last(), "update order amount");
-                    ad.add_action("update price", pred_side, "limit", MarketData.Close[i], ac.order_data.getLastOrderSize() + amount, ac.order_data.order_serial_list.Last(), "update order price");
+                    if (ac.holding_data.holding_size + ac.order_data.getLastOrderSize() < max_amount)
+                        ad.add_action("update amount", pred_side, "limit", 0, ac.order_data.getLastOrderSize() + amount, ac.order_data.order_serial_list.Last(), "update order amount");
+                    ad.add_action("update price", pred_side, "limit", MarketData.Close[i], ac.order_data.getLastOrderSize(), ac.order_data.order_serial_list.Last(), "update order price");
                 }
                 else if (pred_side != ac.order_data.getLastOrderSide()) //2.
                 {

@@ -239,6 +239,7 @@ namespace BTCSIM
         }
 
 
+        /*executeしたにもかかわらず*/
         public void move_to_next(int i, string dt, double open, double high, double low, double close)
         {
             if (start_ind <= 0)
@@ -412,7 +413,7 @@ namespace BTCSIM
                 }
                 else if (order_data.order_i[s] < i)
                 {
-                    if (order_data.order_type[s] == "limit" && ((order_data.order_side[s] == "buy" && order_data.order_price[s] > low+0.5) || (order_data.order_side[s] == "sell" && order_data.order_price[s] < high-0.5)))
+                    if (order_data.order_type[s] == "limit" && ((order_data.order_side[s] == "buy" && order_data.order_price[s] >= low+0.5) || (order_data.order_side[s] == "sell" && order_data.order_price[s] <= high-0.5)))
                     {
                         process_execution(order_data.order_price[s], s, i, dt);
                         del_order(s, i);
