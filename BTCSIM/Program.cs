@@ -82,17 +82,19 @@ namespace BTCSIM
 
             MarketData.initializer(terms);
 
-            
+            for(int k = 0; k<10; k++)
+                Console.WriteLine(MarketData.Sma[100][51000+k]);
+
             //Read Weight Sim
             if (key == "sim")
             {
                 Console.WriteLine("Started Read Weight SIM");
                 var ga = new GA(0);
-                var chromo = ga.readWeights(0);
+                var chromo = ga.readWeights(1);
                 //var from = 1000 + Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8));
-                var from = 130000;
-                var to = from + 10000;
-                int max_amount = 10;
+                var from = 51000;
+                var to = from + 100000;
+                int max_amount = 1;
                 //var to = MarketData.Close.Count -1;
                 var ac = ga.sim_ga_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString()+ ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1], true);
                 //var ac = ga.sim_ga_limit(Convert.ToInt32(MarketData.Close.Count * 0.05), MarketData.Close.Count - 1, chromo);

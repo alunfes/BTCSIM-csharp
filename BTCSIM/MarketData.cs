@@ -141,7 +141,7 @@ namespace BTCSIM
         static private List<double> calc_sma(int term)
         {
             List<double> res = new List<double>();
-            for (int i = 0; i < term; i++) { res.Add(double.NaN); }
+            for (int i = 0; i < term-1; i++) { res.Add(double.NaN); }
             var sumv = 0.0;
             for (int j = 0; j < term; j++) { sumv += close[j]; }
             for (int i = term; i < close.Count; i++)
