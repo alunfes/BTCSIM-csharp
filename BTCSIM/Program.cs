@@ -24,7 +24,7 @@ namespace BTCSIM
                 }
                 current_pl = combined_total_pl.Last();
                 combined_num_trade += ac_list[i].performance_data.num_trade;
-                combined_num_win = ac_list[i].performance_data.num_win;
+                combined_num_win += ac_list[i].performance_data.num_win;
             }
             combined_win_rate = Math.Round(combined_num_win / combined_num_trade, 4);
 
@@ -94,7 +94,7 @@ namespace BTCSIM
                 var to = from + 10000;
                 int max_amount = 10;
                 //var to = MarketData.Close.Count -1;
-                var ac = ga.sim_ga_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString());
+                var ac = ga.sim_ga_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString()+ ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1], true);
                 //var ac = ga.sim_ga_limit(Convert.ToInt32(MarketData.Close.Count * 0.05), MarketData.Close.Count - 1, chromo);
                 //var ac = ga.sim_ga(Convert.ToInt32(MarketData.Close.Count * 0.05), MarketData.Close.Count-1, chromo);
                 //var ac = ga.sim_ga(1000, Convert.ToInt32(MarketData.Close.Count * 0.05), chromo);
@@ -106,7 +106,7 @@ namespace BTCSIM
             {
                 Console.WriteLine("Started Island GA SIM");
                 RandomSeed.initialize();
-                int from = 100000;
+                int from = 10000;
                 int num_island = 10;
                 int num_chromos = 8;
                 int num_generations = 8;
@@ -122,7 +122,7 @@ namespace BTCSIM
 
                 var ga = new GA(0);
                 var chromo = ga.readWeights(ga_island.best_island);
-                var ac = ga.sim_ga_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString());
+                var ac = ga.sim_ga_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString() + ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to-1]+   ", Best Island="+ga_island.best_island.ToString(), true);
 
             }
             if (key == "conti_ga")
@@ -143,7 +143,7 @@ namespace BTCSIM
                 var ac_list = new List<SimAccount>();
                 for (int i = 0; i < 3; i++)
                 {
-                    int ga_from = i * ga_window + start_ind;
+                    int ga_from = i * sim_window + start_ind;
                     int ga_to = ga_from + ga_window;
                     int sim_from = ga_to;
                     int sim_to = sim_from + sim_window;
@@ -154,7 +154,7 @@ namespace BTCSIM
                     var ga = new GA(0);
                     var chromo = ga.readWeights(ga_island.best_island);
                     var ac = new SimAccount();
-                    ac = ga.sim_ga_limit_conti(sim_from, sim_to, max_amount, chromo, sim_from.ToString() + " - " + sim_to.ToString(), ac);
+                    ac = ga.sim_ga_limit_conti(sim_from, sim_to, max_amount, chromo, sim_from.ToString() + " - " + sim_to.ToString(), ac, false);
                     ac_list.Add(ac);
                 }
                 (List<double> combined_total_pl, int comined_num_trade, double combined_win_rate, double combined_sharp_ratio) res = CombinedAC.calcCombinedAC(ac_list);
@@ -163,7 +163,7 @@ namespace BTCSIM
                 Console.WriteLine("combined total pl=" + res.combined_total_pl.Last().ToString() + ", combined num trade=" + res.comined_num_trade.ToString() + ", combined win rate=" + res.combined_win_rate.ToString() + ", combined sharp ratio=" + res.combined_sharp_ratio.ToString());
                 Console.WriteLine("*************************************************************************");
                 System.Threading.Thread.Sleep(3000);
-                LineChart.DisplayLineChart(res.combined_total_pl, "Conti sim: "+ ga_window + start_ind +", combined num trade=" + res.comined_num_trade.ToString() + ", combined win rate=" + res.combined_win_rate.ToString());
+                LineChart.DisplayLineChart(res.combined_total_pl, "Conti sim: "+ ac_list[0].start_ind.ToString() + " - " + ac_list.Last().end_ind.ToString()  +", combined num trade=" + res.comined_num_trade.ToString() + ", combined win rate=" + res.combined_win_rate.ToString());
             }
             stopWatch.Stop();
             Console.WriteLine("Completed all processes.");

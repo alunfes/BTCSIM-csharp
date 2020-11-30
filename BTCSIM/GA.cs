@@ -110,7 +110,7 @@ namespace BTCSIM
             return ac;
         }
 
-        public SimAccount sim_ga_limit(int from, int to, int max_amount, Gene chromo, string title)
+        public SimAccount sim_ga_limit(int from, int to, int max_amount, Gene chromo, string title, bool chart)
         {
             var sim = new Sim();
             var ac = new SimAccount();
@@ -119,11 +119,12 @@ namespace BTCSIM
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
             Console.WriteLine("win rate=" + ac.performance_data.win_rate);
             Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
-            LineChart.DisplayLineChart(ac.total_pl_list, title);
+            if (chart)
+                LineChart.DisplayLineChart(ac.total_pl_list, title);
             return ac;
         }
 
-        public SimAccount sim_ga_limit_conti(int from, int to, int max_amount, Gene chromo, string title, SimAccount ac)
+        public SimAccount sim_ga_limit_conti(int from, int to, int max_amount, Gene chromo, string title, SimAccount ac, bool chart)
         {
             var sim = new Sim();
             ac = sim.sim_ga_limit(from, to, max_amount, chromo, ac);
@@ -131,7 +132,8 @@ namespace BTCSIM
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
             Console.WriteLine("win rate=" + ac.performance_data.win_rate);
             Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
-            LineChart.DisplayLineChart(ac.total_pl_list, title);
+            if (chart)
+                LineChart.DisplayLineChart(ac.total_pl_list, title);
             return ac;
         }
 
