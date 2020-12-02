@@ -82,7 +82,9 @@ namespace BTCSIM
                 {
                     if (ac.holding_data.holding_size + ac.order_data.getLastOrderSize() < max_amount)
                         ad.add_action("update amount", pred_side, "limit", 0, ac.order_data.getLastOrderSize() + amount, ac.order_data.order_serial_list.Last(), "update order amount");
-                    ad.add_action("update price", pred_side, "limit", MarketData.Close[i], ac.order_data.getLastOrderSize(), ac.order_data.order_serial_list.Last(), "update order price");
+                    //if ((ac.order_data.getLastOrderSide() == "buy" && MarketData.Close[i] > ac.order_data.getLastOrderPrice()) || (ac.order_data.getLastOrderSide() == "sell" && MarketData.Close[i] < ac.order_data.getLastOrderPrice()))
+                    if (ac.order_data.getLastOrderPrice() != MarketData.Close[i])
+                        ad.add_action("update price", pred_side, "limit", MarketData.Close[i], ac.order_data.getLastOrderSize(), ac.order_data.order_serial_list.Last(), "update order price");
                 }
                 else if (pred_side != ac.order_data.getLastOrderSide()) //2.
                 {

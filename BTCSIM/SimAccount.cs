@@ -299,6 +299,11 @@ namespace BTCSIM
 
         public void update_order_price(double update_price, int order_serial_num, int i, string dt)
         {
+            if (order_data.getLastOrderSide() == "buy" && order_data.getLastOrderPrice() > update_price)
+                Console.WriteLine(i.ToString()+": buy update issue:"+order_data.getLastOrderPrice().ToString() + " -> "+update_price.ToString());
+            else if (order_data.getLastOrderSide() == "sell" && order_data.getLastOrderPrice() < update_price)
+                Console.WriteLine(i.ToString() + ": sell update issue:" + order_data.getLastOrderPrice().ToString() + " -> " + update_price.ToString());
+
             if (update_price > 0 && order_data.order_serial_list.Contains(order_serial_num))
             {
                 order_data.order_price[order_serial_num] = update_price;
@@ -400,6 +405,9 @@ namespace BTCSIM
             }
         }
 
+        //order priceよりも低い・高い価格をつけたら約定と判定する。
+        //buy: order price=10000のときにlowが9999.5以下になったら約定。
+        //sell: order price=10000のときにhighが10000.5以上になったら約定。
         private void check_execution(int i, string dt, double open, double high, double low)
         {
             var serial_list = order_data.order_serial_list.ToArray();

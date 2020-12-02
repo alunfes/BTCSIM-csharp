@@ -48,6 +48,16 @@ namespace BTCSIM
                 var nn_outputs = nn.calcNN(nn_inputs, chromo.num_units, chromo.weight_gene1, chromo.weight_gene2, chromo.bias_gene1, chromo.bias_gene2, 1);
                 var pred = nn.getActivatedUnit(nn_outputs);
                 var actions = strategy.GALimitStrategy(i, pred, amount, max_amount, ac);
+
+                /*
+                Console.WriteLine("i=" + i.ToString());
+                for (int k = 0; k < nn_inputs.Length; k++)
+                    Console.WriteLine(nn_inputs[k]);
+                for (int k = 0; k < nn_outputs.Length; k++)
+                    Console.WriteLine(nn_outputs[k]);
+                */
+
+
                 for (int j = 0; j < actions.action.Count; j++)
                 {
                     if (actions.action[j] == "entry")
