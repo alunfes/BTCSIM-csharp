@@ -1,0 +1,41 @@
+﻿<Properties GitUserInfo="UsingGIT" StartupConfiguration="{3C1E82C7-9D21-4A51-B1E2-6C8D37DD4747}|Default">
+  <MonoDevelop.Ide.ItemProperties.BTCSIM PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="BTCSIM/Strategy.cs">
+    <Files>
+      <File FileName="BTCSIM/Program.cs" Line="116" Column="41" />
+      <File FileName="BTCSIM/GAIsland.cs" />
+      <File FileName="BTCSIM/GA.cs" Line="151" Column="14" />
+      <File FileName="BTCSIM/Sim.cs" Line="50" Column="55" />
+      <File FileName="BTCSIM/SimAccount.cs" Line="108" Column="6" />
+      <File FileName="BTCSIM/Strategy.cs" Line="220" Column="18" />
+      <File FileName="BTCSIM/MarketData.cs" />
+      <File FileName="BTCSIM/NNInputDataGenerator.cs" Line="162" Column="1" />
+      <File FileName="BTCSIM/NN.cs" />
+      <File FileName="BTCSIM/LineChart.cs" />
+      <File FileName="BTCSIM/RandomGenerator.cs" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="BTCSIM" expanded="True">
+            <Node name="BTCSIM" expanded="True">
+              <Node name="Strategy.cs" selected="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State />
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|anycpu" />
+  <Debugger.DebugSourceFolders>
+    <String>/Users/alun/Library/Caches/VisualStudio/8.0/Symbols/mono/corefx/7c24bb0756fd39fbf09b8777f25c15d21d78eb46</String>
+  </Debugger.DebugSourceFolders>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+</Properties>
