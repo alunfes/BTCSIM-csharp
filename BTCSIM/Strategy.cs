@@ -100,5 +100,88 @@ namespace BTCSIM
             }
             return ad;
         }
+
+
+
+        /*
+        1. No / Cancel
+        2. New Entry
+        3. Update Price
+        4. Additional Entry
+        5. Exit
+        6. Others (
+         */
+        public StrategyActionData GALimitStrategy2(int i, int nn_output, int amount, int max_amount, SimAccount ac)
+        {
+            var ad = new StrategyActionData();
+            var output_action_list = new string[] { "no", "buy", "sell", "cancel" };
+            var pred_side = output_action_list[nn_output];
+            //1. No / Cancel
+            if (pred_side == "no")
+            {
+            }
+            else if (pred_side == "cancel")
+            {
+                if (ac.order_data.getLastSerialNum() > 0)
+                    ad.add_action("cancel", "", "", 0, 0, ac.order_data.getLastSerialNum(), "cancel all order");
+            }
+            else
+            {
+                //2. New Entry
+                if (ac.holding_data.holding_side == "" && pred_side != ac.order_data.getLastOrderSide())
+                {
+                    ad.add_action("entry", pred_side, "limit", MarketData.Close[i], amount, -1, "New Entry");
+                }
+                //3.Update Price
+                else if (ac.order_data.getLastOrderSide() == pred_side && ac.order_data.getLastOrderPrice() != MarketData.Close[i])
+                {
+                    ad.add_action("update price", pred_side, "limit", MarketData.Close[i], ac.order_data.getLastOrderSize(), ac.order_data.getLastSerialNum(), "update order price");
+                }
+                //4. Additional Entry (pred = holding sideで現在orderなく、holding sizeにamount加えてもmax_amount以下の時に追加注文）
+                else if(ac.holding_data.holding_side == pred_side && ac.holding_data.holding_size + amount <= max_amount && ac.order_data.getLastOrderSide() == "")
+                {
+                    ad.add_action("entry", pred_side, "limit", MarketData.Close[i], amount, -1, "Additional Entry");
+                }
+                //5. Exit (holding side != predでかつpred sideのorderがない時にexit orderを出す）
+                else if((ac.holding_data.holding_side != pred_side && ac.holding_data.holding_side!="") && (pred_side != ac.order_data.getLastOrderSide()))
+                {
+                    ad.add_action("entry", pred_side, "limit", MarketData.Close[i], amount, -1, "Exit Entry");
+                }
+                else
+                {
+                    //Exitのorderが既に入っている場合。
+                    if (ac.holding_data.holding_side!="" && pred_side!= ac.holding_data.holding_side && pred_side == ac.order_data.getLastOrderSide())
+                    {
+
+                    }
+                    //既にmax amountのholdingを持っていて
+                    else
+                    {
+                        Console.WriteLine("Strategy - Unknown Situation !");
+                    }
+                }
+
+                if (pred_side == ac.order_data.getLastOrderSide()) //1.
+                {
+                    if (ac.holding_data.holding_size + ac.order_data.getLastOrderSize() < max_amount)
+                        ad.add_action("update amount", pred_side, "limit", 0, ac.order_data.getLastOrderSize() + amount, ac.order_data.order_serial_list.Last(), "update order amount");
+                    //if ((ac.order_data.getLastOrderSide() == "buy" && MarketData.Close[i] > ac.order_data.getLastOrderPrice()) || (ac.order_data.getLastOrderSide() == "sell" && MarketData.Close[i] < ac.order_data.getLastOrderPrice()))
+                    if (ac.order_data.getLastOrderPrice() != MarketData.Close[i])
+                        ad.add_action("update price", pred_side, "limit", MarketData.Close[i], ac.order_data.getLastOrderSize(), ac.order_data.order_serial_list.Last(), "update order price");
+                }
+                else if (pred_side != ac.order_data.getLastOrderSide()) //2.
+                {
+                    if (ac.order_data.getLastOrderSide() != "")
+                        ad.add_action("cancel", "", "", 0, 0, ac.order_data.order_serial_list.Last(), "cancel all order");
+                    if ((pred_side == ac.holding_data.holding_side && ac.holding_data.holding_size + amount > max_amount) == false)
+                        ad.add_action("entry", pred_side, "limit", MarketData.Close[i], amount, -1, "entry order");
+                }
+                else if (pred_side == ac.holding_data.holding_side && ac.holding_data.holding_size + ac.order_data.getLastOrderSize() < max_amount) //3.
+                    ad.add_action("entry", pred_side, "limit", MarketData.Close[i], amount, -1, "entry order");
+                else if (pred_side != ac.holding_data.holding_side && ac.order_data.getLastOrderSide() != pred_side) //4.
+                    ad.add_action("entry", pred_side, "limit", MarketData.Close[i], Math.Min(ac.holding_data.holding_size + amount, ac.holding_data.holding_size + max_amount), -1, "entry order");
+            }
+            return ad;
+        }
     }
 }
