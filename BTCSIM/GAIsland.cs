@@ -148,7 +148,7 @@ namespace BTCSIM
                 + ", Best num trade=" + gas[best_island].best_ac.performance_data.num_trade.ToString()
                 + ", Best win rate=" + gas[best_island].best_ac.performance_data.win_rate.ToString()
                 + ", Best sharp ratio = " + gas[best_island].best_ac.performance_data.sharp_ratio.ToString());
-            Console.WriteLine("Time Elapsed (sec)="+sw.Elapsed.Seconds.ToString());
+            Console.WriteLine("Time Elapsed (sec)="+sw.Elapsed.TotalSeconds.ToString());
             Console.WriteLine("---------------------------------------------------");
         }
 

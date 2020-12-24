@@ -147,21 +147,21 @@ namespace BTCSIM
             var option = new ParallelOptions();
             option.MaxDegreeOfParallelism = System.Environment.ProcessorCount;
 
-            /*
             Parallel.For(0, chromos.Length, option, j =>
             {
                 (double total_pl, SimAccount ac) res = evaluation(from, to, max_amount, j, chromos[j]);
                 eva_dic.GetOrAdd(j, res.total_pl);
                 ac_dic.GetOrAdd(j, res.ac);
             });
-            */
             //Console.WriteLine("island No."+island_id.ToString() + ", eva time="+sw.Elapsed.Seconds.ToString());
+            /*
             for (int k = 0; k < chromos.Length; k++)
             {
                 (double total_pl, SimAccount ac) res = evaluation(from, to,max_amount, k, chromos[k]);
                 eva_dic.GetOrAdd(k, res.total_pl);
                 ac_dic.GetOrAdd(k, res.ac);
             }
+            */
             //check best eva
             check_best_eva(eva_dic, ac_dic);
             //roulette selection

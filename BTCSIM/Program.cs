@@ -88,11 +88,11 @@ namespace BTCSIM
             {
                 Console.WriteLine("Started Read Weight SIM");
                 var ga = new GA(0);
-                var chromo = ga.readWeights(4);
+                var chromo = ga.readWeights(9);
                 //var from = 1000 + Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8));
                 var from = 51000;
-                var to = from + 100000;
-                int max_amount = 1;
+                var to = from + 500000;
+                int max_amount = 10;
                 //var to = MarketData.Close.Count -1;
                 var ac = ga.sim_ga_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString()+ ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1], true);
                 //var ac = ga.sim_ga_limit(Convert.ToInt32(MarketData.Close.Count * 0.05), MarketData.Close.Count - 1, chromo);
@@ -167,7 +167,7 @@ namespace BTCSIM
             }
             stopWatch.Stop();
             Console.WriteLine("Completed all processes.");
-            Console.WriteLine("Time Elapsed (min)=" + stopWatch.Elapsed.Minutes.ToString());
+            Console.WriteLine("Time Elapsed (sec)=" + stopWatch.Elapsed.TotalSeconds.ToString());
         }
 
 
