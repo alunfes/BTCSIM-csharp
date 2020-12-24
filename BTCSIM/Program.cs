@@ -112,7 +112,7 @@ namespace BTCSIM
                 int num_generations = 8;
                 int banned_move_period = 3;
                 int max_amount = 10;
-                var units = new int[] { 20, 10, 4 };
+                var units = new int[] { 19, 10, 4 };
                 var mutation_rate = 0.9;
                 var move_ratio = 0.2;
                 //int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8)) + from;

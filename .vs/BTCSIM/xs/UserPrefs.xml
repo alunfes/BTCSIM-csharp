@@ -7,7 +7,7 @@
       <File FileName="BTCSIM/GA.cs" Line="151" Column="14" />
       <File FileName="BTCSIM/Sim.cs" Line="50" Column="55" />
       <File FileName="BTCSIM/SimAccount.cs" Line="108" Column="6" />
-      <File FileName="BTCSIM/Strategy.cs" Line="220" Column="18" />
+      <File FileName="BTCSIM/Strategy.cs" Line="17" Column="36" />
       <File FileName="BTCSIM/MarketData.cs" />
       <File FileName="BTCSIM/NNInputDataGenerator.cs" Line="162" Column="1" />
       <File FileName="BTCSIM/NN.cs" />

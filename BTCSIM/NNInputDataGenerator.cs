@@ -167,11 +167,12 @@ namespace BTCSIM
                 input_data.Add(ac.performance_data.unrealized_pl / ac.holding_data.holding_period);
 
             //holding size
+            /*
             if (ac.holding_data.holding_size == 0)
                 input_data.Add(0);
             else
                 input_data.Add(ac.holding_data.holding_size / 10.0);
-
+            */
             //unrealize pl change
             
 
