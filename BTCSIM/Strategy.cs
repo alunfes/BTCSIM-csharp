@@ -108,8 +108,11 @@ namespace BTCSIM
         2. New Entry
         3. Update Price
         4. Additional Entry
-        5. Exit
-        6. Others (
+        5. Exit (もし既存のadditional orderがあったらまずはそれをキャンセル）
+        6. Opposite Order Cancel
+        7. Others1 (既にmax amountのholdingがあり、pred side=holding sideで何もしなくて良い場合）
+        8. Others2 (holding side== pred sideで既にpred sideのorderが存在しており、update priceも不要な場合）
+        9. Others3 (holding side != predで既にexit orderが存在しており、update priceも不要な場合)
          */
         public StrategyActionData GALimitStrategy2(int i, int nn_output, int amount, int max_amount, SimAccount ac)
         {
@@ -145,41 +148,36 @@ namespace BTCSIM
                 //5. Exit (holding side != predでかつpred sideのorderがない時にexit orderを出す）
                 else if((ac.holding_data.holding_side != pred_side && ac.holding_data.holding_side!="") && (pred_side != ac.order_data.getLastOrderSide()))
                 {
-                    ad.add_action("entry", pred_side, "limit", MarketData.Close[i], amount, -1, "Exit Entry");
+                    //もし既存のadditional orderがあったらまずはそれをキャンセル）
+                    if (ac.order_data.getLastOrderSide() != "")
+                        ad.add_action("cancel", "", "", 0, 0, ac.order_data.getLastSerialNum(), "cancel all order");
+                    ad.add_action("entry", pred_side, "limit", MarketData.Close[i], ac.holding_data.holding_size, -1, "Exit Entry");
+                }
+                //6. Opposite Order Cancel
+                else if (pred_side != ac.order_data.getLastOrderSide() && ac.order_data.getLastOrderSide() != "")
+                {
+                    ad.add_action("cancel", "", "", 0, 0, ac.order_data.getLastSerialNum(), "cancel all order");
                 }
                 else
                 {
-                    //Exitのorderが既に入っている場合。
-                    if (ac.holding_data.holding_side!="" && pred_side!= ac.holding_data.holding_side && pred_side == ac.order_data.getLastOrderSide())
+                    //7. Others1 (既にmax amountのholdingがあり、pred side=holding sideで何もしなくて良い場合）
+                    if (ac.holding_data.holding_size >= max_amount && ac.holding_data.holding_side == pred_side)
+                    {
+                    }
+                    //8.Others2(holding side == pred sideで既にpred sideのorderが存在しており、その価格の更新が不要な場合）
+                    else if (ac.holding_data.holding_side == pred_side && ac.order_data.getLastOrderSide() == pred_side && ac.order_data.getLastOrderPrice() == MarketData.Close[i])
+                    {
+                    }
+                    //9. Others3 (holding side != predで既にexit orderが存在しており、update priceも不要な場合)
+                    else if (ac.holding_data.holding_side != pred_side && ac.order_data.getLastOrderSide() == pred_side && ac.order_data.getLastOrderPrice() == MarketData.Close[i])
                     {
 
                     }
-                    //既にmax amountのholdingを持っていて
                     else
                     {
                         Console.WriteLine("Strategy - Unknown Situation !");
                     }
                 }
-
-                if (pred_side == ac.order_data.getLastOrderSide()) //1.
-                {
-                    if (ac.holding_data.holding_size + ac.order_data.getLastOrderSize() < max_amount)
-                        ad.add_action("update amount", pred_side, "limit", 0, ac.order_data.getLastOrderSize() + amount, ac.order_data.order_serial_list.Last(), "update order amount");
-                    //if ((ac.order_data.getLastOrderSide() == "buy" && MarketData.Close[i] > ac.order_data.getLastOrderPrice()) || (ac.order_data.getLastOrderSide() == "sell" && MarketData.Close[i] < ac.order_data.getLastOrderPrice()))
-                    if (ac.order_data.getLastOrderPrice() != MarketData.Close[i])
-                        ad.add_action("update price", pred_side, "limit", MarketData.Close[i], ac.order_data.getLastOrderSize(), ac.order_data.order_serial_list.Last(), "update order price");
-                }
-                else if (pred_side != ac.order_data.getLastOrderSide()) //2.
-                {
-                    if (ac.order_data.getLastOrderSide() != "")
-                        ad.add_action("cancel", "", "", 0, 0, ac.order_data.order_serial_list.Last(), "cancel all order");
-                    if ((pred_side == ac.holding_data.holding_side && ac.holding_data.holding_size + amount > max_amount) == false)
-                        ad.add_action("entry", pred_side, "limit", MarketData.Close[i], amount, -1, "entry order");
-                }
-                else if (pred_side == ac.holding_data.holding_side && ac.holding_data.holding_size + ac.order_data.getLastOrderSize() < max_amount) //3.
-                    ad.add_action("entry", pred_side, "limit", MarketData.Close[i], amount, -1, "entry order");
-                else if (pred_side != ac.holding_data.holding_side && ac.order_data.getLastOrderSide() != pred_side) //4.
-                    ad.add_action("entry", pred_side, "limit", MarketData.Close[i], Math.Min(ac.holding_data.holding_size + amount, ac.holding_data.holding_size + max_amount), -1, "entry order");
             }
             return ad;
         }

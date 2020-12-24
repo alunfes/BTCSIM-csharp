@@ -47,7 +47,7 @@ namespace BTCSIM
                 var nn_inputs = nn_input_data_generator.generateNNInputDataLimit(ac, i);
                 var nn_outputs = nn.calcNN(nn_inputs, chromo.num_units, chromo.weight_gene1, chromo.weight_gene2, chromo.bias_gene1, chromo.bias_gene2, 1);
                 var pred = nn.getActivatedUnit(nn_outputs);
-                var actions = strategy.GALimitStrategy(i, pred, amount, max_amount, ac);
+                var actions = strategy.GALimitStrategy2(i, pred, amount, max_amount, ac);
 
                 /*
                 Console.WriteLine("i=" + i.ToString());
