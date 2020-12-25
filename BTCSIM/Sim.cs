@@ -51,7 +51,7 @@ namespace BTCSIM
 
                 //check invalid ac situation
                 if (ac.order_data.order_side.Count > 1)
-                    Console.WriteLine("Sim - # of order is more than 1 !");
+                    Console.WriteLine("Sim: # of order is more than 1 !");
 
                 for (int j = 0; j < actions.action.Count; j++)
                 {
@@ -63,6 +63,8 @@ namespace BTCSIM
                         ac.update_order_amount(actions.order_size[j], actions.order_serial_num[j], i, MarketData.Dt[i].ToString());
                     else if (actions.action[j] == "update price")
                         ac.update_order_price(actions.order_price[j], actions.order_serial_num[j], i, MarketData.Dt[i].ToString());
+                    else
+                        Console.WriteLine("Sim: Unknown strategy action !");
                 }
                 ac.move_to_next(i + 1, MarketData.Dt[i + 1].ToString(), MarketData.Open[i + 1], MarketData.High[i + 1], MarketData.Low[i + 1], MarketData.Close[i + 1]);
             }
