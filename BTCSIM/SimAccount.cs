@@ -299,10 +299,10 @@ namespace BTCSIM
 
         public void update_order_price(double update_price, int order_serial_num, int i, string dt)
         {
-            if (order_data.getLastOrderSide() == "buy" && order_data.getLastOrderPrice() > update_price)
-                Console.WriteLine(i.ToString()+": buy update issue:"+order_data.getLastOrderPrice().ToString() + " -> "+update_price.ToString());
-            else if (order_data.getLastOrderSide() == "sell" && order_data.getLastOrderPrice() < update_price)
-                Console.WriteLine(i.ToString() + ": sell update issue:" + order_data.getLastOrderPrice().ToString() + " -> " + update_price.ToString());
+            if (order_data.getLastOrderSide() == "buy" && order_data.getLastOrderPrice() > update_price) { }
+            //Console.WriteLine(i.ToString()+": buy update issue:"+order_data.getLastOrderPrice().ToString() + " -> "+update_price.ToString());
+            else if (order_data.getLastOrderSide() == "sell" && order_data.getLastOrderPrice() < update_price) { }
+                //Console.WriteLine(i.ToString() + ": sell update issue:" + order_data.getLastOrderPrice().ToString() + " -> " + update_price.ToString());
 
             if (update_price > 0 && order_data.order_serial_list.Contains(order_serial_num))
             {
