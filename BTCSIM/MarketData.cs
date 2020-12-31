@@ -216,6 +216,8 @@ namespace BTCSIM
             }
         }
 
+
+        /*1分毎の変化率合計値の移動平均*/
         static private List<double> calcVolaKyori(int term)
         {
             List<double> res = new List<double>();

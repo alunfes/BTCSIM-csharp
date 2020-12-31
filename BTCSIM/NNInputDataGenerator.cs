@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
+
 
 namespace BTCSIM
 {
@@ -75,6 +77,8 @@ namespace BTCSIM
         }
 
 
+
+
         public double[] generateNNInputDataLimit(SimAccount ac, int i)
         {
             var input_data = new List<double>();
@@ -83,17 +87,32 @@ namespace BTCSIM
             foreach (var d in MarketData.Divergence_minmax_scale[i])
                 input_data.Add(d);
 
+            //price raw data
+            /*
+            var term = 1000;
+            var num_sampling = 10;
+            var sampling_window = term / num_sampling;
+            List<double> sampled_data = new List<double>();
+            for (int j = 0; j < num_sampling; j++)
+                sampled_data.Add(MarketData.Close[i-j* num_sampling]);
+            var minv = sampled_data.Min();
+            for (int j = 0; j < sampled_data.Count; j++)
+                sampled_data[j] = sampled_data[j] - minv;
+            var maxv = sampled_data.Max();
+            for (int j = 0; j < sampled_data.Count; j++)
+                input_data.Add(sampled_data[j] / maxv);
+            */
+
+            //order side
             if (ac.order_data.order_side.Count > 0)
             {
                 if (ac.order_data.getLastOrderSide()=="buy")
                 {
-                    input_data.Add(0);
                     input_data.Add(1);
                     input_data.Add(0);
                 }
                 else if (ac.order_data.getLastOrderSide() == "sell")
                 {
-                    input_data.Add(0);
                     input_data.Add(0);
                     input_data.Add(1);
                 }
@@ -102,33 +121,27 @@ namespace BTCSIM
                     Console.WriteLine("Unknown order side! " + ac.order_data.order_side[ac.order_data.order_serial_list[0]]);
                     input_data.Add(0);
                     input_data.Add(0);
-                    input_data.Add(0);
                 }
             }
             else
             {
                 input_data.Add(0);
                 input_data.Add(0);
-                input_data.Add(0);
             }
 
-
-
+            //holding side
             if (ac.holding_data.holding_side == "buy")
             {
                 input_data.Add(0);
                 input_data.Add(1);
-                input_data.Add(0);
             }
             else if (ac.holding_data.holding_side == "sell")
             {
-                input_data.Add(0);
                 input_data.Add(0);
                 input_data.Add(1);
             }
             else
             {
-                input_data.Add(1);
                 input_data.Add(0);
                 input_data.Add(0);
             }
@@ -138,25 +151,18 @@ namespace BTCSIM
             if (ac.performance_data.unrealized_pl == 0)
             {
                 input_data.Add(0);
-                input_data.Add(0);
             }
-            else if (ac.performance_data.unrealized_pl > 0)
+            else
             {
                 //unrealized_pl = amount * (price - holding_price)
                 //(price - holding_price) / holding_price  <-目的式
                 //(unrealized_pl / amount) / holding_price
                 input_data.Add((ac.performance_data.unrealized_pl / ac.holding_data.holding_size) / (ac.holding_data.holding_price));
-                input_data.Add(0);
-            }
-            else
-            {
-                input_data.Add(0);
-                input_data.Add(-1.0 * (ac.performance_data.unrealized_pl / ac.holding_data.holding_size) / (ac.holding_data.holding_price));
             }
 
             //holding period
             if (ac.holding_data.holding_period == 0)
-                input_data.Add(-1);
+                input_data.Add(1.0);
             else
                 input_data.Add(1.0 / ac.holding_data.holding_period);
 

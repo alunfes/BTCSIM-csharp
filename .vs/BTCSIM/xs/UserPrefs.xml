@@ -1,25 +1,30 @@
 ﻿<Properties GitUserInfo="UsingGIT" StartupConfiguration="{3C1E82C7-9D21-4A51-B1E2-6C8D37DD4747}|Default">
   <MonoDevelop.Ide.ItemProperties.BTCSIM PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="BTCSIM/Strategy.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="BTCSIM/GA.cs">
     <Files>
-      <File FileName="BTCSIM/Program.cs" Line="116" Column="41" />
-      <File FileName="BTCSIM/GAIsland.cs" />
-      <File FileName="BTCSIM/GA.cs" Line="151" Column="14" />
-      <File FileName="BTCSIM/Sim.cs" Line="50" Column="55" />
-      <File FileName="BTCSIM/SimAccount.cs" Line="108" Column="6" />
-      <File FileName="BTCSIM/Strategy.cs" Line="17" Column="36" />
-      <File FileName="BTCSIM/MarketData.cs" />
-      <File FileName="BTCSIM/NNInputDataGenerator.cs" Line="162" Column="1" />
+      <File FileName="BTCSIM/Program.cs" Line="77" Column="51" />
+      <File FileName="BTCSIM/GAIsland.cs" Line="150" Column="49" />
+      <File FileName="BTCSIM/GA.cs" Line="13" Column="38" />
+      <File FileName="BTCSIM/Sim.cs" Line="20" Column="13" />
+      <File FileName="BTCSIM/Strategy.cs" Line="139" Column="1" />
+      <File FileName="BTCSIM/SimAccount.cs" Line="481" Column="10" />
+      <File FileName="BTCSIM/MarketData.cs" Line="224" Column="68" />
+      <File FileName="BTCSIM/NNInputDataGenerator.cs" Line="100" Column="56" />
       <File FileName="BTCSIM/NN.cs" />
       <File FileName="BTCSIM/LineChart.cs" />
-      <File FileName="BTCSIM/RandomGenerator.cs" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="BTCSIM" expanded="True">
+            <Node name="Solution Items" expanded="True" />
             <Node name="BTCSIM" expanded="True">
-              <Node name="Strategy.cs" selected="True" />
+              <Node name="References" expanded="True">
+                <Node name="From Packages" expanded="True" />
+              </Node>
+              <Node name="Packages" expanded="True" />
+              <Node name="Properties" expanded="True" />
+              <Node name="GA.cs" selected="True" />
             </Node>
           </Node>
         </State>
@@ -35,7 +40,14 @@
     <String>/Users/alun/Library/Caches/VisualStudio/8.0/Symbols/mono/corefx/7c24bb0756fd39fbf09b8777f25c15d21d78eb46</String>
   </Debugger.DebugSourceFolders>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
+    <BreakpointStore>
+      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/Sim.cs" relfile="BTCSIM/Sim.cs" line="54" column="1" />
+      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/Sim.cs" relfile="BTCSIM/Sim.cs" line="67" column="1" />
+      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/Strategy.cs" relfile="BTCSIM/Strategy.cs" line="138" column="1" />
+      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/Strategy.cs" relfile="BTCSIM/Strategy.cs" line="207" column="1" />
+      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/Strategy.cs" relfile="BTCSIM/Strategy.cs" line="30" column="1" />
+      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/Strategy.cs" relfile="BTCSIM/Strategy.cs" line="183" column="1" />
+    </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MultiItemStartupConfigurations />
 </Properties>

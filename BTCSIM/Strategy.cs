@@ -26,6 +26,8 @@ namespace BTCSIM
         }
         public void add_action(string action, string side, string type, double price, double size, int serial_num, string message)
         {
+            if (size > 1)
+                Console.WriteLine("sise > 1 !");
             this.action.Add(action);
             order_side.Add(side);
             order_type.Add(type);
@@ -113,6 +115,7 @@ namespace BTCSIM
         7. Others1 (既にmax amountのholdingがあり、pred side=holding sideで何もしなくて良い場合）
         8. Others2 (holding side== pred sideで既にpred sideのorderが存在しており、update priceも不要な場合）
         9. Others3 (holding side != predで既にexit orderが存在しており、update priceも不要な場合)
+        10.Others4 (holding side == pred sideでorderもない場合）
          */
         /*
          * ・simだと本来約定できない状況でもlimit order executedとして処理されることがある。
@@ -127,10 +130,17 @@ namespace BTCSIM
             var pred_side = output_action_list[nn_output];
             var buy_entry_price = MarketData.Close[i] - 0.5;
             var sell_entry_price = MarketData.Close[i] + 0.5;
-            //1. No / Cancel
+            var update_price_kijun = 3;
+
+
+            //check invalid situation
+            if (ac.holding_data.holding_size > max_amount)
+                Console.WriteLine("Sim Strategy: Holding size is larger than max_amount !");
+
+            //1. No / Cancel           
             if (pred_side == "no")
             {
-                if (ac.order_data.getLastOrderSide() != "" && ac.order_data.getLastOrderPrice() != (ac.order_data.getLastOrderSide() == "buy" ? buy_entry_price : sell_entry_price))
+                if (ac.order_data.getLastOrderSide() != "" && Math.Abs(ac.order_data.getLastOrderPrice() - (ac.order_data.getLastOrderSide() == "buy" ? buy_entry_price : sell_entry_price)) > update_price_kijun)
                     ad.add_action("update price", pred_side, "limit", pred_side=="buy" ? buy_entry_price : sell_entry_price, -1, ac.order_data.getLastSerialNum(), "1. No: update order price");
             }
             else if (pred_side == "cancel")
@@ -146,7 +156,7 @@ namespace BTCSIM
                     ad.add_action("entry", pred_side, "limit", pred_side == "buy" ? buy_entry_price : sell_entry_price, amount, -1, "2. New Entry");
                 }
                 //3.Update Price
-                else if (ac.order_data.getLastOrderSide() == pred_side && ac.order_data.getLastOrderPrice() != (ac.order_data.getLastOrderSide() == "buy" ? buy_entry_price : sell_entry_price))
+                else if (ac.order_data.getLastOrderSide() == pred_side && Math.Abs(ac.order_data.getLastOrderPrice() - (ac.order_data.getLastOrderSide() == "buy" ? buy_entry_price : sell_entry_price)) > update_price_kijun)
                 {
                     ad.add_action("update price", "", "limit", pred_side == "buy" ? buy_entry_price : sell_entry_price, -1, ac.order_data.getLastSerialNum(), "3. update order price");
                 }
@@ -167,11 +177,10 @@ namespace BTCSIM
                 else if (pred_side != ac.order_data.getLastOrderSide() && ac.order_data.getLastOrderSide() != "")
                 {
                     ad.add_action("cancel", "", "", 0, 0, ac.order_data.getLastSerialNum(), "6. cancel all order");
-                    if (ac.holding_data.holding_size <= max_amount)
+                    if (ac.holding_data.holding_size + amount <= max_amount)
                         ad.add_action("entry", pred_side, "limit", pred_side == "buy" ? buy_entry_price : sell_entry_price, amount, -1, "6. Opposite Entry");
                     if (ac.holding_data.holding_side != "" && ac.holding_data.holding_side != pred_side)
                         Console.WriteLine("Strategy: Opposite holding exist while cancelling opposite order !");
-
                 }
                 else
                 {
@@ -180,11 +189,16 @@ namespace BTCSIM
                     {
                     }
                     //8.Others2(holding side == pred sideで既にpred sideのorderが存在しており、その価格の更新が不要な場合）
-                    else if (ac.holding_data.holding_side == pred_side && ac.order_data.getLastOrderSide() == pred_side && ac.order_data.getLastOrderPrice() == (ac.order_data.getLastOrderSide() == "buy" ? buy_entry_price : sell_entry_price))
+                    else if (ac.holding_data.holding_side == pred_side && ac.order_data.getLastOrderSide() == pred_side && Math.Abs(ac.order_data.getLastOrderPrice() - (ac.order_data.getLastOrderSide() == "buy" ? buy_entry_price : sell_entry_price)) <= update_price_kijun)
                     {
                     }
                     //9. Others3 (holding side != predで既にexit orderが存在しており、update priceも不要な場合)
-                    else if (ac.holding_data.holding_side != pred_side && ac.order_data.getLastOrderSide() == pred_side && ac.order_data.getLastOrderPrice() == (ac.order_data.getLastOrderSide() == "buy" ? buy_entry_price : sell_entry_price))
+                    else if (ac.holding_data.holding_side != pred_side && ac.order_data.getLastOrderSide() == pred_side && Math.Abs(ac.order_data.getLastOrderPrice() - (ac.order_data.getLastOrderSide() == "buy" ? buy_entry_price : sell_entry_price)) <= update_price_kijun)
+                    {
+
+                    }
+                    //10.Others4(holding side == pred sideでorderもない場合）
+                    else if (ac.holding_data.holding_side == pred_side && ac.order_data.getLastOrderSide() =="")
                     {
 
                     }

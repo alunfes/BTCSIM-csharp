@@ -7,8 +7,38 @@ using System.Linq;
 using System.IO;
 using System.Text;
 
+
 namespace BTCSIM
 {
+    /*
+    public static class LINQExtension
+    {
+        public static double Median(this IEnumerable<double>? source)
+        {
+            if (!(source?.Any() ?? false))
+            {
+                throw new InvalidOperationException("Cannot compute median for a null or empty set.");
+            }
+
+            var sortedList = (from number in source
+                              orderby number
+                              select number).ToList();
+
+            int itemIndex = sortedList.Count / 2;
+
+            if (sortedList.Count % 2 == 0)
+            {
+                // Even number of items.
+                return (sortedList[itemIndex] + sortedList[itemIndex - 1]) / 2;
+            }
+            else
+            {
+                // Odd number of items.
+                return sortedList[itemIndex];
+            }
+        }
+    }*/
+
     public class Gene
     {
         //3 layer NN
@@ -238,10 +268,9 @@ namespace BTCSIM
             var sim = new Sim();
             //ac = sim.sim_ga(from, to, chro, ac);
             ac = sim.sim_ga_limit(from, to, max_amount, chro, ac);
-            //return (ac.performance_data.total_pl * ac.performance_data.num_trade, ac);
-            //return (ac.performance_data.unrealized_pl_list.Sum(), ac);
-
-            return (ac.performance_data.sharp_ratio * 0.1 * ac.performance_data.num_trade, ac);
+            //return (ac.performance_data.sharp_ratio * 0.1 * ac.performance_data.num_trade, ac);
+            return (ac.performance_data.total_pl * ac.performance_data.num_trade, ac);
+            //return (ac.performance_data.realized_pl_list.Median() * ac.performance_data.total_pl * ac.performance_data.num_trade, ac);
         }
 
         private void check_best_eva(ConcurrentDictionary<int, double> eva, ConcurrentDictionary<int, SimAccount> ac)
