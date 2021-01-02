@@ -269,7 +269,7 @@ namespace BTCSIM
             //ac = sim.sim_ga(from, to, chro, ac);
             ac = sim.sim_ga_limit(from, to, max_amount, chro, ac);
             //return (ac.performance_data.sharp_ratio * 0.1 * ac.performance_data.num_trade, ac);
-            return (ac.performance_data.total_pl * ac.performance_data.num_trade, ac);
+            return (ac.performance_data.total_pl * Math.Sqrt(Convert.ToDouble(ac.performance_data.num_trade)), ac);
             //return (ac.performance_data.realized_pl_list.Median() * ac.performance_data.total_pl * ac.performance_data.num_trade, ac);
         }
 

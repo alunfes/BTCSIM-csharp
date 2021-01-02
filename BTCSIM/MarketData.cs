@@ -217,7 +217,9 @@ namespace BTCSIM
         }
 
 
-        /*1分毎の変化率合計値の移動平均*/
+        /*1分毎の二乗変化率合計値の移動平均をtermで割った値
+         * （各termのvola kyoriを同じiでmin max scaleした時にtermが長いものほど1に近い値になるのを調整する)
+         */
         static private List<double> calcVolaKyori(int term)
         {
             List<double> res = new List<double>();
@@ -225,13 +227,13 @@ namespace BTCSIM
             res.Add(double.NaN);
             var change = new List<double>();
             for (int i = 1; i < close.Count; i++)
-                change.Add(Math.Abs(close[i] - close[i - 1]));
+                change.Add(Math.Pow((close[i] - close[i - 1]) / close[i-1], 2.0));
             var sumv = change.GetRange(0, term).Sum();
-            res.Add(sumv);
+            res.Add(sumv/term);
             for (int i = term + 1; i < change.Count; i++)
             {
                 sumv = sumv - change[i - 1] + change[i];
-                res.Add(sumv);
+                res.Add(sumv/term);
             }
             return res;
         }
