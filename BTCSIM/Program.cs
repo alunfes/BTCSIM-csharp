@@ -88,7 +88,7 @@ namespace BTCSIM
             {
                 Console.WriteLine("Started Read Weight SIM");
                 var ga = new GA(0);
-                var chromo = ga.readWeights(1);
+                var chromo = ga.readWeights(10);
                 //var from = 1000 + Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8));
                 var from = 401000;
                 var to = from + 200000;

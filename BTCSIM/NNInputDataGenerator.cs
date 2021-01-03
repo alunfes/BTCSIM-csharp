@@ -136,7 +136,7 @@ namespace BTCSIM
             //holding side
             if (ac.holding_data.holding_side == "buy")
             {
-                input_data.Add(0);
+                input_data.Add(1);
                 input_data.Add(1);
             }
             else if (ac.holding_data.holding_side == "sell")
