@@ -91,6 +91,17 @@ namespace BTCSIM
             foreach (var d in MarketData.Volakyori_minmax_scale[i])
                 input_data.Add(d);
 
+            //vol ma divergence minmax scale
+            foreach (var d in MarketData.Vol_ma_divergence_minmax_scale[i])
+                input_data.Add(d);
+
+            //buy sell vol ratio
+            foreach (var d in MarketData.Buysell_vol_ratio_minmax_scale[i])
+                input_data.Add(d);
+
+
+
+
             //price raw data
             /*
             var term = 1000;
@@ -137,7 +148,7 @@ namespace BTCSIM
             if (ac.holding_data.holding_side == "buy")
             {
                 input_data.Add(1);
-                input_data.Add(1);
+                input_data.Add(0);
             }
             else if (ac.holding_data.holding_side == "sell")
             {
@@ -151,7 +162,7 @@ namespace BTCSIM
             }
 
 
-            //ac pl, 損益率を2unitにわけて表現する
+            //ac pl, 損益率を表現する
             if (ac.performance_data.unrealized_pl == 0)
             {
                 input_data.Add(0);
@@ -174,7 +185,11 @@ namespace BTCSIM
             if (ac.holding_data.holding_period == 0)
                 input_data.Add(0);
             else
-                input_data.Add(ac.performance_data.unrealized_pl / ac.holding_data.holding_period);
+                input_data.Add(ac.performance_data.unrealized_pl / (ac.holding_data.holding_period * ac.holding_data.holding_size));
+
+
+            
+            
 
             //holding size
             /*

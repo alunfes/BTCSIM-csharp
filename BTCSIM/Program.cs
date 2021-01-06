@@ -92,7 +92,7 @@ namespace BTCSIM
                 //var from = 1000 + Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8));
                 var from = 401000;
                 var to = from + 200000;
-                int max_amount = 1;
+                int max_amount = 10;
                 //var to = MarketData.Close.Count -1;
                 var ac = ga.sim_ga_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString()+ ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1], true);
                 //var ac = ga.sim_ga_limit(Convert.ToInt32(MarketData.Close.Count * 0.05), MarketData.Close.Count - 1, chromo);
@@ -112,7 +112,7 @@ namespace BTCSIM
                 int num_generations = 10;
                 int banned_move_period = 3;
                 int max_amount = 1;
-                var units = new int[] { 25, 500, 4 };
+                var units = new int[] { 34, 500, 4 };
                 var mutation_rate = 0.9;
                 var move_ratio = 0.2;
                 //int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8)) + from;
