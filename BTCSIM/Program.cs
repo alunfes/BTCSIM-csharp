@@ -78,7 +78,7 @@ namespace BTCSIM
             stopWatch.Start();
             Console.WriteLine("started program.");
             List<int> terms = new List<int>();
-            for(int i=100; i<1000; i = i + 100) { terms.Add(i); }
+            for(int i=10; i<1000; i = i + 100) { terms.Add(i); }
 
             MarketData.initializer(terms);
 
@@ -112,7 +112,7 @@ namespace BTCSIM
                 int num_generations = 10;
                 int banned_move_period = 3;
                 int max_amount = 1;
-                var units = new int[] { 34, 500, 4 };
+                var units = new int[] { 47, 500, 4 };
                 var mutation_rate = 0.9;
                 var move_ratio = 0.2;
                 //int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8)) + from;

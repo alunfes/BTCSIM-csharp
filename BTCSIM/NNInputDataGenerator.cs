@@ -101,7 +101,6 @@ namespace BTCSIM
 
 
 
-
             //price raw data
             /*
             var term = 1000;

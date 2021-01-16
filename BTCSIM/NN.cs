@@ -67,6 +67,8 @@ namespace BTCSIM
                     max_ind = i;
                 }
             }
+            if (max_ind < 0)
+                    Console.WriteLine("NN-getActivatedUnit: Invalid output val !");
             return max_ind;
         }
     }

@@ -111,7 +111,7 @@ namespace BTCSIM
         }
         static public ref Dictionary<int, List<double>> Buysellvol_price_ratio
         {
-            get { return ref Buysellvol_price_ratio; }
+            get { return ref buysellvol_price_ratio; }
         }
         static public void initializer(List<int> terms_list)
         {
@@ -136,7 +136,7 @@ namespace BTCSIM
             trendfollow = new Dictionary<int, List<double>>();
             vola_kyori_minmax_scale = new Dictionary<int, List<double>>();
             vol_ma_divergence = new Dictionary<int, List<double>>();
-            vol_ma_divergence_minmax_scale = new Dictionary<int, List<double>>();
+            vol_ma_divergence_minmax_scale = new Dictionary<int, List<double>>(); //pythonと若干の乖離あり
             buysell_vol_ratio = new Dictionary<int, List<double>>();
             buysell_vol_ratio_minmax_scale = new Dictionary<int, List<double>>();
             Buysellvol_price_ratio = new Dictionary<int, List<double>>();
@@ -185,37 +185,134 @@ namespace BTCSIM
                 vola_kyori[t] = calcVolaKyori(t);
                 trendfollow[t] = calc_trendfollow(t);
                 buysell_vol_ratio[t] = calcBuysellVolRatio(t);
+                Buysellvol_price_ratio[t] = calcBusellvolPriceRatio(t);
+                vol_ma_divergence[t] = calcVolMaDivergence(t);
             }
             calcVolakyoriMinMaxScaler();
             calcDivergenceMinMaxScaler();
-            calcVolMaDivergence();
             calcVolMaDivergenceMinMaxScaler();
             calcBuySellVolRatioMinmaxScaler();
         }
 
-        static private List<double> calc_sma(int term)
+        //use to calc sma in MarketData for other index
+        static private List<double> calc_sma(int term, List<double> data)
         {
-            List<double> res = new List<double>();
-            for (int i = 0; i < term-1; i++) { res.Add(double.NaN); }
-            var sumv = 0.0;
-            for (int j = 0; j < term; j++) { sumv += close[j]; }
-            for (int i = term; i < close.Count; i++)
+            var res = new List<double>();
+            //detect nan_ind
+            var nan_ind = 0;
+            for (int i = 0; i < data.Count; i++)
             {
-                res.Add(sumv / Convert.ToDouble(term));
-                sumv = sumv - close[i - term] + close[i];
+                if (double.IsNaN(data[i]) == false)
+                {
+                    nan_ind = i;
+                    break;
+                }
+            }
+            for (int i = 0; i < term+nan_ind-1; i++) { res.Add(double.NaN); }
+            var sumv = 0.0;
+            for(int i=nan_ind; i<term+nan_ind; i++){ sumv += data[i]; }
+            res.Add(sumv / term);
+            for (int i=term+nan_ind; i < data.Count; i++)
+            {
+                sumv = sumv - data[i - term] + data[i];
+                res.Add(sumv / term);
             }
             return res;
         }
 
-        static private List<double> calc_divergence(int term)
+        static private List<double> calc_divergence(List<double> price, List<double> ma)
         {
             List<double> res = new List<double>();
-            for (int i = 0; i < sma[term].Count; i++)
+            if (price.Count == ma.Count)
             {
-                if (double.IsNaN(sma[term][i])) { res.Add(double.NaN); }
-                else { res.Add((close[i] - sma[term][i]) / sma[term][i]); }
+                for (int i = 0; i < price.Count; i++)
+                {
+                    if (price[i] == double.NaN || ma[i] == double.NaN) { res.Add(double.NaN); }
+                    else { res.Add( (price[i] - ma[i]) / ma[i]); }
+                }
+
+            }
+            else
+                Console.WriteLine("marketData: Length is not matched in calc_divergence !");
+            return res;
+        }
+
+        static private List<double> calc_ratio(List<double> denominator, List<double> numerator)
+        {
+            var res = new List<double>();
+            if (denominator.Count == numerator.Count)
+            {
+                for (int i = 0; i < denominator.Count; i++)
+                {
+                    if (denominator[i] == double.NaN || numerator[i] == double.NaN) { res.Add(double.NaN); }
+                    else if (Math.Abs(denominator[i]) == 0) { res.Add(numerator[i]); }
+                    else { res.Add(numerator[i] / denominator[i]); }
+                }
+            }
+            else
+                Console.WriteLine("MarketData: data length is not matched in calc_ratio !");
+            return res;
+        }
+
+
+        /*
+         * 各termのdataの値を同じiについて並べて、minmax scaleする
+         * data structure image
+         * term=100: nan, nan, nan,,, nan, 0,2, 0,3,,
+         * term=200: nan, nan, nan,,, nan, nan, 0,2, 0,3,,
+         * term=300: nan, nan, nan,,, nan, nan, nan, 0,2, 0,3,,
+         * 上記データを同じi番目のそれぞれのtermのデータをminmax scaleする。
+         */
+        static private Dictionary<int, List<double>> calc_minmax_scale(Dictionary<int, List<double>> data)
+        {
+            var res = new Dictionary<int, List<double>>();
+
+            //detect max num of nan in data in all terms
+            var nan_ind = 0;
+            foreach (var t in terms)
+            {
+                var ind = 0;
+                for (int i = 0; i < data[t].Count; i++)
+                {
+                    if (double.IsNaN(data[t][i]) == false)
+                    {
+                        ind = i;
+                        break;
+                    }
+                }
+                nan_ind = Math.Max(nan_ind, ind);
+            }
+            //don't do minmax scale calc and insert nan for first nan_ind index
+            var tmp = new List<double>();
+            for (int i = 0; i < terms.Count; i++) { tmp.Add(double.NaN); }
+            for (int i = 0; i < nan_ind; i++) { res[i] = tmp; } //nan_ind is not NaN
+            //calc minmax for all index from nan_ind
+            for (int i = nan_ind; i < data[terms[0]].Count; i++)
+            {
+                var minmaxed_data = new List<double>();
+                var data_with_i_converted = new List<double>();
+                foreach (var t in terms)
+                    data_with_i_converted.Add(data[t][i]);
+                var maxv = data_with_i_converted.Max();
+                var minv = data_with_i_converted.Min();
+                foreach (var d in data_with_i_converted)
+                    minmaxed_data.Add((d - minv) / (maxv - minv));
+                res[i] = minmaxed_data;
             }
             return res;
+        }
+
+
+
+        static private List<double> calc_sma(int term)
+        {
+            return calc_sma(term, close);
+        }
+
+        
+        static private List<double> calc_divergence(int term)
+        {
+            return calc_divergence(close, sma[term]);
         }
 
         static private List<double> calc_trendfollow(int term)
@@ -231,9 +328,19 @@ namespace BTCSIM
         }
 
         //各termのdivergenceの値を同じiについて並べて、minmax scaleしたもの
+        /*
+         * data structure image
+         term=100: nan, nan, nan,,, nan, 0,2, 0,3,,
+         term=200: nan, nan, nan,,, nan, nan, 0,2, 0,3,,
+         term=300: nan, nan, nan,,, nan, nan, nan, 0,2, 0,3,,
+        上記データを同じi番目のそれぞれのtermのデータをminmax scaleする。
+         */
         static private void calcDivergenceMinMaxScaler()
         {
+            divergence_minmax_scale = calc_minmax_scale(divergence);
+
             //detect max num of nan in divergence in all terms
+            /*
             var nan_ind = 0;
             foreach(var t in terms)
             {
@@ -248,12 +355,13 @@ namespace BTCSIM
                 }
                 nan_ind = Math.Max(nan_ind, ind);
             }
-            //term[-1]まではnanなのでList<double>=nanを入れる。
+            nan_ind--; //nan_ind番目のデータはnanじゃないから
+            //nan_ind-1まではList<double>=nanを入れる。
             var tmp = new List<double>();
-            for (int j = 0; j < divergence.Keys.Count; j++) { tmp.Add(double.NaN); }
-            for (int i = 0; i < nan_ind; i++){divergence_minmax_scale[i] = tmp;}
+            for (int i = 0; i < divergence.Keys.Count; i++) { tmp.Add(double.NaN); }
+            for (int i = 0; i < nan_ind-1; i++){divergence_minmax_scale[i] = tmp;}
             //nan値以降の値をminmax scaleする。
-            for(int i=nan_ind; i<divergence[terms[0]].Count; i++)
+            for(int i=nan_ind+1; i<divergence[terms[0]].Count; i++)
             {
                 var res = new List<double>();
                 var data = new List<double>();
@@ -265,34 +373,40 @@ namespace BTCSIM
                     res.Add( (d - minv) / (maxv - minv) );
                 divergence_minmax_scale[i] = res;
             }
+            */
         }
 
 
-        /*1分毎の二乗変化率合計値の移動平均をtermで割った値
+        /*1分毎のclose price二乗変化率合計値の移動平均
          * （各termのvola kyoriを同じiでmin max scaleした時にtermが長いものほど1に近い値になるのを調整する)
          */
         static private List<double> calcVolaKyori(int term)
         {
-            List<double> res = new List<double>();
-            for (int i = 0; i < term; i++) { res.Add(double.NaN); }
-            res.Add(double.NaN);
             var change = new List<double>();
+            change.Add(double.NaN);//changeの計算分
             for (int i = 1; i < close.Count; i++)
-                change.Add(Math.Pow((close[i] - close[i - 1]) / close[i-1], 2.0));
+                change.Add(Math.Pow(close[i] - close[i - 1], 2.0));
+                //change.Add(Math.Pow((close[i] - close[i - 1]) / close[i-1], 2.0));
+            return calc_sma(term, change);
+            /*
             var sumv = change.GetRange(0, term).Sum();
             res.Add(sumv/term);
-            for (int i = term + 1; i < change.Count; i++)
+            for (int i = term+1; i < change.Count; i++)
             {
-                sumv = sumv - change[i - 1] + change[i];
+                sumv = sumv - change[i - term] + change[i];
                 res.Add(sumv/term);
             }
             return res;
+            */
         }
 
+        
+
         //各termのvola_kyoriの値を同じiについて並べて、minmax scaleしたもの
-        //
         static private void calcVolakyoriMinMaxScaler()
         {
+            vola_kyori_minmax_scale = calc_minmax_scale(vola_kyori);
+            /*
             //detect max num of nan in divergence in all terms
             var nan_ind = 0;
             foreach (var t in terms)
@@ -328,11 +442,16 @@ namespace BTCSIM
                     res.Add((d - minv) / (maxv - minv));
                 vola_kyori_minmax_scale[i] = res;
             }
+            */
         }
 
-        static private Dictionary<int, List<double>> calcVolMaDivergence()
+
+        static private List<double> calcVolMaDivergence(int term)
         {
-            var res = new Dictionary<int, List<double>>();
+            var vol_ma = new List<double>();
+            vol_ma = calc_sma(term, size);
+            return calc_divergence(size, vol_ma);
+            /*
             foreach (var t in terms)
             {
                 //calc vol ma
@@ -351,16 +470,18 @@ namespace BTCSIM
                 for (int i = 0; i < vol_ma.Count; i++)
                 {
                     if (double.IsNaN(vol_ma[i])) { vol_ma_div.Add(double.NaN); }
-                    else { vol_ma_div.Add((close[i] - vol_ma[i]) / vol_ma[i]); }
+                    else { vol_ma_div.Add((size[i] - vol_ma[i]) / vol_ma[i]); }
                 }
                 res[t] = vol_ma_div;
             }
-            return res;
+            return res;*/
         }
 
 
         static private void calcVolMaDivergenceMinMaxScaler()
         {
+            vol_ma_divergence_minmax_scale = calc_minmax_scale(vol_ma_divergence);
+            /*
             //detect max num of nan in divergence in all terms
             var nan_ind = 0;
             foreach (var t in terms)
@@ -395,13 +516,18 @@ namespace BTCSIM
                 foreach (var d in data)
                     res.Add((d - minv) / (maxv - minv));
                 vol_ma_divergence_minmax_scale[i] = res;
-            }
+            }*/
         }
 
 
         static private List<double> calcBuysellVolRatio(int term)
         {
             List<double> res = new List<double>();
+            var buy_ma = calc_sma(term, buy_vol);
+            var sell_ma = calc_sma(term, sell_vol);
+            return calc_ratio(sell_ma, buy_ma);
+
+            /*
             for (int i = 0; i < term; i++) { res.Add(double.NaN); }
             res.Add(double.NaN);
             var buy_sum = new List<double>();
@@ -420,12 +546,14 @@ namespace BTCSIM
                 buy_sumv = buy_sumv - buy_vol[i - term] + buy_vol[i];
                 sell_sumv = sell_sumv - sell_vol[i - term] + sell_vol[i];
             }
-            return res;
+            return res;*/
         }
 
 
         static private void calcBuySellVolRatioMinmaxScaler()
         {
+            buysell_vol_ratio_minmax_scale = calc_minmax_scale(Buysell_vol_ratio);
+            /*
             var nan_ind = 0;
             foreach (var t in terms)
             {
@@ -459,12 +587,17 @@ namespace BTCSIM
                 foreach (var d in data)
                     res.Add((d - minv) / (maxv - minv));
                 buysell_vol_ratio_minmax_scale[i] = res;
-            }
+            }*/
         }
 
         //その期間の価格変化率 / buysell vol ratioの割合
         static private List<double> calcBusellvolPriceRatio(int term)
         {
+            var price_change = new List<double>();
+            for (int i = 0; i < term; i++) { price_change.Add(double.NaN); }
+            for (int i = term; i < close.Count; i++) { price_change.Add(close[i]/close[i-term]); }
+            return calc_ratio(buysell_vol_ratio[term], price_change);
+            /*
             List<double> res = new List<double>();
             for (int i = 0; i < term; i++) { res.Add(double.NaN); }
             res.Add(double.NaN);
@@ -476,7 +609,7 @@ namespace BTCSIM
                 buy_sumv = buy_sumv - buy_vol[i - term] + buy_vol[i];
                 sell_sumv = sell_sumv - sell_vol[i - term] + sell_vol[i];
             }
-            return res;
+            return res;*/
         }
     }
 }

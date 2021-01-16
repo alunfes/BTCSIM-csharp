@@ -26,8 +26,6 @@ namespace BTCSIM
         }
         public void add_action(string action, string side, string type, double price, double size, int serial_num, string message)
         {
-            if (size > 1)
-                Console.WriteLine("sise > 1 !");
             this.action.Add(action);
             order_side.Add(side);
             order_type.Add(type);
@@ -123,13 +121,17 @@ namespace BTCSIM
          * すると次のohlcは価格が動かなくてもhigh=10000.5となるのでlimit sell orderが10000で約定したことになり、0.00025%のmaker fee分の利益が出たようになってしまう。 
          * ->entry / price updateはcloseよりも0.5だけ有利な方向にする（i.e. buy orderのときclose=10000でも10000.5にentryするので最低でもbuy/sellに合ったbid_ask値でのentryとなる）
          */
+        /*
+         tick dataから毎分のbid/askを生成した。
+
+         */
         public StrategyActionData GALimitStrategy2(int i, int nn_output, int amount, int max_amount, SimAccount ac)
         {
             var ad = new StrategyActionData();
             var output_action_list = new string[] { "no", "buy", "sell", "cancel" };
             var pred_side = output_action_list[nn_output];
-            var buy_entry_price = MarketData.Close[i] - 0.5;
-            var sell_entry_price = MarketData.Close[i] + 0.5;
+            var buy_entry_price = MarketData.Bid[i] - 0.5;
+            var sell_entry_price = MarketData.Ask[i] + 0.5;
             var update_price_kijun = 3;
 
 
