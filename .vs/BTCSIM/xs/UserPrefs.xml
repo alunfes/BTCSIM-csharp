@@ -2,13 +2,13 @@
   <MonoDevelop.Ide.ItemProperties.BTCSIM PreferredExecutionTarget="MonoDevelop.Default" />
   <MonoDevelop.Ide.Workbench ActiveDocument="BTCSIM/MarketData.cs">
     <Files>
-      <File FileName="BTCSIM/Program.cs" Line="94" Column="40" />
+      <File FileName="BTCSIM/Program.cs" Line="124" Column="68" />
       <File FileName="BTCSIM/GAIsland.cs" />
       <File FileName="BTCSIM/GA.cs" />
       <File FileName="BTCSIM/Sim.cs" />
       <File FileName="BTCSIM/Strategy.cs" />
       <File FileName="BTCSIM/SimAccount.cs" />
-      <File FileName="BTCSIM/MarketData.cs" Line="591" Column="44" />
+      <File FileName="BTCSIM/MarketData.cs" Line="458" Column="43" />
       <File FileName="BTCSIM/NNInputDataGenerator.cs" />
       <File FileName="BTCSIM/NN.cs" />
       <File FileName="BTCSIM/LineChart.cs" />
@@ -23,16 +23,15 @@
     <BreakpointStore>
       <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/Sim.cs" relfile="BTCSIM/Sim.cs" line="54" column="1" />
       <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/Sim.cs" relfile="BTCSIM/Sim.cs" line="67" column="1" />
-      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/Strategy.cs" relfile="BTCSIM/Strategy.cs" line="136" column="1" />
-      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/Strategy.cs" relfile="BTCSIM/Strategy.cs" line="205" column="1" />
-      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/Strategy.cs" relfile="BTCSIM/Strategy.cs" line="181" column="1" />
-      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/MarketData.cs" relfile="BTCSIM/MarketData.cs" line="195" column="1" />
-      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/MarketData.cs" relfile="BTCSIM/MarketData.cs" line="191" column="1" />
-      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/MarketData.cs" relfile="BTCSIM/MarketData.cs" line="192" column="1" />
-      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/MarketData.cs" relfile="BTCSIM/MarketData.cs" line="194" column="1" />
-      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/MarketData.cs" relfile="BTCSIM/MarketData.cs" line="251" column="1" />
-      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/MarketData.cs" relfile="BTCSIM/MarketData.cs" line="235" column="1" />
-      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/MarketData.cs" relfile="BTCSIM/MarketData.cs" line="193" column="1" />
+      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/Strategy.cs" relfile="BTCSIM/Strategy.cs" line="140" column="1" />
+      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/Strategy.cs" relfile="BTCSIM/Strategy.cs" line="209" column="1" />
+      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/Strategy.cs" relfile="BTCSIM/Strategy.cs" line="185" column="1" />
+      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/MarketData.cs" relfile="BTCSIM/MarketData.cs" line="259" column="1" />
+      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/MarketData.cs" relfile="BTCSIM/MarketData.cs" line="242" column="1" />
+      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/NNInputDataGenerator.cs" relfile="BTCSIM/NNInputDataGenerator.cs" line="103" column="1" />
+      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/NN.cs" relfile="BTCSIM/NN.cs" line="24" column="1" />
+      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/NN.cs" relfile="BTCSIM/NN.cs" line="76" column="1" />
+      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/MarketData.cs" relfile="BTCSIM/MarketData.cs" line="461" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MultiItemStartupConfigurations />

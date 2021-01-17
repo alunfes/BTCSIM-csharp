@@ -169,6 +169,12 @@ namespace BTCSIM
                 buy_vol.Add(Convert.ToDouble(data[8]));
                 sell_vol.Add(Convert.ToDouble(data[9]));
             }
+            if (size.Contains(Double.NaN))
+                Console.WriteLine("MarketData-read_data: Nan in size !");
+            if (buy_vol.Contains(Double.NaN))
+                Console.WriteLine("MarketData-read_data: Nan in buy_vol !");
+            if (sell_vol.Contains(Double.NaN))
+                Console.WriteLine("MarketData-read_data: Nan in sell_vol !");
             Console.WriteLine("Completed read data.");
         }
 
@@ -228,7 +234,7 @@ namespace BTCSIM
                 for (int i = 0; i < price.Count; i++)
                 {
                     if (price[i] == double.NaN || ma[i] == double.NaN) { res.Add(double.NaN); }
-                    else { res.Add( (price[i] - ma[i]) / ma[i]); }
+                    else { res.Add((price[i] - ma[i]) / ma[i]); }
                 }
 
             }
@@ -262,6 +268,7 @@ namespace BTCSIM
          * term=200: nan, nan, nan,,, nan, nan, 0,2, 0,3,,
          * term=300: nan, nan, nan,,, nan, nan, nan, 0,2, 0,3,,
          * 上記データを同じi番目のそれぞれのtermのデータをminmax scaleする。
+         * 全部同じ値のときは0を出力とする（python minmax scalerと同じ）
          */
         static private Dictionary<int, List<double>> calc_minmax_scale(Dictionary<int, List<double>> data)
         {
@@ -293,10 +300,30 @@ namespace BTCSIM
                 var data_with_i_converted = new List<double>();
                 foreach (var t in terms)
                     data_with_i_converted.Add(data[t][i]);
+                //check if all data is same (if so then min max scaled data should be 0)
+                double check_same = 0.0;
+                bool flg = false;
+                for(int j=0; j<data_with_i_converted.Count; j++)
+                {
+                    if (j == 0) { check_same = data_with_i_converted[j]; }
+                    else
+                    {
+                        if (check_same != data_with_i_converted[j])
+                        {
+                            flg = true;
+                            break;
+                        }
+                    }
+                }
                 var maxv = data_with_i_converted.Max();
                 var minv = data_with_i_converted.Min();
                 foreach (var d in data_with_i_converted)
-                    minmaxed_data.Add((d - minv) / (maxv - minv));
+                {
+                    if (flg)
+                        minmaxed_data.Add((d - minv) / (maxv - minv));
+                    else
+                        minmaxed_data.Add(0);
+                }
                 res[i] = minmaxed_data;
             }
             return res;

@@ -99,7 +99,8 @@ namespace BTCSIM
             foreach (var d in MarketData.Buysell_vol_ratio_minmax_scale[i])
                 input_data.Add(d);
 
-
+            if (input_data.Contains(Double.NaN))
+                Console.WriteLine("NNInputDataGenerator: Nan is included !");
 
             //price raw data
             /*

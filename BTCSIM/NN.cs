@@ -19,6 +19,10 @@ namespace BTCSIM
 
         public double[] calcNN(double[] input_vals, int[] num_units, double[] weight1, double[] weight2, double[] bias1, double[] bias2, int activation)
         {
+            if (input_vals.Contains(Double.NaN))
+            {
+                Console.WriteLine("NN-calcNN: nan in included in input_vals !");
+            }
             if (input_vals.Length * num_units[1] == weight1.Length)
             {
                 //first weight
@@ -68,7 +72,9 @@ namespace BTCSIM
                 }
             }
             if (max_ind < 0)
-                    Console.WriteLine("NN-getActivatedUnit: Invalid output val !");
+            {
+                Console.WriteLine("NN-getActivatedUnit: Invalid output val !");
+            }
             return max_ind;
         }
     }
