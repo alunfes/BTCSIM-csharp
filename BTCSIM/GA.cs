@@ -274,11 +274,7 @@ namespace BTCSIM
                 ac = sim.sim_ga_market_limit(from, to, max_amount, chro, ac);
             else
                 Console.WriteLine("GA-evaluation: Invalid Sim Type!");
-            eva = ac.performance_data.total_pl * Math.Sqrt(Convert.ToDouble(ac.performance_data.num_trade));
-            if (eva == 0)
-                return (Math.Sqrt(Convert.ToDouble(ac.performance_data.num_trade)), ac);
-            else
-                return (eva, ac);
+            return (ac.performance_data.total_pl * ac.performance_data.num_trade, ac);        
         }
 
         private void check_best_eva(ConcurrentDictionary<int, double> eva, ConcurrentDictionary<int, SimAccount> ac)
