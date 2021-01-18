@@ -54,7 +54,7 @@ namespace BTCSIM
             }
             else
             {
-                Console.WriteLine("# of input vals and units in first layer is not matched!");
+                Console.WriteLine("# of input vals and units in first layer is not matched!" + ", num_input="+input_vals.Length.ToString() + ", num_layer="+weight1.Length.ToString());
                 return new double[0];
             }
         }
@@ -76,6 +76,34 @@ namespace BTCSIM
                 Console.WriteLine("NN-getActivatedUnit: Invalid output val !");
             }
             return max_ind;
+        }
+
+        //nn_output = "no", "buy", "sell", "cancel", "Market / Limit"
+        /*int[action, order_type]
+         * order_type: 0-> Market, 1->Limit
+         */
+        public List<int> getActivatedUnitLimitMarket(double[] output_vals)
+        {
+            var res = new List<int>();
+            double maxv = 0.0;
+            int max_ind = -1;
+            for (int i = 0; i < output_vals.Length-1; i++)
+            {
+                if (maxv < output_vals[i])
+                {
+                    maxv = output_vals[i];
+                    max_ind = i;
+                }
+            }
+            if (max_ind < 0)
+            {
+                Console.WriteLine("NN-getActivatedUnit: Invalid output val !");
+            }
+            res.Add(max_ind);
+            //order type
+            int otype = output_vals[output_vals.Length - 1] >= 0.5 ? 0 : 1;
+            res.Add(otype);
+            return res;
         }
     }
 }

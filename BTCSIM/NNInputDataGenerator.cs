@@ -87,6 +87,7 @@ namespace BTCSIM
             foreach (var d in MarketData.Divergence_minmax_scale[i])
                 input_data.Add(d);
 
+            /*
             //vola_kyori_minmax_scale
             foreach (var d in MarketData.Volakyori_minmax_scale[i])
                 input_data.Add(d);
@@ -94,6 +95,7 @@ namespace BTCSIM
             //vol ma divergence minmax scale
             foreach (var d in MarketData.Vol_ma_divergence_minmax_scale[i])
                 input_data.Add(d);
+            */
 
             //buy sell vol ratio
             foreach (var d in MarketData.Buysell_vol_ratio_minmax_scale[i])

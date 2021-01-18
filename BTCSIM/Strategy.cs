@@ -212,5 +212,97 @@ namespace BTCSIM
             }
             return ad;
         }
+
+        /*
+         NNでは最大出力ユニットを発火としているが、limit / marketのorder typeの別を決めるためにNN-ActivateUnitで最後のユニットが0.5以上・未満を判定してorder typeとして出力するように変更が必要。
+         */
+        //nn_output = "no", "buy", "sell", "cancel", "Market / Limit"
+        public StrategyActionData GALimitMarketStrategy(int i, List<int> nn_output, int amount, int max_amount, SimAccount ac)
+        {
+            var ad = new StrategyActionData();
+            var output_action_list = new string[] { "no", "buy", "sell", "cancel"};
+            var pred_side = output_action_list[nn_output[0]];
+            var otype = nn_output[1] == 0 ? "market" : "limit";
+            var buy_entry_price = MarketData.Bid[i]; //- 0.5;
+            var sell_entry_price = MarketData.Ask[i];// + 0.5;
+            var update_price_kijun = 3;
+
+            //check invalid situation
+            if (ac.holding_data.holding_size > max_amount)
+                Console.WriteLine("Sim Strategy: Holding size is larger than max_amount !");
+
+            //1. No / Cancel           
+            if (pred_side == "no")
+            {
+                if (ac.order_data.getLastOrderSide() != "" && Math.Abs(ac.order_data.getLastOrderPrice() - (ac.order_data.getLastOrderSide() == "buy" ? buy_entry_price : sell_entry_price)) > update_price_kijun)
+                    ad.add_action("update price", pred_side, otype, pred_side == "buy" ? buy_entry_price : sell_entry_price, -1, ac.order_data.getLastSerialNum(), "1. No: update order price");
+            }
+            else if (pred_side == "cancel")
+            {
+                if (ac.order_data.getLastOrderSide() != "")
+                    ad.add_action("cancel", "", "", 0, 0, ac.order_data.getLastSerialNum(), "1. Cancel: cancel all order");
+            }
+            else
+            {
+                //2. New Entry
+                if (ac.holding_data.holding_side == "" && pred_side != ac.order_data.getLastOrderSide() && ac.order_data.getLastOrderSide() == "")
+                {
+                    ad.add_action("entry", pred_side, otype, pred_side == "buy" ? buy_entry_price : sell_entry_price, amount, -1, "2. New Entry");
+                }
+                //3.Update Price
+                else if (ac.order_data.getLastOrderSide() == pred_side && Math.Abs(ac.order_data.getLastOrderPrice() - (ac.order_data.getLastOrderSide() == "buy" ? buy_entry_price : sell_entry_price)) > update_price_kijun)
+                {
+                    ad.add_action("update price", "", otype, pred_side == "buy" ? buy_entry_price : sell_entry_price, -1, ac.order_data.getLastSerialNum(), "3. update order price");
+                }
+                //4. Additional Entry (pred = holding sideで現在orderなく、holding sizeにamount加えてもmax_amount以下の時に追加注文）
+                else if (ac.holding_data.holding_side == pred_side && ac.holding_data.holding_size + amount <= max_amount && ac.order_data.getLastOrderSide() == "")
+                {
+                    ad.add_action("entry", pred_side, otype, pred_side == "buy" ? buy_entry_price : sell_entry_price, amount, -1, "4. Additional Entry");
+                }
+                //5. Exit (holding side != predでかつpred sideのorderがない時にexit orderを出す）
+                else if ((ac.holding_data.holding_side != pred_side && ac.holding_data.holding_side != "") && (pred_side != ac.order_data.getLastOrderSide()))
+                {
+                    //もし既存のadditional orderがあったらまずはそれをキャンセル）
+                    if (ac.order_data.getLastOrderSide() != "")
+                        ad.add_action("cancel", "", "", 0, 0, ac.order_data.getLastSerialNum(), "5. cancel all order");
+                    ad.add_action("entry", pred_side, otype, pred_side == "buy" ? buy_entry_price : sell_entry_price, ac.holding_data.holding_size, -1, "5. Exit Entry");
+                }
+                //6. Opposite Order Cancel
+                else if (pred_side != ac.order_data.getLastOrderSide() && ac.order_data.getLastOrderSide() != "")
+                {
+                    ad.add_action("cancel", "", "", 0, 0, ac.order_data.getLastSerialNum(), "6. cancel all order");
+                    if (ac.holding_data.holding_size + amount <= max_amount)
+                        ad.add_action("entry", pred_side, otype, pred_side == "buy" ? buy_entry_price : sell_entry_price, amount, -1, "6. Opposite Entry");
+                    if (ac.holding_data.holding_side != "" && ac.holding_data.holding_side != pred_side)
+                        Console.WriteLine("Strategy: Opposite holding exist while cancelling opposite order !");
+                }
+                else
+                {
+                    //7. Others1 (既にmax amountのholdingがあり、pred side=holding sideで何もしなくて良い場合）
+                    if (ac.holding_data.holding_size >= max_amount && ac.holding_data.holding_side == pred_side)
+                    {
+                    }
+                    //8.Others2(holding side == pred sideで既にpred sideのorderが存在しており、その価格の更新が不要な場合）
+                    else if (ac.holding_data.holding_side == pred_side && ac.order_data.getLastOrderSide() == pred_side && Math.Abs(ac.order_data.getLastOrderPrice() - (ac.order_data.getLastOrderSide() == "buy" ? buy_entry_price : sell_entry_price)) <= update_price_kijun)
+                    {
+                    }
+                    //9. Others3 (holding side != predで既にexit orderが存在しており、update priceも不要な場合)
+                    else if (ac.holding_data.holding_side != pred_side && ac.order_data.getLastOrderSide() == pred_side && Math.Abs(ac.order_data.getLastOrderPrice() - (ac.order_data.getLastOrderSide() == "buy" ? buy_entry_price : sell_entry_price)) <= update_price_kijun)
+                    {
+
+                    }
+                    //10.Others4(holding side == pred sideでorderもない場合）
+                    else if (ac.holding_data.holding_side == pred_side && ac.order_data.getLastOrderSide() == "")
+                    {
+
+                    }
+                    else
+                    {
+                        Console.WriteLine("Strategy - Unknown Situation !");
+                    }
+                }
+            }
+            return ad;
+        }
     }
 }

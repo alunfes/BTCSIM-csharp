@@ -31,7 +31,7 @@ namespace BTCSIM
          *
          *->各GA instanceにおいて、1世代ごとの計算で止めて染色体を保存した上で、次の世代の計算をするという仕組みが必要。
          */
-        public void start_ga_island(int from, int to, int max_amount, int num_island, int move_ban_period, double move_ratio, int num_chromos, int num_generations, int[] units, double mutation_rate)
+        public void start_ga_island(int from, int to, int max_amount, int num_island, int move_ban_period, double move_ratio, int num_chromos, int num_generations, int[] units, double mutation_rate, int sim_type)
         {
             var sww = new Stopwatch();
             //initialize GS in each island
@@ -43,7 +43,7 @@ namespace BTCSIM
                 sww.Start();
                 for(int j=0; j<num_island; j++)
                 {
-                    gas[j].start_island_ga(from, to, max_amount, num_chromos, i, units, mutation_rate);
+                    gas[j].start_island_ga(from, to, max_amount, num_chromos, i, units, mutation_rate, sim_type);
                 }
                 checkBestIsland();
                 sww.Stop();
@@ -58,7 +58,7 @@ namespace BTCSIM
                 moveBetweenIsland(move_ratio);
                 for (int j = 0; j < num_island; j++)
                 {
-                    gas[j].start_island_ga(from, to, max_amount, num_chromos, i, units, mutation_rate);
+                    gas[j].start_island_ga(from, to, max_amount, num_chromos, i, units, mutation_rate, sim_type);
                     //gas[j].resetChromos();
                 }
                 checkBestIsland();
@@ -74,53 +74,55 @@ namespace BTCSIM
          ->best chromo以外を選択するようにする*/
         private void moveBetweenIsland(double move_ratio)
         {
-            for(int i=0; i<gas.Count; i++)
+            if (gas.Count > 1)
             {
-                var num_move = Convert.ToInt32(gas[i].chromos.Length * move_ratio);
-                for (int j = 0; j < num_move; j++)
+                for (int i = 0; i < gas.Count; i++)
                 {
-                    var island_list = Enumerable.Range(0, gas.Count).ToList();
-                    island_list.RemoveAt(island_list.IndexOf(i));
-                    var selected_island = island_list[RandomSeed.rnd.Next(0, island_list.Count)];
-                    var target_chrom_list = Enumerable.Range(0, gas[selected_island].chromos.Length).ToList();
-                    target_chrom_list.RemoveAt(target_chrom_list.IndexOf(gas[selected_island].best_chromo));
-                    var selected_target_chromo = target_chrom_list[RandomSeed.rnd.Next(0, target_chrom_list.Count)];
-                    var selected_id = RandomSeed.rnd.Next(0, gas[i].chromos.Length);
-                    while (selected_id == gas[i].best_chromo)
-                        selected_id = RandomSeed.rnd.Next(0, gas[i].chromos.Length);
+                    var num_move = Convert.ToInt32(gas[i].chromos.Length * move_ratio);
+                    for (int j = 0; j < num_move; j++)
+                    {
+                        var island_list = Enumerable.Range(0, gas.Count).ToList();
+                        island_list.RemoveAt(island_list.IndexOf(i));
+                        var selected_island = island_list[RandomSeed.rnd.Next(0, island_list.Count)];
+                        var target_chrom_list = Enumerable.Range(0, gas[selected_island].chromos.Length).ToList();
+                        target_chrom_list.RemoveAt(target_chrom_list.IndexOf(gas[selected_island].best_chromo));
+                        var selected_target_chromo = target_chrom_list[RandomSeed.rnd.Next(0, target_chrom_list.Count)];
+                        var selected_id = RandomSeed.rnd.Next(0, gas[i].chromos.Length);
+                        while (selected_id == gas[i].best_chromo)
+                            selected_id = RandomSeed.rnd.Next(0, gas[i].chromos.Length);
 
-                    //exchange chromo
-                    //copy targe chromo to tmp chromo
-                    var tmp_chrom = new Gene(gas[selected_island].chromos[selected_target_chromo].num_units);
-                    for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene1.Length; k++)
-                        tmp_chrom.bias_gene1[k] = gas[selected_island].chromos[selected_target_chromo].bias_gene1[k];
-                    for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene2.Length; k++)
-                        tmp_chrom.bias_gene2[k] = gas[selected_island].chromos[selected_target_chromo].bias_gene2[k];
-                    for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene1.Length; k++)
-                        tmp_chrom.weight_gene1[k] = gas[selected_island].chromos[selected_target_chromo].weight_gene1[k];
-                    for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene2.Length; k++)
-                        tmp_chrom.weight_gene2[k] = gas[selected_island].chromos[selected_target_chromo].weight_gene2[k];
-                    //copy from selected chromo to target chromo
-                    for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene1.Length; k++)
-                        gas[selected_island].chromos[selected_target_chromo].bias_gene1[k] = gas[i].chromos[selected_id].bias_gene1[k];
-                    for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene2.Length; k++)
-                        gas[selected_island].chromos[selected_target_chromo].bias_gene2[k] = gas[i].chromos[selected_id].bias_gene2[k];
-                    for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene1.Length; k++)
-                        gas[selected_island].chromos[selected_target_chromo].weight_gene1[k] = gas[i].chromos[selected_id].weight_gene1[k];
-                    for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene2.Length; k++)
-                        gas[selected_island].chromos[selected_target_chromo].weight_gene2[k] = gas[i].chromos[selected_id].weight_gene2[k];
-                    //copy from target chromo to selected chromo
-                    for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene1.Length; k++)
-                        gas[i].chromos[selected_id].bias_gene1[k] = tmp_chrom.bias_gene1[k];
-                    for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene2.Length; k++)
-                        gas[i].chromos[selected_id].bias_gene2[k] = tmp_chrom.bias_gene2[k];
-                    for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene1.Length; k++)
-                        gas[i].chromos[selected_id].weight_gene1[k] = tmp_chrom.weight_gene1[k];
-                    for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene2.Length; k++)
-                        gas[i].chromos[selected_id].weight_gene2[k] = tmp_chrom.weight_gene2[k];
-                }   
+                        //exchange chromo
+                        //copy targe chromo to tmp chromo
+                        var tmp_chrom = new Gene(gas[selected_island].chromos[selected_target_chromo].num_units);
+                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene1.Length; k++)
+                            tmp_chrom.bias_gene1[k] = gas[selected_island].chromos[selected_target_chromo].bias_gene1[k];
+                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene2.Length; k++)
+                            tmp_chrom.bias_gene2[k] = gas[selected_island].chromos[selected_target_chromo].bias_gene2[k];
+                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene1.Length; k++)
+                            tmp_chrom.weight_gene1[k] = gas[selected_island].chromos[selected_target_chromo].weight_gene1[k];
+                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene2.Length; k++)
+                            tmp_chrom.weight_gene2[k] = gas[selected_island].chromos[selected_target_chromo].weight_gene2[k];
+                        //copy from selected chromo to target chromo
+                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene1.Length; k++)
+                            gas[selected_island].chromos[selected_target_chromo].bias_gene1[k] = gas[i].chromos[selected_id].bias_gene1[k];
+                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene2.Length; k++)
+                            gas[selected_island].chromos[selected_target_chromo].bias_gene2[k] = gas[i].chromos[selected_id].bias_gene2[k];
+                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene1.Length; k++)
+                            gas[selected_island].chromos[selected_target_chromo].weight_gene1[k] = gas[i].chromos[selected_id].weight_gene1[k];
+                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene2.Length; k++)
+                            gas[selected_island].chromos[selected_target_chromo].weight_gene2[k] = gas[i].chromos[selected_id].weight_gene2[k];
+                        //copy from target chromo to selected chromo
+                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene1.Length; k++)
+                            gas[i].chromos[selected_id].bias_gene1[k] = tmp_chrom.bias_gene1[k];
+                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene2.Length; k++)
+                            gas[i].chromos[selected_id].bias_gene2[k] = tmp_chrom.bias_gene2[k];
+                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene1.Length; k++)
+                            gas[i].chromos[selected_id].weight_gene1[k] = tmp_chrom.weight_gene1[k];
+                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene2.Length; k++)
+                            gas[i].chromos[selected_id].weight_gene2[k] = tmp_chrom.weight_gene2[k];
+                    }
+                }
             }
-            
         }
 
 

@@ -168,7 +168,7 @@ namespace BTCSIM
         }
 
 
-        public void start_island_ga(int from, int to, int max_amount, int num_chromos, int generation_ind, int[] units, double mutation_rate)
+        public void start_island_ga(int from, int to, int max_amount, int num_chromos, int generation_ind, int[] units, double mutation_rate, int sim_type)
         {
             if (generation_ind == 0)
                 generate_chromos(num_chromos, units);
@@ -187,7 +187,7 @@ namespace BTCSIM
             //Console.WriteLine("island No."+island_id.ToString() + ", eva time="+sw.Elapsed.Seconds.ToString());
             for (int k = 0; k < chromos.Length; k++)
             {
-                (double total_pl, SimAccount ac) res = evaluation(from, to,max_amount, k, chromos[k]);
+                (double total_pl, SimAccount ac) res = evaluation(from, to,max_amount, k, chromos[k], sim_type);
                 eva_dic.GetOrAdd(k, res.total_pl);
                 ac_dic.GetOrAdd(k, res.ac);
             }
@@ -205,7 +205,7 @@ namespace BTCSIM
         }
 
 
-        public void start_ga(int from, int to, int max_amount, int num_chromos, int num_generations, int[] units, double mutation_rate, bool display_info)
+        public void start_ga(int from, int to, int max_amount, int num_chromos, int num_generations, int[] units, double mutation_rate, bool display_info, int sim_type)
         {
             //initialize chromos
             Console.WriteLine("started GA");
@@ -222,7 +222,7 @@ namespace BTCSIM
                 option.MaxDegreeOfParallelism = System.Environment.ProcessorCount;
                 Parallel.For(0, chromos.Length, option, j =>
                 {
-                    (double total_pl, SimAccount ac) res = evaluation(from, to, max_amount, j, chromos[j]);
+                    (double total_pl, SimAccount ac) res = evaluation(from, to, max_amount, j, chromos[j], sim_type);
                     eva_dic.GetOrAdd(j, res.total_pl);
                     ac_dic.GetOrAdd(j, res.ac);
                 });
@@ -262,15 +262,23 @@ namespace BTCSIM
                 chromos[i] = new Gene(num_units_layer);
         }
 
-        private (double, SimAccount) evaluation(int from, int to, int max_amount, int chro_id, Gene chro)
+        private (double, SimAccount) evaluation(int from, int to, int max_amount, int chro_id, Gene chro, int sim_type)
         {
             var ac = new SimAccount();
             var sim = new Sim();
+            var eva = 0.0;
             //ac = sim.sim_ga(from, to, chro, ac);
-            ac = sim.sim_ga_limit(from, to, max_amount, chro, ac);
-            //return (ac.performance_data.sharp_ratio * 0.1 * ac.performance_data.num_trade, ac);
-            return (ac.performance_data.total_pl * Math.Sqrt(Convert.ToDouble(ac.performance_data.num_trade)), ac);
-            //return (ac.performance_data.realized_pl_list.Median() * ac.performance_data.total_pl * ac.performance_data.num_trade, ac);
+            if (sim_type == 0)
+                ac = sim.sim_ga_limit(from, to, max_amount, chro, ac);
+            else if (sim_type == 1)
+                ac = sim.sim_ga_market_limit(from, to, max_amount, chro, ac);
+            else
+                Console.WriteLine("GA-evaluation: Invalid Sim Type!");
+            eva = ac.performance_data.total_pl * Math.Sqrt(Convert.ToDouble(ac.performance_data.num_trade));
+            if (eva == 0)
+                return (Math.Sqrt(Convert.ToDouble(ac.performance_data.num_trade)), ac);
+            else
+                return (eva, ac);
         }
 
         private void check_best_eva(ConcurrentDictionary<int, double> eva, ConcurrentDictionary<int, SimAccount> ac)
