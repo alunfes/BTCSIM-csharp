@@ -154,6 +154,20 @@ namespace BTCSIM
             return ac;
         }
 
+        public SimAccount sim_ga_market_limit(int from, int to, int max_amount, Gene chromo, string title, bool chart)
+        {
+            var sim = new Sim();
+            var ac = new SimAccount();
+            ac = sim.sim_ga_market_limit(from, to, max_amount, chromo, ac);
+            Console.WriteLine("pl=" + ac.performance_data.total_pl);
+            Console.WriteLine("num trade=" + ac.performance_data.num_trade);
+            Console.WriteLine("win rate=" + ac.performance_data.win_rate);
+            Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
+            if (chart)
+                LineChart.DisplayLineChart(ac.total_pl_list, title);
+            return ac;
+        }
+
         public SimAccount sim_ga_limit_conti(int from, int to, int max_amount, Gene chromo, string title, SimAccount ac, bool chart)
         {
             var sim = new Sim();
@@ -266,7 +280,6 @@ namespace BTCSIM
         {
             var ac = new SimAccount();
             var sim = new Sim();
-            var eva = 0.0;
             //ac = sim.sim_ga(from, to, chro, ac);
             if (sim_type == 0)
                 ac = sim.sim_ga_limit(from, to, max_amount, chro, ac);

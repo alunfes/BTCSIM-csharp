@@ -88,13 +88,14 @@ namespace BTCSIM
             {
                 Console.WriteLine("Started Read Weight SIM");
                 var ga = new GA(0);
-                var chromo = ga.readWeights(45);
+                var chromo = ga.readWeights(26);
                 //var from = 1000 + Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8));
-                var from = 401000;
-                var to = from + 250000;
+                var from = 501000;
+                var to = from + 150000;
                 int max_amount = 1;
                 //var to = MarketData.Close.Count -1;
-                var ac = ga.sim_ga_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString()+ ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1], true);
+                //var ac = ga.sim_ga_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString()+ ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1], true);
+                var ac = ga.sim_ga_market_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString() + ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1], true);
                 //var ac = ga.sim_ga_limit(Convert.ToInt32(MarketData.Close.Count * 0.05), MarketData.Close.Count - 1, chromo);
                 //var ac = ga.sim_ga(Convert.ToInt32(MarketData.Close.Count * 0.05), MarketData.Close.Count-1, chromo);
                 //var ac = ga.sim_ga(1000, Convert.ToInt32(MarketData.Close.Count * 0.05), chromo);
@@ -123,8 +124,11 @@ namespace BTCSIM
 
                 var ga = new GA(0);
                 var chromo = ga.readWeights(ga_island.best_island);
-                var ac = ga.sim_ga_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString() + ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to-1]+   ", Best Island="+ga_island.best_island.ToString(), true);
-
+                var ac = new SimAccount();
+                if (sim_type==0)
+                    ac = ga.sim_ga_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString() + ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to-1]+   ", Best Island="+ga_island.best_island.ToString(), true);
+                else
+                    ac = ga.sim_ga_market_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString() + ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1] + ", Best Island=" + ga_island.best_island.ToString(), true);
             }
             if (key == "conti_ga")
             {
