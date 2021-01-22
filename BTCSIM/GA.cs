@@ -193,7 +193,7 @@ namespace BTCSIM
             /*
             Parallel.For(0, chromos.Length, option, j =>
             {
-                (double total_pl, SimAccount ac) res = evaluation(from, to, max_amount, j, chromos[j]);
+                (double total_pl, SimAccount ac) res = evaluation(from, to, max_amount, j, chromos[j], sim_type);
                 eva_dic.GetOrAdd(j, res.total_pl);
                 ac_dic.GetOrAdd(j, res.ac);
             });
@@ -212,7 +212,7 @@ namespace BTCSIM
             //cross over
             crossover(selected_chro_ind_list, 0.3);
             //mutation
-            mutation(mutation_rate);
+            mutation(mutation_rate, -10, 10);
             write_best_chromo();
             eva_dic = null;
             ac_dic = null;
@@ -256,7 +256,7 @@ namespace BTCSIM
                 //cross over
                 crossover(selected_chro_ind_list, 0.3);
                 //mutation
-                mutation(mutation_rate);
+                mutation(mutation_rate, -1, 1);
                 generationWatch.Stop();
                 generation_time_log.Add(generationWatch.Elapsed.Seconds);
                 calc_time_to_complete_from_generation_time(i, num_generations);
@@ -384,7 +384,7 @@ namespace BTCSIM
             return selected_chro_ind;
         }
 
-        private void mutation(double mutation_ratio)
+        private void mutation(double mutation_ratio, int random_weight_min, int random_weight_max)
         {
             Random rnd = new Random(DateTime.Now.Millisecond);
             for (int i=0; i<chromos.Count(); i++)
@@ -392,13 +392,13 @@ namespace BTCSIM
                 if (i != best_chromo)
                 {
                     for (int j = 0; j < chromos[i].bias_gene1.Length; j++)
-                        chromos[i].bias_gene1[j] = rnd.NextDouble() > (1-mutation_ratio) ? random_generator.getRandomArrayRange(-5,5) : chromos[i].bias_gene1[j];
+                        chromos[i].bias_gene1[j] = rnd.NextDouble() > (1-mutation_ratio) ? random_generator.getRandomArrayRange(random_weight_min, random_weight_max) : chromos[i].bias_gene1[j];
                     for (int j = 0; j < chromos[i].weight_gene1.Length; j++)
-                        chromos[i].weight_gene1[j] = rnd.NextDouble() > (1 - mutation_ratio) ? random_generator.getRandomArrayRange(-5, 5) : chromos[i].weight_gene1[j];
+                        chromos[i].weight_gene1[j] = rnd.NextDouble() > (1 - mutation_ratio) ? random_generator.getRandomArrayRange(random_weight_min, random_weight_max) : chromos[i].weight_gene1[j];
                     for (int j = 0; j < chromos[i].bias_gene2.Length; j++)
-                        chromos[i].bias_gene2[j] = rnd.NextDouble() > (1 - mutation_ratio) ? random_generator.getRandomArrayRange(-5, 5) : chromos[i].bias_gene2[j];
+                        chromos[i].bias_gene2[j] = rnd.NextDouble() > (1 - mutation_ratio) ? random_generator.getRandomArrayRange(random_weight_min, random_weight_max) : chromos[i].bias_gene2[j];
                     for (int j = 0; j < chromos[i].weight_gene2.Length; j++)
-                        chromos[i].weight_gene2[j] = rnd.NextDouble() > (1 - mutation_ratio) ? random_generator.getRandomArrayRange(-5, 5) : chromos[i].weight_gene2[j];
+                        chromos[i].weight_gene2[j] = rnd.NextDouble() > (1 - mutation_ratio) ? random_generator.getRandomArrayRange(random_weight_min, random_weight_max) : chromos[i].weight_gene2[j];
                 }
             }
         }
