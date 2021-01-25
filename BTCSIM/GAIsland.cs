@@ -38,10 +38,10 @@ namespace BTCSIM
             for (int i = 0; i < num_island; i++)
                 gas.Add(new GA(i));
             //do GA calc for move_ban_period
-            for(int i=0; i<move_ban_period; i++)
+            for (int i = 0; i < move_ban_period; i++)
             {
                 sww.Start();
-                for(int j=0; j<num_island; j++)
+                for (int j = 0; j < num_island; j++)
                 {
                     gas[j].start_island_ga(from, to, max_amount, num_chromos, i, units, mutation_rate, sim_type);
                 }
@@ -93,33 +93,50 @@ namespace BTCSIM
 
                         //exchange chromo
                         //copy targe chromo to tmp chromo
-                        var tmp_chrom = new Gene(gas[selected_island].chromos[selected_target_chromo].num_units);
-                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene1.Length; k++)
-                            tmp_chrom.bias_gene1[k] = gas[selected_island].chromos[selected_target_chromo].bias_gene1[k];
-                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene2.Length; k++)
-                            tmp_chrom.bias_gene2[k] = gas[selected_island].chromos[selected_target_chromo].bias_gene2[k];
-                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene1.Length; k++)
-                            tmp_chrom.weight_gene1[k] = gas[selected_island].chromos[selected_target_chromo].weight_gene1[k];
-                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene2.Length; k++)
-                            tmp_chrom.weight_gene2[k] = gas[selected_island].chromos[selected_target_chromo].weight_gene2[k];
+                        var tmp_chrom = new Gene2(gas[selected_island].chromos[selected_target_chromo].num_units);
+                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene.Count; k++) //for layers
+                        {
+                            for (int l = 0; l < gas[selected_island].chromos[selected_target_chromo].bias_gene[k].Length; l++) //for weights
+                                tmp_chrom.bias_gene[k][l] = gas[selected_island].chromos[selected_target_chromo].bias_gene[k][l];
+                        }
+                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene.Count; k++) //for layers
+                        {
+                            for (int l = 0; l < gas[selected_island].chromos[selected_target_chromo].weight_gene[k].Count; l++) //for units
+                            {
+                                for (int m = 0; m < gas[selected_island].chromos[selected_target_chromo].weight_gene[k][l][m]; m++) //for weights
+                                    tmp_chrom.weight_gene[k][l][m] = gas[selected_island].chromos[selected_target_chromo].weight_gene[k][l][m];
+                            }
+                        }
+
                         //copy from selected chromo to target chromo
-                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene1.Length; k++)
-                            gas[selected_island].chromos[selected_target_chromo].bias_gene1[k] = gas[i].chromos[selected_id].bias_gene1[k];
-                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene2.Length; k++)
-                            gas[selected_island].chromos[selected_target_chromo].bias_gene2[k] = gas[i].chromos[selected_id].bias_gene2[k];
-                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene1.Length; k++)
-                            gas[selected_island].chromos[selected_target_chromo].weight_gene1[k] = gas[i].chromos[selected_id].weight_gene1[k];
-                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene2.Length; k++)
-                            gas[selected_island].chromos[selected_target_chromo].weight_gene2[k] = gas[i].chromos[selected_id].weight_gene2[k];
+                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene.Count; k++) //for layers
+                        {
+                            for (int l = 0; l < gas[selected_island].chromos[selected_target_chromo].bias_gene[k].Length; l++) //for weights
+                                gas[selected_island].chromos[selected_target_chromo].bias_gene[k] = gas[i].chromos[selected_id].bias_gene[k];
+                        }
+                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene.Count; k++) //for layers
+                        {
+                            for (int l = 0; l < gas[selected_island].chromos[selected_target_chromo].weight_gene[k].Count; l++) //for units
+                            {
+                                for (int m = 0; m < gas[selected_island].chromos[selected_target_chromo].weight_gene[k][l][m]; m++) //for weights
+                                    gas[selected_island].chromos[selected_target_chromo].weight_gene[k][l][m] = gas[i].chromos[selected_id].weight_gene[k][l][m];
+                            }
+                        }
+
                         //copy from target chromo to selected chromo
-                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene1.Length; k++)
-                            gas[i].chromos[selected_id].bias_gene1[k] = tmp_chrom.bias_gene1[k];
-                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene2.Length; k++)
-                            gas[i].chromos[selected_id].bias_gene2[k] = tmp_chrom.bias_gene2[k];
-                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene1.Length; k++)
-                            gas[i].chromos[selected_id].weight_gene1[k] = tmp_chrom.weight_gene1[k];
-                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene2.Length; k++)
-                            gas[i].chromos[selected_id].weight_gene2[k] = tmp_chrom.weight_gene2[k];
+                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene.Count; k++) //for layers
+                        {
+                            for (int l = 0; l < gas[selected_island].chromos[selected_target_chromo].bias_gene[k].Length; l++) //for weights
+                                gas[i].chromos[selected_id].bias_gene[k][l] = tmp_chrom.bias_gene[k][l];
+                        }
+                        for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].weight_gene.Count; k++) //for layers
+                        {
+                            for (int l = 0; l < gas[selected_island].chromos[selected_target_chromo].weight_gene[k].Count; l++) //for units
+                            {
+                                for (int m = 0; m < gas[selected_island].chromos[selected_target_chromo].weight_gene[k][l][m]; m++) //for weights
+                                    gas[i].chromos[selected_id].weight_gene[k][l][m] = tmp_chrom.weight_gene[k][l][m];
+                            }
+                        }
                     }
                 }
             }
@@ -150,11 +167,11 @@ namespace BTCSIM
                 + ", Best num trade=" + gas[best_island].best_ac.performance_data.num_trade.ToString()
                 + ", Best win rate=" + gas[best_island].best_ac.performance_data.win_rate.ToString()
                 + ", Best sharp ratio = " + gas[best_island].best_ac.performance_data.sharp_ratio.ToString());
-            Console.WriteLine("Time Elapsed (sec)="+sw.Elapsed.TotalSeconds.ToString());
+            Console.WriteLine("Time Elapsed (sec)=" + sw.Elapsed.TotalSeconds.ToString());
             Console.WriteLine("---------------------------------------------------");
         }
 
 
-        
+
     }
 }
