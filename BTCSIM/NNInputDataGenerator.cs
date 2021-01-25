@@ -95,12 +95,11 @@ namespace BTCSIM
             foreach (var d in MarketData.Vol_ma_divergence_minmax_scale[i])
                 input_data.Add(d);
 
-
             //buy sell vol ratio
             foreach (var d in MarketData.Buysell_vol_ratio_minmax_scale[i])
                 input_data.Add(d);
 
-            if (input_data.Contains(Double.NaN))
+            if (input_data.Contains(Double.NaN) || input_data.Contains(Double.PositiveInfinity) || input_data.Contains(Double.NegativeInfinity))
                 Console.WriteLine("NNInputDataGenerator: Nan is included !");
 
             //price raw data

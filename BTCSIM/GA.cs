@@ -63,10 +63,38 @@ namespace BTCSIM
         }
     }
 
+    //for multile middle layer and dic type weights
+    public class Gene2
+    {
+        public List<Dictionary<int, double[]>> weight_gene { get; set; } //middle - (middle) output [<num_first_middle_units, num_inputs>, <num_middle_units-1, num_first_middle_units>, <num_middle_units-1, num_middle_units-2> ...]
+        public List<double[]> bias_gene { get; set; } //[num_unit[1], num_unit[2], .. ]
+        public int[] num_units { get; set; } //[num_inputs, num_middle, num_middle2... , num_output]
+
+        public Gene2(int[] units)
+        {
+            var random_generator = new RandomGenerator();
+            this.num_units = units;
+            weight_gene = new List<Dictionary<int, double[]>>();
+            bias_gene = new List<double[]>();
+            //initialize weight / bias
+            for(int i=0;i <units.Length-1; i++)
+            {
+                var weight = new Dictionary<int, double[]>();
+                weight[i] = random_generator.getRandomArray(units[i]);
+                weight_gene.Add(weight);
+                var gene = random_generator.getRandomArray(units[i+1]);
+                bias_gene.Add(gene);
+            }
+        }
+
+    }
+
+
+
 
     public class GA
     {
-        public Gene[] chromos { get; set; }
+        public Gene2[] chromos { get; set; }
         public List<double> best_eva_log { get; set; }
         public double best_eva { get; set; }
         public int best_chromo { get; set; }
@@ -99,7 +127,7 @@ namespace BTCSIM
         }
 
 
-        public Gene readWeights(int island_id)
+        public Gene2 readWeights(int island_id)
         {
             using(StreamReader sr =new StreamReader(@"./best_weight_ID-"+ island_id.ToString()+".csv", Encoding.UTF8, false))
             {
@@ -111,10 +139,12 @@ namespace BTCSIM
                         break;
                 }
                 data.RemoveAt(data.Count - 1); //remove null
+
+
                 var units = new int[3] { Convert.ToInt32(data[data.IndexOf("units") + 1]), Convert.ToInt32(data[data.IndexOf("units") + 2]), Convert.ToInt32(data[data.IndexOf("units") + 3]) };
-                var chrom = new Gene(units);
+                var chrom = new Gene2(units);
 
-
+                /*
                 for (int i=Convert.ToInt32(data.IndexOf("bias1"))+1; i< Convert.ToInt32(data.IndexOf("weight1")); i++)
                     chrom.bias_gene1[i- Convert.ToInt32(data.IndexOf("bias1")) - 1] = Convert.ToDouble(data[i]);
                 for (int i = Convert.ToInt32(data.IndexOf("weight1")) + 1; i < Convert.ToInt32(data.IndexOf("bias2")); i++)
@@ -123,11 +153,12 @@ namespace BTCSIM
                     chrom.bias_gene2[i- Convert.ToInt32(data.IndexOf("bias2")) - 1] = Convert.ToDouble(data[i]);
                 for (int i = Convert.ToInt32(data.IndexOf("weight2")) + 1; i < data.Count; i++)
                     chrom.weight_gene2[i- Convert.ToInt32(data.IndexOf("weight2")) - 1] = Convert.ToDouble(data[i]);
+                */
                 return chrom;
             }
         }
 
-        public SimAccount sim_ga(int from, int to, Gene chromo, string title)
+        public SimAccount sim_ga(int from, int to, Gene2 chromo, string title)
         {
             var sim = new Sim();
             var ac = new SimAccount();
@@ -140,7 +171,7 @@ namespace BTCSIM
             return ac;
         }
 
-        public SimAccount sim_ga_limit(int from, int to, int max_amount, Gene chromo, string title, bool chart)
+        public SimAccount sim_ga_limit(int from, int to, int max_amount, Gene2 chromo, string title, bool chart)
         {
             var sim = new Sim();
             var ac = new SimAccount();
@@ -154,7 +185,7 @@ namespace BTCSIM
             return ac;
         }
 
-        public SimAccount sim_ga_market_limit(int from, int to, int max_amount, Gene chromo, string title, bool chart)
+        public SimAccount sim_ga_market_limit(int from, int to, int max_amount, Gene2 chromo, string title, bool chart)
         {
             var sim = new Sim();
             var ac = new SimAccount();
@@ -168,7 +199,7 @@ namespace BTCSIM
             return ac;
         }
 
-        public SimAccount sim_ga_limit_conti(int from, int to, int max_amount, Gene chromo, string title, SimAccount ac, bool chart)
+        public SimAccount sim_ga_limit_conti(int from, int to, int max_amount, Gene2 chromo, string title, SimAccount ac, bool chart)
         {
             var sim = new Sim();
             ac = sim.sim_ga_limit(from, to, max_amount, chromo, ac);
@@ -271,12 +302,12 @@ namespace BTCSIM
 
         private void generate_chromos(int num_chrom, int[] num_units_layer)
         {
-            chromos = new Gene[num_chrom];
+            chromos = new Gene2[num_chrom];
             for(int i=0; i<num_chrom; i++)
-                chromos[i] = new Gene(num_units_layer);
+                chromos[i] = new Gene2(num_units_layer);
         }
 
-        private (double, SimAccount) evaluation(int from, int to, int max_amount, int chro_id, Gene chro, int sim_type)
+        private (double, SimAccount) evaluation(int from, int to, int max_amount, int chro_id, Gene2 chro, int sim_type)
         {
             var ac = new SimAccount();
             var sim = new Sim();
@@ -384,6 +415,7 @@ namespace BTCSIM
             return selected_chro_ind;
         }
 
+
         private void mutation(double mutation_ratio, int random_weight_min, int random_weight_max)
         {
             Random rnd = new Random(DateTime.Now.Millisecond);
@@ -391,17 +423,23 @@ namespace BTCSIM
             {
                 if (i != best_chromo)
                 {
-                    for (int j = 0; j < chromos[i].bias_gene1.Length; j++)
-                        chromos[i].bias_gene1[j] = rnd.NextDouble() > (1-mutation_ratio) ? random_generator.getRandomArrayRange(random_weight_min, random_weight_max) : chromos[i].bias_gene1[j];
-                    for (int j = 0; j < chromos[i].weight_gene1.Length; j++)
-                        chromos[i].weight_gene1[j] = rnd.NextDouble() > (1 - mutation_ratio) ? random_generator.getRandomArrayRange(random_weight_min, random_weight_max) : chromos[i].weight_gene1[j];
-                    for (int j = 0; j < chromos[i].bias_gene2.Length; j++)
-                        chromos[i].bias_gene2[j] = rnd.NextDouble() > (1 - mutation_ratio) ? random_generator.getRandomArrayRange(random_weight_min, random_weight_max) : chromos[i].bias_gene2[j];
-                    for (int j = 0; j < chromos[i].weight_gene2.Length; j++)
-                        chromos[i].weight_gene2[j] = rnd.NextDouble() > (1 - mutation_ratio) ? random_generator.getRandomArrayRange(random_weight_min, random_weight_max) : chromos[i].weight_gene2[j];
+                    for (int j = 0; j < chromos[i].bias_gene.Count; j++)
+                    {
+                        for (int k=0; k<chromos[i].bias_gene[j].Length; k++)
+                            chromos[i].bias_gene[j][k] = rnd.NextDouble() > (1 - mutation_ratio) ? random_generator.getRandomArrayRange(random_weight_min, random_weight_max) : chromos[i].bias_gene[j][k];
+                    }
+                    for(int j=0; j<chromos[i].weight_gene.Count; j++)
+                    {
+                        for(int k=0; k<chromos[i].weight_gene[j].Count; k++)
+                        {
+                            for(int l=0; l<chromos[i].weight_gene[j][k].Length; l++)
+                                chromos[i].weight_gene[j][k][l] = rnd.NextDouble() > (1 - mutation_ratio) ? random_generator.getRandomArrayRange(random_weight_min, random_weight_max) : chromos[i].weight_gene[j][k][l];
+                        }
+                    }
                 }
             }
         }
+
 
         //reset chromos with random weigths except best chromo
         public void resetChromos()
@@ -409,7 +447,7 @@ namespace BTCSIM
             for (int i = 0; i < chromos.Length; i++)
             {
                 if (i != best_chromo)
-                    chromos[i] = new Gene(chromos[i].num_units);
+                    chromos[i] = new Gene2(chromos[i].num_units);
             }
         }
 
@@ -417,21 +455,27 @@ namespace BTCSIM
         private void crossover(List<int> selected, double cross_over_ratio)
         {
             var rnd = new Random(DateTime.Now.Millisecond);
-            var new_chromos = new Gene[chromos.Count()];
+            var new_chromos = new Gene2[chromos.Count()];
 
             //deep copy chromos
             for (int i = 0; i < new_chromos.Length; i++)
-                new_chromos[i] = new Gene(chromos[0].num_units);
+                new_chromos[i] = new Gene2(chromos[0].num_units);
+
             for(int i=0; i<new_chromos.Length; i++)
             {
-                for (int j = 0; j < chromos[i].bias_gene1.Length; j++)
-                    new_chromos[i].bias_gene1[j] = chromos[i].bias_gene1[j];
-                for (int j = 0; j < chromos[i].bias_gene2.Length; j++)
-                    new_chromos[i].bias_gene2[j] = chromos[i].bias_gene2[j];
-                for (int j = 0; j < chromos[i].weight_gene1.Length; j++)
-                    new_chromos[i].weight_gene1[j] = chromos[i].weight_gene1[j];
-                for (int j = 0; j < chromos[i].weight_gene2.Length; j++)
-                    new_chromos[i].weight_gene2[j] = chromos[i].weight_gene2[j];
+                for (int j=0; j<chromos[i].bias_gene.Count; j++)
+                {
+                    for (int k = 0; k < chromos[i].bias_gene[j].Length; k++)
+                        new_chromos[i].bias_gene[j][k] = chromos[i].bias_gene[j][k];
+                }
+                for (int j = 0; j < chromos[i].weight_gene.Count; j++)
+                {
+                    for (int k = 0; k < chromos[i].weight_gene[j].Count; k++)
+                    {
+                        for (int l = 0; l < chromos[i].weight_gene[j][k].Length; l++)
+                            new_chromos[i].weight_gene[j][k][l] = chromos[i].weight_gene[j][k][l];
+                    }
+                }
             }
 
 
@@ -440,47 +484,25 @@ namespace BTCSIM
                 if (i != best_chromo)
                 {
                     //bias1/2, weight1/2からそれぞれからランダムにratio %のweightを選択して交配
-                    for (int j = 0; j < chromos[i].weight_gene1.Length; j++)
+                    for (int j=0; j<chromos[i].weight_gene.Count; j++)
                     {
-                        if (rnd.NextDouble() > (1 - cross_over_ratio))
-                            new_chromos[i].weight_gene1[j] = chromos[selected[i]].weight_gene1[j];
-                        else
-                            new_chromos[i].weight_gene1[j] = chromos[i].weight_gene1[j];
+                        for(int k=0; k<chromos[i].weight_gene[j].Count; k++)
+                        {
+                            if (rnd.NextDouble() > (1 - cross_over_ratio))
+                            {
+                                new_chromos[i].weight_gene[j][k] = chromos[selected[i]].weight_gene[j][k];
+                                new_chromos[i].bias_gene[j] = chromos[selected[i]].bias_gene[j];
+                            }
+                            else
+                            {
+                                new_chromos[i].weight_gene[j][k] = chromos[i].weight_gene[j][k];
+                                new_chromos[i].bias_gene[j] = chromos[i].bias_gene[j];
+                            }
+                        }
                     }
-                    for (int j = 0; j < chromos[i].bias_gene1.Length; j++)
-                    {
-                        if (rnd.NextDouble() > (1 - cross_over_ratio))
-                            new_chromos[i].bias_gene1[j] = chromos[selected[i]].bias_gene1[j];
-                        else
-                            new_chromos[i].bias_gene1[j] = chromos[i].bias_gene1[j];
-                    }
-                    for (int j = 0; j < chromos[i].weight_gene2.Length; j++)
-                    {
-                        if (rnd.NextDouble() > (1 - cross_over_ratio))
-                            new_chromos[i].weight_gene2[j] = chromos[selected[i]].weight_gene2[j];
-                        else
-                            new_chromos[i].weight_gene2[j] = chromos[i].weight_gene2[j];
-                    }
-                    for (int j = 0; j < chromos[i].bias_gene2.Length; j++)
-                    {
-                        if (rnd.NextDouble() > (1 - cross_over_ratio))
-                            new_chromos[i].bias_gene2[j] = chromos[selected[i]].bias_gene2[j];
-                        else
-                            new_chromos[i].bias_gene2[j] = chromos[i].bias_gene2[j];
-                    }
-                        
-                    /*
-                    for (int j = 0; j < chromos[i].weight_gene1.Length; j++)
-                        new_chromos[i].weight_gene1[j] = rnd.NextDouble() > (1- cross_over_ratio) ? chromos[selected[i]].weight_gene1[j] : chromos[i].weight_gene1[j];
-                    for (int j = 0; j < chromos[i].bias_gene1.Length; j++)
-                        new_chromos[i].bias_gene1[j] = rnd.NextDouble() > (1 - cross_over_ratio) ? chromos[selected[i]].bias_gene1[j] : chromos[i].bias_gene1[j];
-                    for (int j = 0; j < chromos[i].weight_gene2.Length; j++)
-                        new_chromos[i].weight_gene2[j] = rnd.NextDouble() > (1 - cross_over_ratio) ? chromos[selected[i]].weight_gene2[j] : chromos[i].weight_gene2[j];
-                    for (int j = 0; j < chromos[i].bias_gene2.Length; j++)
-                        new_chromos[i].bias_gene2[j] = rnd.NextDouble() > (1 - cross_over_ratio) ? chromos[selected[i]].bias_gene2[j] : chromos[i].bias_gene2[j];*/
                 }
             }
-            chromos = new Gene[chromos.Count()];
+            chromos = new Gene2[chromos.Count()];
             new_chromos.CopyTo(chromos, 0);
         }
 
@@ -504,32 +526,31 @@ namespace BTCSIM
         private void write_best_chromo()
         {
             //Console.WriteLine("Writing Best Chromo...");
-            using (StreamWriter sw = new StreamWriter(@"./best_weight_ID-" +island_id.ToString()+".csv", false, Encoding.UTF8))
+            using (StreamWriter sw = new StreamWriter(@"./best_weight_ID-" + island_id.ToString() + ".csv", false, Encoding.UTF8))
             {
                 //units
                 sw.WriteLine("units");
-                foreach(var v in chromos[best_chromo].num_units)
+                foreach (var v in chromos[best_chromo].num_units)
                     sw.WriteLine(v);
-                //bias1
-                sw.WriteLine("bias1");
-                foreach (var v in chromos[best_chromo].bias_gene1)
-                    sw.WriteLine(v);
-                //weight1
-                sw.WriteLine("weight1");
-                foreach (var v in chromos[best_chromo].weight_gene1)
-                    sw.WriteLine(v);
-                //bias2
-                sw.WriteLine("bias2");
-                foreach (var v in chromos[best_chromo].bias_gene2)
-                    sw.WriteLine(v);
-                //weight2
-                sw.WriteLine("weight2");
-                foreach (var v in chromos[best_chromo].weight_gene2)
-                    sw.WriteLine(v);
+                //bias
+                for (int i = 0; i < chromos[best_chromo].bias_gene.Count; i++)
+                {
+                    sw.WriteLine("bias" + i.ToString());
+                    foreach (var v in chromos[best_chromo].bias_gene[i])
+                        sw.WriteLine(v);
+                }
+                //weight
+                for (int i = 0; i < chromos[i].weight_gene.Count; i++)
+                {
+                    for (int j = 0; j < chromos[i].weight_gene[i].Count; j++)
+                    {
+                        sw.WriteLine("weight" + i.ToString() + "-" + j.ToString());
+                        foreach (var v in chromos[best_chromo].weight_gene[i][j])
+                            sw.WriteLine(v);
+                    }
+                }
             }
             //Console.WriteLine("Completed write best chromo.");
         }
-
-
     }
 }

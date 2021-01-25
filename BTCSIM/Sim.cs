@@ -11,7 +11,7 @@ namespace BTCSIM
         {
         }
         
-        public SimAccount sim_ga(int from, int to, Gene chromo, SimAccount ac)
+        public SimAccount sim_ga(int from, int to, Gene2 chromo, SimAccount ac)
         {
             var nn = new NN();
             var strategy = new Strategy();
@@ -21,7 +21,7 @@ namespace BTCSIM
             for (int i =from; i< to; i++)
             {
                 var nn_inputs = nn_input_data_generator.generateNNInputData(ac, i);
-                var nn_outputs = nn.calcNN(nn_inputs, chromo.num_units, chromo.weight_gene1, chromo.weight_gene2, chromo.bias_gene1, chromo.bias_gene2, 1);
+                var nn_outputs = nn.calcNN(nn_inputs, chromo.num_units, chromo, 1);
                 var pred = nn.getActivatedUnit(nn_outputs);
                 var actions = strategy.GAStrategy(pred, amount, ac);
                 for (int j=0; j<actions.action.Count; j++)
@@ -35,7 +35,7 @@ namespace BTCSIM
             return ac;
         }
 
-        public SimAccount sim_ga_limit(int from, int to, int max_amount, Gene chromo, SimAccount ac)
+        public SimAccount sim_ga_limit(int from, int to, int max_amount, Gene2 chromo, SimAccount ac)
         {
             var nn = new NN();
             var strategy = new Strategy();
@@ -45,7 +45,7 @@ namespace BTCSIM
             for (int i = from; i < to; i++)
             {
                 var nn_inputs = nn_input_data_generator.generateNNInputDataLimit(ac, i);
-                var nn_outputs = nn.calcNN(nn_inputs, chromo.num_units, chromo.weight_gene1, chromo.weight_gene2, chromo.bias_gene1, chromo.bias_gene2, 1);
+                var nn_outputs = nn.calcNN(nn_inputs, chromo.num_units, chromo, 1);
                 var pred = nn.getActivatedUnit(nn_outputs);
                 var actions = strategy.GALimitStrategy2(i, pred, amount, max_amount, ac);
 
@@ -73,17 +73,25 @@ namespace BTCSIM
         }
 
 
-        public SimAccount sim_ga_market_limit(int from, int to, int max_amount, Gene chromo, SimAccount ac)
+        public SimAccount sim_ga_market_limit(int from, int to, int max_amount, Gene2 chromo, SimAccount ac)
         {
             var nn = new NN();
             var strategy = new Strategy();
             int amount = 1;
             var nn_input_data_generator = new NNInputDataGenerator();
+            var zero_trade_check_point = 0.1; //to - fromの間のx%進捗した時にnum trade=0だったらsimを打ち切る。
 
             for (int i = from; i < to; i++)
             {
+                //check num trade=0 discontinue sim
+                if (i - from > ((to - from) * zero_trade_check_point) && ac.performance_data.num_trade == 0)
+                {
+                    //Console.WriteLine("Stopped sim due to zero trade.");
+                    break;
+                }
+
                 var nn_inputs = nn_input_data_generator.generateNNInputDataLimit(ac, i);
-                var nn_outputs = nn.calcNN(nn_inputs, chromo.num_units, chromo.weight_gene1, chromo.weight_gene2, chromo.bias_gene1, chromo.bias_gene2, 1);
+                var nn_outputs = nn.calcNN(nn_inputs, chromo.num_units, chromo, 1);
                 var pred = nn.getActivatedUnitLimitMarket(nn_outputs);
                 var actions = strategy.GALimitMarketStrategy(i, pred, amount, max_amount, ac);
 

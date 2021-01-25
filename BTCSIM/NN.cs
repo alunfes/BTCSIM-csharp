@@ -17,46 +17,37 @@ namespace BTCSIM
             return 1.0 / (1.0 + Math.Exp(-input_val));
         }
 
-        public double[] calcNN(double[] input_vals, int[] num_units, double[] weight1, double[] weight2, double[] bias1, double[] bias2, int activation)
+
+        private double[] calcWeights(double[] input_vals, Gene2 chromo, int layer_key, int activation)
+        {
+            var res = new double[chromo.weight_gene[layer_key].Count];
+
+            for(int i=0; i<chromo.weight_gene[layer_key].Count; i++)
+            {
+                var sum_v = 0.0;
+                for (int j = 0; j < input_vals.Length; j++)
+                    sum_v += input_vals[j] * chromo.weight_gene[layer_key][i][j];
+                sum_v += chromo.bias_gene[layer_key][i];
+                res[i] = (activation == 0 ? sigmoid(sum_v) : tanh(sum_v));
+            }
+            return res;
+        }
+
+        public double[] calcNN(double[] input_vals, int[] num_units, Gene2 chromo, int activation)
         {
             if (input_vals.Contains(Double.NaN))
             {
                 Console.WriteLine("NN-calcNN: nan in included in input_vals !");
             }
-            if (input_vals.Length * num_units[1] == weight1.Length)
+            //input layer
+            var inputs = calcWeights(input_vals, chromo, 0, activation);
+            //middle layers
+            for (int i = 1; i < chromo.weight_gene.Count-1; i++) //do calc for each of middle layer
             {
-                //first weight
-                double[] sum_first_outputs = new double[num_units[1]];
-                for (int i = 0; i < num_units[1]; i++)
-                {
-                    var sum_v = 0.0;
-                    for (int j = 0; j < input_vals.Length; j++)
-                    {
-                        sum_v += input_vals[j] * weight1[i];
-                    }
-                    sum_v += bias1[i];
-                    sum_first_outputs[i] = (activation == 0 ? sigmoid(sum_v) : tanh(sum_v));
-                }
-
-                //second weight
-                double[] sum_second_outputs = new double[num_units[2]];
-                for (int i = 0; i < num_units[2]; i++)
-                {
-                    var sum_v = 0.0;
-                    for (int j = 0; j < sum_first_outputs.Length; j++)
-                    {
-                        sum_v += sum_first_outputs[j] * weight2[i];
-                    }
-                    sum_v += bias2[i];
-                    sum_second_outputs[i] = sigmoid(sum_v);
-                }
-                return sum_second_outputs;
+                var outputs = calcWeights(inputs, chromo, i, activation);
+                inputs = outputs;
             }
-            else
-            {
-                Console.WriteLine("# of input vals and units in first layer is not matched!" + ", num_input="+input_vals.Length.ToString() + ", num_layer="+weight1.Length.ToString());
-                return new double[0];
-            }
+            return calcWeights(inputs, chromo, chromo.weight_gene.Count - 1, 0);
         }
 
         public int getActivatedUnit(double[] output_vals)

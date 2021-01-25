@@ -78,7 +78,7 @@ namespace BTCSIM
             stopWatch.Start();
             Console.WriteLine("started program.");
             List<int> terms = new List<int>();
-            for(int i=10; i<1000; i = i + 200) { terms.Add(i); }
+            for(int i=10; i<1000; i = i + 100) { terms.Add(i); }
 
             MarketData.initializer(terms);
 
@@ -110,15 +110,15 @@ namespace BTCSIM
                 int from = 1000;
                 int num_island = 2;
                 int num_chromos = 8;
-                int num_generations = 10;
+                int num_generations = 5;
                 int banned_move_period = 3;
                 int max_amount = 1;
-                var units = new int[] { 27, 50, 5};
-                var mutation_rate = 0.0;
+                var units = new int[] { 47, 10,10, 5};
+                var mutation_rate = 0.5;
                 var move_ratio = 0.2;
                 var sim_type = 1; //0:limit, 1:market/limit
                 //int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8)) + from;
-                int to = 500000 + from;
+                int to = 50000 + from;
                 var ga_island = new GAIsland();
                 ga_island.start_ga_island(from, to, max_amount, num_island, banned_move_period, move_ratio, num_chromos, num_generations, units, mutation_rate, sim_type);
 
