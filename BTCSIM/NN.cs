@@ -18,15 +18,15 @@ namespace BTCSIM
         }
 
 
+        
         private double[] calcWeights(double[] input_vals, Gene2 chromo, int layer_key, int activation)
         {
             var res = new double[chromo.weight_gene[layer_key].Count];
-
-            for (int i = 0; i < chromo.weight_gene[layer_key].Count; i++)
+            for (int i = 0; i < chromo.weight_gene[layer_key].Count; i++) //for units
             {
                 var sum_v = 0.0;
-                for (int j = 0; j < input_vals.Length; j++)
-                    sum_v += input_vals[j] * chromo.weight_gene[layer_key][i][j];
+                for (int j = 0; j < input_vals.Length; j++) //for weight
+                    sum_v += input_vals[j] * chromo.weight_gene[layer_key][i][j];  //weight_gene[layer][input unit][output unit]
                 sum_v += chromo.bias_gene[layer_key][i];
                 res[i] = (activation == 0 ? sigmoid(sum_v) : tanh(sum_v));
             }
@@ -42,7 +42,7 @@ namespace BTCSIM
             //input layer
             var inputs = calcWeights(input_vals, chromo, 0, activation);
             //middle layers
-            for (int i = 1; i < chromo.weight_gene.Count - 1; i++) //do calc for each of middle layer
+            for (int i = 1; i < chromo.weight_gene.Count; i++) //do calc for each layers
             {
                 var outputs = calcWeights(inputs, chromo, i, activation);
                 inputs = outputs;

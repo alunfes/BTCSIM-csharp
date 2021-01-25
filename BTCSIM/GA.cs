@@ -63,8 +63,8 @@ namespace BTCSIM
     //for multile middle layer and dic type weights
     public class Gene2
     {
-        public List<Dictionary<int, double[]>> weight_gene { get; set; } //middle - (middle) output [<num_first_middle_units, num_inputs>, <num_middle_units-1, num_first_middle_units>, <num_middle_units-1, num_middle_units-2> ...]
-        public List<double[]> bias_gene { get; set; } //[num_unit[1], num_unit[2], .. ]
+        public List<Dictionary<int, double[]>> weight_gene { get; set; } //weight_gene[layer][output unit][input unit] -> [<inputs units id as key, double[num middle units-1]>, <middle units id as key, double[num middle units-2>, ..]
+        public List<double[]> bias_gene { get; set; } //bias_gene[layer][output unit]  ->  [num_unit[1], num_unit[2], .. num_unit[num_layers - 1]]
         public int[] num_units { get; set; } //[num_inputs, num_middle, num_middle2... , num_output]
 
         public Gene2(int[] units)
@@ -74,12 +74,16 @@ namespace BTCSIM
             weight_gene = new List<Dictionary<int, double[]>>();
             bias_gene = new List<double[]>();
             //initialize weight / bias
-            for (int i = 0; i < units.Length - 1; i++)
+            for (int i = 1; i < units.Length; i++) //for layers
             {
                 var weight = new Dictionary<int, double[]>();
-                weight[i] = random_generator.getRandomArray(units[i]);
+                for (int j = 0; j < units[i]; j++) //for units in a layer
+                {
+                    weight[j] = random_generator.getRandomArray(units[i - 1]);
+                    
+                }
                 weight_gene.Add(weight);
-                var gene = random_generator.getRandomArray(units[i + 1]);
+                var gene = random_generator.getRandomArray(units[i]);
                 bias_gene.Add(gene);
             }
         }
