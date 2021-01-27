@@ -42,7 +42,7 @@ namespace BTCSIM
             //input layer
             var inputs = calcWeights(input_vals, chromo, 0, activation);
             //middle layers
-            for (int i = 1; i < chromo.weight_gene.Count; i++) //do calc for each layers
+            for (int i = 1; i < chromo.weight_gene.Count-1; i++) //do calc for each layers
             {
                 var outputs = calcWeights(inputs, chromo, i, activation);
                 inputs = outputs;

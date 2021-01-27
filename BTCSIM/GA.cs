@@ -91,8 +91,6 @@ namespace BTCSIM
     }
 
 
-
-
     public class GA
     {
         public Gene2[] chromos { get; set; }
@@ -133,28 +131,50 @@ namespace BTCSIM
             using (StreamReader sr = new StreamReader(@"./best_weight_ID-" + island_id.ToString() + ".csv", Encoding.UTF8, false))
             {
                 var data = new List<string>();
+                var units = new List<int>();
+                var bias = new List<double[]>();
+                var　weights = new List<Dictionary<int, double[]>>();
+                var layer_id_list = new List<int>();
+                
                 while (true)
                 {
-                    data.Add(sr.ReadLine());
-                    if (data.Last() == null)
+                    var line = sr.ReadLine();
+                    data.Add(line);
+                    if (line == null)
                         break;
+                    else
+                    {
+                        if (line.Contains("units"))
+                        {
+                            var ele = line.Split(',').ToList();
+                            units = ele.GetRange(1, ele.Count - 1).Select(int.Parse).ToList();
+                        }
+                        else if (line.Contains("bias"))
+                        {
+                            var ele = line.Split(',').ToList();
+                            var ele_range = ele.GetRange(1, ele.Count - 1).Select(double.Parse).ToList();
+                            bias.Add(ele_range.ToArray());
+                        }
+                        else if (line.Contains("weight")) //weight:0:0,-0.369,0.9373   -> weight:layer:unit
+                        {
+                            var ele = line.Split(',').ToList();
+                            var ele_range = ele.GetRange(1, ele.Count - 1).Select(double.Parse).ToArray();
+                            var layer_id = Convert.ToInt32(ele[0].Split(':')[1]);
+                            var unit_id = Convert.ToInt32(ele[0].Split(':')[2]);
+                            var dic = new Dictionary<int, double[]>();
+                            dic[unit_id] = ele_range;
+                            if (layer_id_list.Contains(layer_id))
+                                weights[layer_id][unit_id] = ele_range;
+                            else
+                                weights.Add(dic);
+                            layer_id_list.Add(layer_id);
+                        }
+                    }
                 }
                 data.RemoveAt(data.Count - 1); //remove null
-
-
-                var units = new int[3] { Convert.ToInt32(data[data.IndexOf("units") + 1]), Convert.ToInt32(data[data.IndexOf("units") + 2]), Convert.ToInt32(data[data.IndexOf("units") + 3]) };
-                var chrom = new Gene2(units);
-
-                /*
-                for (int i=Convert.ToInt32(data.IndexOf("bias1"))+1; i< Convert.ToInt32(data.IndexOf("weight1")); i++)
-                    chrom.bias_gene1[i- Convert.ToInt32(data.IndexOf("bias1")) - 1] = Convert.ToDouble(data[i]);
-                for (int i = Convert.ToInt32(data.IndexOf("weight1")) + 1; i < Convert.ToInt32(data.IndexOf("bias2")); i++)
-                    chrom.weight_gene1[i- Convert.ToInt32(data.IndexOf("weight1")) - 1] = Convert.ToDouble(data[i]);
-                for (int i = Convert.ToInt32(data.IndexOf("bias2")) + 1; i < Convert.ToInt32(data.IndexOf("weight2")); i++)
-                    chrom.bias_gene2[i- Convert.ToInt32(data.IndexOf("bias2")) - 1] = Convert.ToDouble(data[i]);
-                for (int i = Convert.ToInt32(data.IndexOf("weight2")) + 1; i < data.Count; i++)
-                    chrom.weight_gene2[i- Convert.ToInt32(data.IndexOf("weight2")) - 1] = Convert.ToDouble(data[i]);
-                */
+                var chrom = new Gene2(units.ToArray());
+                chrom.bias_gene = bias;
+                chrom.weight_gene = weights;
                 return chrom;
             }
         }
@@ -244,7 +264,7 @@ namespace BTCSIM
             //cross over
             crossover(selected_chro_ind_list, 0.3);
             //mutation
-            mutation(mutation_rate, -10, 10);
+            mutation(mutation_rate, -1, 1);
             write_best_chromo();
             eva_dic = null;
             ac_dic = null;
@@ -479,7 +499,6 @@ namespace BTCSIM
                 }
             }
 
-
             for (int i = 0; i < chromos.Count(); i++)
             {
                 if (i != best_chromo)
@@ -524,30 +543,28 @@ namespace BTCSIM
             }
         }
 
+
         private void write_best_chromo()
         {
             //Console.WriteLine("Writing Best Chromo...");
             using (StreamWriter sw = new StreamWriter(@"./best_weight_ID-" + island_id.ToString() + ".csv", false, Encoding.UTF8))
             {
                 //units
-                sw.WriteLine("units");
-                foreach (var v in chromos[best_chromo].num_units)
-                    sw.WriteLine(v);
+                var units = "units," + string.Join(",", chromos[best_chromo].num_units);
+                sw.WriteLine(units);
                 //bias
                 for (int i = 0; i < chromos[best_chromo].bias_gene.Count; i++)
                 {
-                    sw.WriteLine("bias" + i.ToString());
-                    foreach (var v in chromos[best_chromo].bias_gene[i])
-                        sw.WriteLine(v);
+                    var bias = "bias" + i.ToString() + "," + string.Join(",", chromos[best_chromo].bias_gene[i]);
+                    sw.WriteLine(bias);
                 }
                 //weight
-                for (int i = 0; i < chromos[i].weight_gene.Count; i++)
+                for (int i=0; i<chromos[best_chromo].weight_gene.Count; i++)
                 {
-                    for (int j = 0; j < chromos[i].weight_gene[i].Count; j++)
+                    foreach (var key in chromos[best_chromo].weight_gene[i].Keys)
                     {
-                        sw.WriteLine("weight" + i.ToString() + "-" + j.ToString());
-                        foreach (var v in chromos[best_chromo].weight_gene[i][j])
-                            sw.WriteLine(v);
+                        var weights = "weight:" + i.ToString() + ":" + key.ToString() +"," + string.Join(",", chromos[best_chromo].weight_gene[i][key]);
+                        sw.WriteLine(weights);
                     }
                 }
             }
