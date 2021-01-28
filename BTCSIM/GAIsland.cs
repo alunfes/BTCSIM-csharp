@@ -37,7 +37,7 @@ namespace BTCSIM
          *
          *->各GA instanceにおいて、1世代ごとの計算で止めて染色体を保存した上で、次の世代の計算をするという仕組みが必要。
          */
-        public void start_ga_island(int from, int to, int max_amount, int num_island, int move_ban_period, double move_ratio, int num_chromos, int num_generations, int[] units, double mutation_rate, int sim_type)
+        public void start_ga_island(int from, int to, int max_amount, int num_island, int move_ban_period, double move_ratio, int num_chromos, int num_generations, int[] units, double mutation_rate, int sim_type, double nn_threshold)
         {
             var sww = new Stopwatch();
             this.move_ban_period = move_ban_period;
@@ -50,7 +50,7 @@ namespace BTCSIM
                 sww.Start();
                 for (int j = 0; j < num_island; j++)
                 {
-                    gas[j].start_island_ga(from, to, max_amount, num_chromos, i, units, mutation_rate, sim_type);
+                    gas[j].start_island_ga(from, to, max_amount, num_chromos, i, units, mutation_rate, sim_type, nn_threshold);
                 }
                 checkBestIsland();
                 sww.Stop();
@@ -68,7 +68,6 @@ namespace BTCSIM
          ->best chromo以外を選択するようにする*/
         private void moveBetweenIsland(double move_ratio)
         {
-            Console.WriteLine("Move Between Island.");
             if (gas.Count > 1)
             {
                 for (int i = 0; i < gas.Count; i++)

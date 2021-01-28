@@ -73,7 +73,7 @@ namespace BTCSIM
         }
 
 
-        public SimAccount sim_ga_market_limit(int from, int to, int max_amount, Gene2 chromo, SimAccount ac)
+        public SimAccount sim_ga_market_limit(int from, int to, int max_amount, Gene2 chromo, SimAccount ac, double nn_threshold)
         {
             var nn = new NN();
             var strategy = new Strategy();
@@ -92,7 +92,7 @@ namespace BTCSIM
 
                 var nn_inputs = nn_input_data_generator.generateNNInputDataLimit(ac, i);
                 var nn_outputs = nn.calcNN(nn_inputs, chromo.num_units, chromo, 1);
-                var pred = nn.getActivatedUnitLimitMarket(nn_outputs);
+                var pred = nn.getActivatedUnitLimitMarket(nn_outputs, nn_threshold);
                 var actions = strategy.GALimitMarketStrategy(i, pred, amount, max_amount, ac);
 
                 //check invalid ac situation

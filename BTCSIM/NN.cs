@@ -72,8 +72,9 @@ namespace BTCSIM
         //nn_output = "no", "buy", "sell", "cancel", "Market / Limit"
         /*int[action, order_type]
          * order_type: 0-> Market, 1->Limit
+         * 最大出力outputがthreshold以下の場合はnoとして取り扱う
          */
-        public List<int> getActivatedUnitLimitMarket(double[] output_vals)
+        public List<int> getActivatedUnitLimitMarket(double[] output_vals, double threshold)
         {
             var res = new List<int>();
             double maxv = 0.0;
@@ -90,6 +91,8 @@ namespace BTCSIM
             {
                 Console.WriteLine("NN-getActivatedUnit: Invalid output val !");
             }
+            if (output_vals[max_ind] < threshold)
+                max_ind = 0;
             res.Add(max_ind);
             //order type
             int otype = output_vals[output_vals.Length - 1] >= 0.5 ? 0 : 1;
