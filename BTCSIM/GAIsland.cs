@@ -14,6 +14,9 @@ namespace BTCSIM
         public List<int> best_island_log { get; set; }
         public double best_eva { get; set; }
         public List<double> best_eva_log { get; set; }
+        public int last_move_banned_generation { get; set; }
+        public int move_ban_period { get; set; }
+        public bool move_ban_flg { get; set; }
 
         public GAIsland()
         {
@@ -22,6 +25,9 @@ namespace BTCSIM
             best_island_log = new List<int>();
             best_eva = -1;
             best_eva_log = new List<double>();
+            last_move_banned_generation = 0;
+            move_ban_period = 100;
+            move_ban_flg = true;
         }
 
         /*それぞれのislandでchromosを初期化する
@@ -34,11 +40,12 @@ namespace BTCSIM
         public void start_ga_island(int from, int to, int max_amount, int num_island, int move_ban_period, double move_ratio, int num_chromos, int num_generations, int[] units, double mutation_rate, int sim_type)
         {
             var sww = new Stopwatch();
+            this.move_ban_period = move_ban_period;
             //initialize GS in each island
             for (int i = 0; i < num_island; i++)
                 gas.Add(new GA(i));
             //do GA calc for move_ban_period
-            for (int i = 0; i < move_ban_period; i++)
+            for (int i = 0; i < num_generations; i++)
             {
                 sww.Start();
                 for (int j = 0; j < num_island; j++)
@@ -48,22 +55,9 @@ namespace BTCSIM
                 checkBestIsland();
                 sww.Stop();
                 display_info(i, sww);
-                sww.Reset();
-            }
-            Console.WriteLine("Move banned period has been finished.");
-            //do GA calc for remaining generations
-            for (int i = move_ban_period; i < num_generations; i++)
-            {
-                sww.Start();
-                moveBetweenIsland(move_ratio);
-                for (int j = 0; j < num_island; j++)
-                {
-                    gas[j].start_island_ga(from, to, max_amount, num_chromos, i, units, mutation_rate, sim_type);
-                    //gas[j].resetChromos();
-                }
-                checkBestIsland();
-                sww.Stop();
-                display_info(i, sww);
+                resetIslandsMoveBanControl(i);
+                if (move_ban_flg==false)
+                    moveBetweenIsland(move_ratio);
                 sww.Reset();
             }
             Console.WriteLine("Completed GA");
@@ -74,6 +68,7 @@ namespace BTCSIM
          ->best chromo以外を選択するようにする*/
         private void moveBetweenIsland(double move_ratio)
         {
+            Console.WriteLine("Move Between Island.");
             if (gas.Count > 1)
             {
                 for (int i = 0; i < gas.Count; i++)
@@ -155,6 +150,25 @@ namespace BTCSIM
             }
             best_eva_log.Add(best_eva);
             best_island_log.Add(best_island);
+        }
+
+
+        //move ban period後、一定世代が経過したらbest island以外の染色体を全てresetして再度move banにする。
+        private void resetIslandsMoveBanControl(int current_generation)
+        {
+            if (current_generation - last_move_banned_generation >= move_ban_period && move_ban_flg)
+            {
+                move_ban_flg = false;
+                Console.WriteLine("Allowed Move.");
+            }
+            else if (current_generation - last_move_banned_generation > move_ban_period + move_ban_period && move_ban_flg == false)
+            {
+                Console.WriteLine("Banned Move.");
+                move_ban_flg = true;
+                last_move_banned_generation = current_generation;
+                for (int i = 0; i < gas.Count; i++)
+                    if (i != best_island) { gas[i].resetChromos(); }
+            }
         }
 
 

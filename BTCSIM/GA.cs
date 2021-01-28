@@ -101,6 +101,7 @@ namespace BTCSIM
         public SimAccount best_ac { get; set; }
         public List<SimAccount> best_ac_log { get; set; }
 
+
         public ConcurrentDictionary<int, long> eva_time { get; set; }
 
         public List<int> generation_time_log { get; set; }
@@ -339,7 +340,7 @@ namespace BTCSIM
                 ac = sim.sim_ga_market_limit(from, to, max_amount, chro, ac);
             else
                 Console.WriteLine("GA-evaluation: Invalid Sim Type!");
-            return (ac.performance_data.total_pl * ac.performance_data.num_trade, ac);
+            return (ac.performance_data.total_pl * Math.Sqrt(ac.performance_data.num_trade), ac);
         }
 
         private void check_best_eva(ConcurrentDictionary<int, double> eva, ConcurrentDictionary<int, SimAccount> ac)
@@ -462,14 +463,11 @@ namespace BTCSIM
         }
 
 
-        //reset chromos with random weigths except best chromo
+        //reset chromos with random weigths except
         public void resetChromos()
         {
             for (int i = 0; i < chromos.Length; i++)
-            {
-                if (i != best_chromo)
-                    chromos[i] = new Gene2(chromos[i].num_units);
-            }
+                chromos[i] = new Gene2(chromos[i].num_units);
         }
 
 
