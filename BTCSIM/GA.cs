@@ -213,6 +213,7 @@ namespace BTCSIM
             var ac = new SimAccount();
             ac = sim.sim_ga_market_limit(from, to, max_amount, chromo, ac, nn_threshold);
             Console.WriteLine("pl=" + ac.performance_data.total_pl);
+            Console.WriteLine("pl ratio=" + ac.performance_data.total_pl_ratio);
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
             Console.WriteLine("win rate=" + ac.performance_data.win_rate);
             Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
@@ -338,8 +339,29 @@ namespace BTCSIM
                 ac = sim.sim_ga_market_limit(from, to, max_amount, chro, ac, nn_threshold);
             else
                 Console.WriteLine("GA-evaluation: Invalid Sim Type!");
-            return (ac.performance_data.total_pl * Math.Sqrt(ac.performance_data.num_trade), ac);
+            return (ac.performance_data.total_pl_ratio * Math.Sqrt(ac.performance_data.num_trade) / calcSquareError(ac.total_pl_ratio_list, ac.performance_data.num_trade), ac);
         }
+
+        private double calcSquareError(List<double> data, int num_trade)
+        {
+            var res = 0.0;
+            if (num_trade > 0)
+            {
+                //calc stright line
+                var line = new List<double>();
+                line.Add(data[0]);
+                var change = (data[data.Count - 1] - data[0]) / Convert.ToDouble(data.Count);
+                for (int i = 0; i < data.Count; i++)
+                    line.Add(data[i] + change);
+                //calc square error
+                for (int i = 0; i < data.Count; i++)
+                    res += Math.Pow(data[i] - line[i], 2.0);
+            }
+            else
+                res = 1.0;
+            return res;
+        }
+
 
         private void check_best_eva(ConcurrentDictionary<int, double> eva, ConcurrentDictionary<int, SimAccount> ac)
         {

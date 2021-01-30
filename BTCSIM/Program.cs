@@ -87,12 +87,12 @@ namespace BTCSIM
             {
                 Console.WriteLine("Started Read Weight SIM");
                 var ga = new GA(0);
-                var chromo = ga.readWeights(4);
+                var chromo = ga.readWeights(0);
                 //var from = 1000 + Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8));
-                var from = 1000;
-                var to = from + 501000;
+                var from = 501000;
+                var to = from + 150000;
                 int max_amount = 1;
-                double nn_threshold = 0.7;
+                double nn_threshold = 0.5;
                 //var to = MarketData.Close.Count -1;
                 //var ac = ga.sim_ga_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString()+ ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1], true);
                 var ac = ga.sim_ga_market_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString() + ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1], true, nn_threshold);
@@ -113,13 +113,13 @@ namespace BTCSIM
                 int num_generations = 20;
                 int banned_move_period = 2;
                 int max_amount = 1;
-                var units = new int[] { 17, 7, 7, 5 };
+                var units = new int[] { 27, 10, 10, 5 };
                 var mutation_rate = 0.5;
                 var move_ratio = 0.2;
                 var sim_type = 1; //0:limit, 1:market/limit
-                double nn_threshold = 0.7;
+                double nn_threshold = 0.5;
                 //int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8)) + from;
-                int to = 5000 + from;
+                int to = 500000 + from;
                 var ga_island = new GAIsland();
                 ga_island.start_ga_island(from, to, max_amount, num_island, banned_move_period, move_ratio, num_chromos, num_generations, units, mutation_rate, sim_type, nn_threshold);
 

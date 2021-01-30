@@ -17,6 +17,7 @@ namespace BTCSIM
         public List<double> realized_pl_list { get; set; }
         public double unrealized_pl { get; set; }
         public List<double> unrealized_pl_list { get; set; } //record unrealided pl during holding period for NN input data
+        public double total_pl_ratio { get; set; }
 
         public int num_trade { get; set; }
         public int num_buy { get; set; }
@@ -30,6 +31,7 @@ namespace BTCSIM
         public PerformanceData()
         {
             total_pl = 0;
+            total_pl_ratio = 0;
             realized_pl = 0;
             realized_pl_list = new List<double>();
             unrealized_pl = 0;
@@ -141,6 +143,7 @@ namespace BTCSIM
         public DataSet log_data_set { get; set; }
         public DataTable log_data_table { get; set; }   
         public List<double> total_pl_log { get; set; }
+        public List<double> total_pl_ratio { get; set; }
 
 
         public LogData()
@@ -162,6 +165,7 @@ namespace BTCSIM
             log_data_table.Columns.Add("action", typeof(string));
             log_data_set.Tables.Add(log_data_table);
             total_pl_log = new List<double>();
+            total_pl_ratio = new List<double>();
         }
 
         public void add_log_data(int i, string dt, string action, HoldingData hd, OrderData od, PerformanceData pd)
@@ -200,6 +204,7 @@ namespace BTCSIM
         public LogData log_data;
 
         public List<double> total_pl_list = new List<double>();
+        public List<double> total_pl_ratio_list = new List<double>();
 
         public SimAccount()
         {
@@ -208,6 +213,7 @@ namespace BTCSIM
             order_data = new OrderData();
             holding_data = new HoldingData();
             total_pl_list = new List<double>();
+            total_pl_ratio_list = new List<double>();
         }
 
         /*should be called after all sim calc*/
@@ -262,10 +268,12 @@ namespace BTCSIM
                 performance_data.unrealized_pl_list = new List<double>();
             }
             performance_data.total_pl = performance_data.realized_pl + performance_data.unrealized_pl - performance_data.total_fee;
+            performance_data.total_pl_ratio = performance_data.total_pl / MarketData.Close[i];
             if (performance_data.num_trade > 0)
                 performance_data.win_rate = Math.Round(Convert.ToDouble(performance_data.num_win) / Convert.ToDouble(performance_data.num_trade), 4);
             log_data.add_log_data(i, dt, "move to next", holding_data, order_data, performance_data);
             total_pl_list.Add(performance_data.total_pl);
+            total_pl_ratio_list.Add(performance_data.total_pl_ratio);
         }
 
         public void entry_order(string type, string side, double size, double price, int i, string dt, string message)
