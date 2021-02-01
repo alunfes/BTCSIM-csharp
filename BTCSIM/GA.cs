@@ -193,11 +193,11 @@ namespace BTCSIM
             return ac;
         }
 
-        public SimAccount sim_ga_limit(int from, int to, int max_amount, Gene2 chromo, string title, bool chart)
+        public SimAccount sim_ga_limit(int from, int to, int max_amount, Gene2 chromo, string title, bool chart, int[] index)
         {
             var sim = new Sim();
             var ac = new SimAccount();
-            ac = sim.sim_ga_limit(from, to, max_amount, chromo, ac);
+            ac = sim.sim_ga_limit(from, to, max_amount, chromo, ac, index);
             Console.WriteLine("pl=" + ac.performance_data.total_pl);
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
             Console.WriteLine("win rate=" + ac.performance_data.win_rate);
@@ -207,11 +207,11 @@ namespace BTCSIM
             return ac;
         }
 
-        public SimAccount sim_ga_market_limit(int from, int to, int max_amount, Gene2 chromo, string title, bool chart, double nn_threshold)
+        public SimAccount sim_ga_market_limit(int from, int to, int max_amount, Gene2 chromo, string title, bool chart, double nn_threshold, int[] index)
         {
             var sim = new Sim();
             var ac = new SimAccount();
-            ac = sim.sim_ga_market_limit(from, to, max_amount, chromo, ac, nn_threshold);
+            ac = sim.sim_ga_market_limit(from, to, max_amount, chromo, ac, nn_threshold, index);
             Console.WriteLine("pl=" + ac.performance_data.total_pl);
             Console.WriteLine("pl ratio=" + ac.performance_data.total_pl_ratio);
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
@@ -222,10 +222,10 @@ namespace BTCSIM
             return ac;
         }
 
-        public SimAccount sim_ga_limit_conti(int from, int to, int max_amount, Gene2 chromo, string title, SimAccount ac, bool chart)
+        public SimAccount sim_ga_limit_conti(int from, int to, int max_amount, Gene2 chromo, string title, SimAccount ac, bool chart, int[] index)
         {
             var sim = new Sim();
-            ac = sim.sim_ga_limit(from, to, max_amount, chromo, ac);
+            ac = sim.sim_ga_limit(from, to, max_amount, chromo, ac, index);
             Console.WriteLine("pl=" + ac.performance_data.total_pl);
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
             Console.WriteLine("win rate=" + ac.performance_data.win_rate);
@@ -236,7 +236,7 @@ namespace BTCSIM
         }
 
 
-        public void start_island_ga(int from, int to, int max_amount, int num_chromos, int generation_ind, int[] units, double mutation_rate, int sim_type, double nn_threshold)
+        public void start_island_ga(int from, int to, int max_amount, int num_chromos, int generation_ind, int[] units, double mutation_rate, int sim_type, double nn_threshold, int[] index)
         {
             if (generation_ind == 0)
                 generate_chromos(num_chromos, units);
@@ -247,7 +247,7 @@ namespace BTCSIM
             /*
             Parallel.For(0, chromos.Length, option, j =>
             {
-                (double total_pl, SimAccount ac) res = evaluation(from, to, max_amount, j, chromos[j], sim_type);
+                (double total_pl, SimAccount ac) res = evaluation(from, to, max_amount, j, chromos[j], sim_type, nn_threshold, index);
                 eva_dic.GetOrAdd(j, res.total_pl);
                 ac_dic.GetOrAdd(j, res.ac);
             });
@@ -255,7 +255,7 @@ namespace BTCSIM
             //Console.WriteLine("island No."+island_id.ToString() + ", eva time="+sw.Elapsed.Seconds.ToString());
             for (int k = 0; k < chromos.Length; k++)
             {
-                (double total_pl, SimAccount ac) res = evaluation(from, to, max_amount, k, chromos[k], sim_type, nn_threshold);
+                (double total_pl, SimAccount ac) res = evaluation(from, to, max_amount, k, chromos[k], sim_type, nn_threshold, index);
                 eva_dic.GetOrAdd(k, res.total_pl);
                 ac_dic.GetOrAdd(k, res.ac);
             }
@@ -273,7 +273,7 @@ namespace BTCSIM
         }
 
 
-        public void start_ga(int from, int to, int max_amount, int num_chromos, int num_generations, int[] units, double mutation_rate, bool display_info, int sim_type, double nn_threshold)
+        public void start_ga(int from, int to, int max_amount, int num_chromos, int num_generations, int[] units, double mutation_rate, bool display_info, int sim_type, double nn_threshold, int[] index)
         {
             //initialize chromos
             Console.WriteLine("started GA");
@@ -290,7 +290,7 @@ namespace BTCSIM
                 option.MaxDegreeOfParallelism = System.Environment.ProcessorCount;
                 Parallel.For(0, chromos.Length, option, j =>
                 {
-                    (double total_pl, SimAccount ac) res = evaluation(from, to, max_amount, j, chromos[j], sim_type, nn_threshold);
+                    (double total_pl, SimAccount ac) res = evaluation(from, to, max_amount, j, chromos[j], sim_type, nn_threshold, index);
                     eva_dic.GetOrAdd(j, res.total_pl);
                     ac_dic.GetOrAdd(j, res.ac);
                 });
@@ -328,15 +328,15 @@ namespace BTCSIM
                 chromos[i] = new Gene2(num_units_layer);
         }
 
-        private (double, SimAccount) evaluation(int from, int to, int max_amount, int chro_id, Gene2 chro, int sim_type, double nn_threshold)
+        private (double, SimAccount) evaluation(int from, int to, int max_amount, int chro_id, Gene2 chro, int sim_type, double nn_threshold, int[] index)
         {
             var ac = new SimAccount();
             var sim = new Sim();
             //ac = sim.sim_ga(from, to, chro, ac);
             if (sim_type == 0)
-                ac = sim.sim_ga_limit(from, to, max_amount, chro, ac);
+                ac = sim.sim_ga_limit(from, to, max_amount, chro, ac, index);
             else if (sim_type == 1)
-                ac = sim.sim_ga_market_limit(from, to, max_amount, chro, ac, nn_threshold);
+                ac = sim.sim_ga_market_limit(from, to, max_amount, chro, ac, nn_threshold, index);
             else
                 Console.WriteLine("GA-evaluation: Invalid Sim Type!");
             return (ac.performance_data.total_pl_ratio * Math.Sqrt(ac.performance_data.num_trade) / calcSquareError(ac.total_pl_ratio_list, ac.performance_data.num_trade), ac);

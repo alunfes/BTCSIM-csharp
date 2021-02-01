@@ -79,26 +79,34 @@ namespace BTCSIM
 
 
 
-        public double[] generateNNInputDataLimit(SimAccount ac, int i)
+        public double[] generateNNInputDataLimit(SimAccount ac, int i, int[] index)
         {
             var input_data = new List<double>();
 
             //Divergence_minmax_scale
-            foreach (var d in MarketData.Divergence_minmax_scale[i])
-                input_data.Add(d);
-
-            //vola_kyori_minmax_scale
-            foreach (var d in MarketData.Volakyori_minmax_scale[i])
-                input_data.Add(d);
-
-            //vol ma divergence minmax scale
-            foreach (var d in MarketData.Vol_ma_divergence_minmax_scale[i])
-                input_data.Add(d);
-
-            //buy sell vol ratio
-            foreach (var d in MarketData.Buysell_vol_ratio_minmax_scale[i])
-                input_data.Add(d);
-            
+            if (index[0] == 1)
+            {
+                foreach (var d in MarketData.Divergence_minmax_scale[i])
+                    input_data.Add(d);
+            }
+            if (index[1] == 1)
+            {
+                //vola_kyori_minmax_scale
+                foreach (var d in MarketData.Volakyori_minmax_scale[i])
+                    input_data.Add(d);
+            }
+            if (index[2] == 1)
+            {
+                //vol ma divergence minmax scale
+                foreach (var d in MarketData.Vol_ma_divergence_minmax_scale[i])
+                    input_data.Add(d);
+            }
+            if (index[3] == 1)
+            {
+                //buy sell vol ratio
+                foreach (var d in MarketData.Buysell_vol_ratio_minmax_scale[i])
+                    input_data.Add(d);
+            }
             if (input_data.Contains(Double.NaN))
                 Console.WriteLine("NNInputDataGenerator: Nan is included !");
 
