@@ -66,7 +66,7 @@ namespace BTCSIM
         public StrategyActionData GALimitStrategy(int i, int nn_output, int amount, int max_amount, SimAccount ac)
         {
             var ad = new StrategyActionData();
-            var output_action_list = new string[] {"no", "buy", "sell", "cancel"};
+            var output_action_list = new string[] { "no", "buy", "sell", "cancel" };
             var pred_side = output_action_list[nn_output];
             if (pred_side == "no")
             {
@@ -143,7 +143,7 @@ namespace BTCSIM
             if (pred_side == "no")
             {
                 if (ac.order_data.getLastOrderSide() != "" && Math.Abs(ac.order_data.getLastOrderPrice() - (ac.order_data.getLastOrderSide() == "buy" ? buy_entry_price : sell_entry_price)) > update_price_kijun)
-                    ad.add_action("update price", pred_side, "limit", pred_side=="buy" ? buy_entry_price : sell_entry_price, -1, ac.order_data.getLastSerialNum(), "1. No: update order price");
+                    ad.add_action("update price", pred_side, "limit", pred_side == "buy" ? buy_entry_price : sell_entry_price, -1, ac.order_data.getLastSerialNum(), "1. No: update order price");
             }
             else if (pred_side == "cancel")
             {
@@ -163,12 +163,12 @@ namespace BTCSIM
                     ad.add_action("update price", "", "limit", pred_side == "buy" ? buy_entry_price : sell_entry_price, -1, ac.order_data.getLastSerialNum(), "3. update order price");
                 }
                 //4. Additional Entry (pred = holding sideで現在orderなく、holding sizeにamount加えてもmax_amount以下の時に追加注文）
-                else if(ac.holding_data.holding_side == pred_side && ac.holding_data.holding_size + amount <= max_amount && ac.order_data.getLastOrderSide() == "")
+                else if (ac.holding_data.holding_side == pred_side && ac.holding_data.holding_size + amount <= max_amount && ac.order_data.getLastOrderSide() == "")
                 {
                     ad.add_action("entry", pred_side, "limit", pred_side == "buy" ? buy_entry_price : sell_entry_price, amount, -1, "4. Additional Entry");
                 }
                 //5. Exit (holding side != predでかつpred sideのorderがない時にexit orderを出す）
-                else if((ac.holding_data.holding_side != pred_side && ac.holding_data.holding_side != "") && (pred_side != ac.order_data.getLastOrderSide()))
+                else if ((ac.holding_data.holding_side != pred_side && ac.holding_data.holding_side != "") && (pred_side != ac.order_data.getLastOrderSide()))
                 {
                     //もし既存のadditional orderがあったらまずはそれをキャンセル）
                     if (ac.order_data.getLastOrderSide() != "")
@@ -200,7 +200,7 @@ namespace BTCSIM
 
                     }
                     //10.Others4(holding side == pred sideでorderもない場合）
-                    else if (ac.holding_data.holding_side == pred_side && ac.order_data.getLastOrderSide() =="")
+                    else if (ac.holding_data.holding_side == pred_side && ac.order_data.getLastOrderSide() == "")
                     {
 
                     }
@@ -220,7 +220,7 @@ namespace BTCSIM
         public StrategyActionData GALimitMarketStrategy(int i, List<int> nn_output, int amount, int max_amount, SimAccount ac)
         {
             var ad = new StrategyActionData();
-            var output_action_list = new string[] { "no", "buy", "sell", "cancel"};
+            var output_action_list = new string[] { "no", "buy", "sell", "cancel" };
             var pred_side = output_action_list[nn_output[0]];
             var otype = nn_output[1] == 0 ? "market" : "limit";
             var buy_entry_price = MarketData.Bid[i]; //- 0.5;

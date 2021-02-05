@@ -2,16 +2,16 @@
   <MonoDevelop.Ide.ItemProperties.BTCSIM PreferredExecutionTarget="MonoDevelop.Default" />
   <MonoDevelop.Ide.Workbench ActiveDocument="BTCSIM/Sim.cs">
     <Files>
-      <File FileName="BTCSIM/Program.cs" Line="91" Column="91" />
-      <File FileName="BTCSIM/RandomGenerator.cs" Line="14" Column="10" />
-      <File FileName="BTCSIM/Sim.cs" Line="88" Column="18" />
-      <File FileName="BTCSIM/Strategy.cs" Line="228" Column="39" />
-      <File FileName="BTCSIM/SimAccount.cs" Line="216" Column="54" />
+      <File FileName="BTCSIM/Program.cs" Line="91" Column="57" />
+      <File FileName="BTCSIM/RandomGenerator.cs" Line="31" Column="13" />
+      <File FileName="BTCSIM/Strategy.cs" />
+      <File FileName="BTCSIM/SimAccount.cs" />
       <File FileName="BTCSIM/MarketData.cs" />
-      <File FileName="BTCSIM/NNInputDataGenerator.cs" Line="102" Column="15" />
-      <File FileName="BTCSIM/NN.cs" Line="18" Column="10" />
-      <File FileName="BTCSIM/GA.cs" Line="327" Column="57" />
-      <File FileName="BTCSIM/GAIsland.cs" Line="54" Column="18" />
+      <File FileName="BTCSIM/NNInputDataGenerator.cs" Line="172" Column="1" />
+      <File FileName="BTCSIM/NN.cs" />
+      <File FileName="BTCSIM/GA.cs" Line="152" Column="26" />
+      <File FileName="BTCSIM/GAIsland.cs" />
+      <File FileName="BTCSIM/Sim.cs" Line="26" Column="47" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">

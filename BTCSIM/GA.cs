@@ -127,9 +127,14 @@ namespace BTCSIM
         }
 
 
-        public Gene2 readWeights(int island_id)
+        public Gene2 readWeights(int island_id, bool multi_sim)
         {
-            using (StreamReader sr = new StreamReader(@"./best_weight_ID-" + island_id.ToString() + ".csv", Encoding.UTF8, false))
+            var file_name = "";
+            if (multi_sim)
+                file_name = @"./log_best_weight_ID-" + island_id.ToString() + ".csv";
+            else
+                file_name = @"./best_weight_ID-" + island_id.ToString() + ".csv";
+            using (StreamReader sr = new StreamReader(file_name, Encoding.UTF8, false))
             {
                 var data = new List<string>();
                 var units = new List<int>();
@@ -176,6 +181,7 @@ namespace BTCSIM
                 var chrom = new Gene2(units.ToArray());
                 chrom.bias_gene = bias;
                 chrom.weight_gene = weights;
+                chrom.num_units = units.ToArray();
                 return chrom;
             }
         }
@@ -189,6 +195,10 @@ namespace BTCSIM
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
             Console.WriteLine("win rate=" + ac.performance_data.win_rate);
             Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
+            Console.WriteLine("num_buy=" + ac.performance_data.num_buy);
+            Console.WriteLine("num_sell=" + ac.performance_data.num_sell);
+            Console.WriteLine("buy_pl=" + ac.performance_data.buy_pl_list.Sum());
+            Console.WriteLine("sell_pl=" + ac.performance_data.sell_pl_list.Sum());
             LineChart.DisplayLineChart(ac.total_pl_list, title);
             return ac;
         }
@@ -202,6 +212,10 @@ namespace BTCSIM
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
             Console.WriteLine("win rate=" + ac.performance_data.win_rate);
             Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
+            Console.WriteLine("num_buy=" + ac.performance_data.num_buy);
+            Console.WriteLine("num_sell=" + ac.performance_data.num_sell);
+            Console.WriteLine("buy_pl=" + ac.performance_data.buy_pl_list.Sum());
+            Console.WriteLine("sell_pl=" + ac.performance_data.sell_pl_list.Sum());
             if (chart)
                 LineChart.DisplayLineChart(ac.total_pl_list, title);
             return ac;
@@ -217,6 +231,10 @@ namespace BTCSIM
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
             Console.WriteLine("win rate=" + ac.performance_data.win_rate);
             Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
+            Console.WriteLine("num_buy=" + ac.performance_data.num_buy);
+            Console.WriteLine("num_sell=" + ac.performance_data.num_sell);
+            Console.WriteLine("buy_pl=" + ac.performance_data.buy_pl_list.Sum());
+            Console.WriteLine("sell_pl=" + ac.performance_data.sell_pl_list.Sum());
             if (chart)
                 LineChart.DisplayLineChart(ac.total_pl_list, title);
             return ac;
@@ -230,9 +248,80 @@ namespace BTCSIM
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
             Console.WriteLine("win rate=" + ac.performance_data.win_rate);
             Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
+            Console.WriteLine("num_buy=" + ac.performance_data.num_buy);
+            Console.WriteLine("num_sell=" + ac.performance_data.num_sell);
+            Console.WriteLine("buy_pl=" + ac.performance_data.buy_pl_list.Sum());
+            Console.WriteLine("sell_pl=" + ac.performance_data.sell_pl_list.Sum());
             if (chart)
                 LineChart.DisplayLineChart(ac.total_pl_list, title);
             return ac;
+        }
+
+        //複数chromを使ったsimを行い、それらの結果の総合したパフォーマンスを表示する。
+        public SimAccount sim_ga_multi_chromo(int from, int to, int max_amount, List<Gene2> chromo, string title, bool chart, List<double> nn_threshold, List<int[]> index)
+        {
+            var ac_list = new List<SimAccount>();
+            for(int i=0; i<chromo.Count; i++)
+            {
+                var sim = new Sim();
+                var ac = new SimAccount();
+                ac = sim.sim_ga_market_limit(from, to, max_amount, chromo[i], ac, nn_threshold[i], index[i]);
+                ac_list.Add(ac);
+                Console.WriteLine("Chromo-"+i.ToString()+":");
+                Console.WriteLine("pl=" + ac.performance_data.total_pl);
+                Console.WriteLine("num trade=" + ac.performance_data.num_trade);
+                Console.WriteLine("win rate=" + ac.performance_data.win_rate);
+                Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
+                Console.WriteLine("num_buy=" + ac.performance_data.num_buy);
+                Console.WriteLine("num_sell=" + ac.performance_data.num_sell);
+                Console.WriteLine("buy_pl=" + ac.performance_data.buy_pl_list.Sum());
+                Console.WriteLine("sell_pl=" + ac.performance_data.sell_pl_list.Sum());
+            }
+            //各chrom sim結果を平均する。
+            var ac_master = new SimAccount();
+            var buy_pl_sum = 0.0;
+            var sell_pl_sum = 0.0;
+            for (int i = 0; i < ac_list[0].total_pl_list.Count; i++)
+            {
+                ac_master.total_pl_list.Add(ac_list[0].total_pl_list[i]);
+                ac_master.total_pl_ratio_list.Add(ac_list[0].total_pl_ratio_list[i]);
+            }
+            for (int i = 0; i < chromo.Count; i++)
+            {
+                ac_master.performance_data.num_trade += ac_list[i].performance_data.num_trade;
+                ac_master.performance_data.num_buy += ac_list[i].performance_data.num_buy;
+                ac_master.performance_data.num_sell += ac_list[i].performance_data.num_sell;
+                ac_master.performance_data.num_win += ac_list[i].performance_data.num_win;
+                ac_master.performance_data.total_pl += ac_list[i].performance_data.total_pl;
+                ac_master.performance_data.total_pl_ratio += ac_list[i].performance_data.total_pl_ratio;
+                buy_pl_sum += ac_list[i].performance_data.buy_pl_list.Sum();
+                sell_pl_sum += ac_list[i].performance_data.sell_pl_list.Sum();
+                for (int j=0; j< ac_list[i].total_pl_list.Count; j++)
+                {
+                    if (i >0)
+                    {
+                        ac_master.total_pl_list[j] += ac_list[i].total_pl_list[j];
+                        ac_master.total_pl_ratio_list[j] += ac_list[i].total_pl_ratio_list[j];
+                    }
+                }
+            }
+            for(int i=0; i<ac_list[0].total_pl_list.Count; i++)
+            {
+                ac_master.total_pl_list[i] = ac_master.total_pl_list[i] / Convert.ToDouble(ac_list.Count);
+                ac_master.total_pl_ratio_list[i] = ac_master.total_pl_ratio_list[i] / Convert.ToDouble(ac_list.Count);
+            }
+
+            Console.WriteLine("Master Results:");
+            Console.WriteLine("pl=" + ac_master.performance_data.total_pl / Convert.ToDouble(ac_list.Count));
+            Console.WriteLine("num trade=" + ac_master.performance_data.num_trade / Convert.ToDouble(ac_list.Count));
+            Console.WriteLine("win rate=" + ac_master.performance_data.num_win / ac_master.performance_data.num_trade);
+            Console.WriteLine("num_buy=" + ac_master.performance_data.num_buy);
+            Console.WriteLine("num_sell=" + ac_master.performance_data.num_sell);
+            Console.WriteLine("buy_pl=" + buy_pl_sum);
+            Console.WriteLine("sell_pl=" + sell_pl_sum);
+            if (chart)
+                LineChart.DisplayLineChart(ac_master.total_pl_ratio_list, title);
+            return ac_master;
         }
 
 
@@ -339,7 +428,7 @@ namespace BTCSIM
                 ac = sim.sim_ga_market_limit(from, to, max_amount, chro, ac, nn_threshold, index);
             else
                 Console.WriteLine("GA-evaluation: Invalid Sim Type!");
-            return (ac.performance_data.total_pl_ratio * Math.Sqrt(ac.performance_data.num_trade) / calcSquareError(ac.total_pl_ratio_list, ac.performance_data.num_trade), ac);
+            return (ac.performance_data.total_pl_ratio * ac.performance_data.num_buy * ac.performance_data.num_sell / calcSquareError(ac.total_pl_ratio_list, ac.performance_data.num_trade), ac);
         }
 
         private double calcSquareError(List<double> data, int num_trade)

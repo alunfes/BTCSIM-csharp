@@ -64,7 +64,7 @@ namespace BTCSIM
         {
             Console.WriteLine("Started Read Weight SIM");
             var ga = new GA(0);
-            var chromo = ga.readWeights(best_island_id);
+            var chromo = ga.readWeights(best_island_id, false);
             if (sim_type == 0)
                 return ga.sim_ga_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString() + ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1] + ", Best Island=" + best_island_id.ToString(), display_chart, index);
             else
@@ -80,6 +80,19 @@ namespace BTCSIM
             return ga_island.best_island;
         }
 
+        private static SimAccount doMultiSim(int from, int to, int max_amount, List<int> best_chrom_log_id, List<int[]> index, bool display_chart, List<double> nn_threshold)
+        {
+            Console.WriteLine("Started Multi SIM");
+            var chromos = new Gene2[best_chrom_log_id.Count];
+            var ga = new GA(0);
+            for (int i = 0; i < best_chrom_log_id.Count; i++)
+            {
+                chromos[i] = ga.readWeights(best_chrom_log_id[i], true);
+            }
+            var title = "Combined PL Ratio - " + from.ToString() + " - " + to.ToString() + ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1];
+            return ga.sim_ga_multi_chromo(from, to, max_amount, chromos.ToList(), title, display_chart, nn_threshold, index);
+        }
+
         public static void Main(string[] args)
         {
             Console.WriteLine("# of CPU cores=" + System.Environment.ProcessorCount.ToString());
@@ -89,10 +102,10 @@ namespace BTCSIM
             {
                 Console.WriteLine("\"ga\" : island GA");
                 Console.WriteLine("\"sim\" : read sim");
-                Console.WriteLine("\"multi\" : multi strategy sim");
-
+                Console.WriteLine("\"mul ga\" : multi strategy ga");
+                Console.WriteLine("\"mul sim\" : multi strategy sim");
                 key = Console.ReadLine();
-                if (key == "ga" || key == "sim" || key == "multi")
+                if (key == "ga" || key == "sim" || key == "mul ga" || key == "mul sim")
                     break;
             }
 
@@ -104,9 +117,9 @@ namespace BTCSIM
             MarketData.initializer(terms);
 
             var from = 1000;
-            var to = 500000;
+            var to = 200000;
             int max_amount = 1;
-            var index = new int[] { 1, 1, 1, 0 };
+            var index = new int[] { 0, 1, 0, 0 };
             double nn_threshold = 0.5;
             int best_island_id = 1;
             bool display_chart = true;
@@ -131,10 +144,12 @@ namespace BTCSIM
                 doSim(from, to, max_amount, sim_type, best_island_id, index, display_chart, nn_threshold);
             }
             //multi strategy combination sim
-            else if (key == "multi")
+            else if (key == "mul ga")
             {
-                var index_list = new List<int[]> { new int[] { 1, 0, 0, 0 }, new int[] { 0, 1, 0, 0 }, new int[] { 0, 0, 1, 0 }, new int[] { 1, 1, 1, 0 }, new int[] { 1, 0, 1, 0 } };
-                var units_list = new List<int[]> { new int[] { 17, 5, 5, 5 }, new int[] { 17, 5, 5, 5 }, new int[] { 17, 5, 5, 5 }, new int[] { 37, 10, 10, 5 }, new int[] { 27, 7, 7, 5 } };
+                //var index_list = new List<int[]> { new int[] { 1, 0, 0, 0 }, new int[] { 0, 1, 0, 0 }, new int[] { 0, 0, 1, 0 }, new int[] { 1, 1, 1, 0 }, new int[] { 1, 0, 1, 0 } };
+                //var units_list = new List<int[]> { new int[] { 17, 5, 5, 5 }, new int[] { 17, 5, 5, 5 }, new int[] { 17, 5, 5, 5 }, new int[] { 37, 10, 10, 5 }, new int[] { 27, 7, 7, 5 } };
+                var index_list = new List<int[]> { new int[] { 1, 0, 0, 0 }, new int[] { 0, 1, 0, 0 }};
+                var units_list = new List<int[]> { new int[] { 17, 5, 5, 5 }, new int[] { 17, 5, 5, 5 } };
                 var best_pl_list = new List<List<double>>();
                 var best_ac_list = new List<SimAccount>();
                 int num_island = 2;
@@ -143,17 +158,21 @@ namespace BTCSIM
                 int banned_move_period = 2;
                 var mutation_rate = 0.5;
                 var move_ratio = 0.2;
-                var conbined_pl = new List<double>();
-                var sim_from = to;
-                var sim_to = to + 200000;
-                for (int i = 0; i < 2; i++)
+                var id_list = new List<int>();
+                var nn_threshold_list = new List<double>();
+                for (int i = 0; i < index_list.Count; i++)
                 {
                     best_island_id = doGA(from, to, max_amount, num_island, num_chromos, num_generations, banned_move_period, units_list[i], mutation_rate, move_ratio, index_list[i], display_chart, nn_threshold);
-                    var ac = doSim(sim_from, sim_to, max_amount, sim_type, best_island_id, index_list[i], display_chart, nn_threshold);
+                    var ac = doSim(from, to, max_amount, sim_type, best_island_id, index_list[i], display_chart, nn_threshold);
                     best_pl_list.Add(ac.total_pl_ratio_list);
                     best_ac_list.Add(ac);
+                    if (File.Exists(@"./log_best_weight_ID-" + i.ToString() + ".csv"))
+                        File.Delete(@"./log_best_weight_ID-" + i.ToString() + ".csv");
                     File.Copy(@"./best_weight_ID-" + best_island_id.ToString() + ".csv", @"./log_best_weight_ID-" + i.ToString() + ".csv");
+                    id_list.Add(i);
+                    nn_threshold_list.Add(nn_threshold);
                 }
+                /*
                 using (StreamWriter sw = new StreamWriter(@"./multi_strategy_results.csv", false, Encoding.UTF8))
                 {
                     for (int i = 0; i < best_pl_list[0].Count; i++)
@@ -171,99 +190,10 @@ namespace BTCSIM
                     }
                     LineChart.DisplayLineChart(conbined_pl, "Combined PL Ratio - " + sim_from.ToString() + " - " + sim_to.ToString() + ", dt:" + MarketData.Dt[sim_from].ToString() + " - " + MarketData.Dt[sim_to - 1]);
                 }
-            }
-
-                /*
-                if (key == "sim")
-                {
-                    Console.WriteLine("Started Read Weight SIM");
-                    var ga = new GA(0);
-                    var chromo = ga.readWeights(1);
-                    //var from = 1000 + Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8));
-                    var from = 501000;
-                    var to = MarketData.Close.Count - 1;
-                    int max_amount = 1;
-                    double nn_threshold = 0.1;
-                    var index = new int[] { 1, 1, 1, 0 };
-                    var ac = ga.sim_ga_market_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString() + ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1], true, nn_threshold, index);
-                }
-
-
-                //Island GA
-                if (key == "ga")
-                {
-                    Console.WriteLine("Started Island GA SIM");
-                    RandomSeed.initialize();
-                    int from = 1000;
-                    int num_island = 2;
-                    int num_chromos = 4;
-                    int num_generations = 20;
-                    int banned_move_period = 2;
-                    int max_amount = 1;
-                    var units = new int[] { 37, 10, 10, 5 };
-                    var index = new int[] { 1,1,1,0};
-                    var mutation_rate = 0.5;
-                    var move_ratio = 0.2;
-                    var sim_type = 1; //0:limit, 1:market/limit
-                    double nn_threshold = 0.5;
-                    //int to = Convert.ToInt32(Math.Round(MarketData.Close.Count * 0.8)) + from;
-                    int to = 600000 + from;
-                    var ga_island = new GAIsland();
-                    ga_island.start_ga_island(from, to, max_amount, num_island, banned_move_period, move_ratio, num_chromos, num_generations, units, mutation_rate, sim_type, nn_threshold, index);
-
-                    var ga = new GA(0);
-                    var chromo = ga.readWeights(ga_island.best_island);
-                    var ac = new SimAccount();
-                    if (sim_type == 0)
-                        ac = ga.sim_ga_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString() + ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1] + ", Best Island=" + ga_island.best_island.ToString(), true, index);
-                    else
-                        ac = ga.sim_ga_market_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString() + ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1] + ", Best Island=" + ga_island.best_island.ToString(), true, nn_threshold, index);
-                }
-                if (key == "conti_ga")
-                {
-                    Console.WriteLine("Started Island GA SIM");
-                    RandomSeed.initialize();
-                    int sim_window = 2000;
-                    int ga_window = 30000;
-                    int start_ind = 10000;
-                    int num_island = 5;
-                    int num_chromos = 8;
-                    int num_generations = 5;
-                    int banned_move_period = 3;
-                    int max_amount = 10;
-                    var units = new int[] { 20, 20, 4 };
-                    var index = new int[] { 1, 1, 1, 0 };
-                    var mutation_rate = 0.9;
-                    var move_ratio = 0.2;
-                    var sim_type = 1;
-                    double nn_threshold = 0.7;
-                    var ac_list = new List<SimAccount>();
-                    for (int i = 0; i < 3; i++)
-                    {
-                        int ga_from = i * sim_window + start_ind;
-                        int ga_to = ga_from + ga_window;
-                        int sim_from = ga_to;
-                        int sim_to = sim_from + sim_window;
-                        Console.WriteLine("Conti GA SIM i=" + i.ToString() + ", ga period=" + ga_from.ToString() + " - " + ga_to.ToString() + ", sim period=" + sim_from.ToString() + " - " + sim_to.ToString());
-                        var ga_island = new GAIsland();
-                        ga_island.start_ga_island(ga_from, ga_to, max_amount, num_island, banned_move_period, move_ratio, num_chromos, num_generations, units, mutation_rate, sim_type, nn_threshold, index);
-
-                        var ga = new GA(0);
-                        var chromo = ga.readWeights(ga_island.best_island);
-                        var ac = new SimAccount();
-                        ac = ga.sim_ga_limit_conti(sim_from, sim_to, max_amount, chromo, sim_from.ToString() + " - " + sim_to.ToString(), ac, false, index);
-                        ac_list.Add(ac);
-                    }
-                    (List<double> combined_total_pl, int comined_num_trade, double combined_win_rate, double combined_sharp_ratio) res = CombinedAC.calcCombinedAC(ac_list);
-                    Console.WriteLine("*************************************************************************");
-                    Console.WriteLine("term total pl=" + ac_list.Last().performance_data.total_pl.ToString() + ", term num trade=" + ac_list.Last().performance_data.num_trade.ToString() + ", term win rate=" + ac_list.Last().performance_data.win_rate.ToString() + ", term sharp ratio=" + ac_list.Last().performance_data.sharp_ratio.ToString());
-                    Console.WriteLine("combined total pl=" + res.combined_total_pl.Last().ToString() + ", combined num trade=" + res.comined_num_trade.ToString() + ", combined win rate=" + res.combined_win_rate.ToString() + ", combined sharp ratio=" + res.combined_sharp_ratio.ToString());
-                    Console.WriteLine("*************************************************************************");
-                    System.Threading.Thread.Sleep(3000);
-                    LineChart.DisplayLineChart(res.combined_total_pl, "Conti sim: " + ac_list[0].start_ind.ToString() + " - " + ac_list.Last().end_ind.ToString() + ", combined num trade=" + res.comined_num_trade.ToString() + ", combined win rate=" + res.combined_win_rate.ToString());
-                }
                 */
-                stopWatch.Stop();
+                doMultiSim(from, to, max_amount, id_list, index_list, true, nn_threshold_list);
+            }
+            stopWatch.Stop();
             Console.WriteLine("Completed all processes.");
             Console.WriteLine("Time Elapsed (sec)=" + stopWatch.Elapsed.TotalSeconds.ToString());
         }
