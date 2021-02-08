@@ -146,15 +146,15 @@ namespace BTCSIM
             //multi strategy combination sim
             else if (key == "mul ga")
             {
-                //var index_list = new List<int[]> { new int[] { 1, 0, 0, 0 }, new int[] { 0, 1, 0, 0 }, new int[] { 0, 0, 1, 0 }, new int[] { 1, 1, 1, 0 }, new int[] { 1, 0, 1, 0 } };
-                //var units_list = new List<int[]> { new int[] { 17, 5, 5, 5 }, new int[] { 17, 5, 5, 5 }, new int[] { 17, 5, 5, 5 }, new int[] { 37, 10, 10, 5 }, new int[] { 27, 7, 7, 5 } };
-                var index_list = new List<int[]> { new int[] { 1, 0, 0, 0 }, new int[] { 0, 1, 0, 0 }};
-                var units_list = new List<int[]> { new int[] { 17, 5, 5, 5 }, new int[] { 17, 5, 5, 5 } };
+                var index_list = new List<int[]> { new int[] { 1, 1, 1, 0 }, new int[] { 0, 1, 0, 0 }, new int[] { 0, 0, 1, 0 }, new int[] { 1, 1, 1, 0 }, new int[] { 1, 0, 1, 0 } };
+                var units_list = new List<int[]> { new int[] { 37, 5, 5, 5, 5 }, new int[] { 17, 5, 5, 5 }, new int[] { 17, 5, 5, 5 }, new int[] { 37, 10, 10, 5 }, new int[] { 27, 7, 7, 5 } };
+                //var index_list = new List<int[]> { new int[] { 1, 0, 0, 0 }, new int[] { 0, 1, 0, 0 }};
+                //var units_list = new List<int[]> { new int[] { 17, 5, 5, 5 }, new int[] { 17, 5, 5, 5 } };
                 var best_pl_list = new List<List<double>>();
                 var best_ac_list = new List<SimAccount>();
                 int num_island = 2;
                 int num_chromos = 4;
-                int num_generations = 6;
+                int num_generations = 60;
                 int banned_move_period = 2;
                 var mutation_rate = 0.5;
                 var move_ratio = 0.2;
@@ -172,25 +172,21 @@ namespace BTCSIM
                     id_list.Add(i);
                     nn_threshold_list.Add(nn_threshold);
                 }
-                /*
-                using (StreamWriter sw = new StreamWriter(@"./multi_strategy_results.csv", false, Encoding.UTF8))
+                doMultiSim(from, to, max_amount, id_list, index_list, true, nn_threshold_list);
+            }
+            else if (key == "mul sim")
+            {
+                //var index_list = new List<int[]> { new int[] { 1, 0, 0, 0 }, new int[] { 0, 1, 0, 0 }, new int[] { 0, 0, 1, 0 }, new int[] { 1, 1, 1, 0 }, new int[] { 1, 0, 1, 0 } };
+                //var units_list = new List<int[]> { new int[] { 17, 5, 5, 5 }, new int[] { 17, 5, 5, 5 }, new int[] { 17, 5, 5, 5 }, new int[] { 37, 10, 10, 5 }, new int[] { 27, 7, 7, 5 } };
+                var index_list = new List<int[]> { new int[] { 1, 0, 0, 0 }, new int[] { 0, 1, 0, 0 } };
+                var units_list = new List<int[]> { new int[] { 17, 5, 5, 5 }, new int[] { 17, 5, 5, 5 } };
+                var id_list = new List<int>();
+                var nn_threshold_list = new List<double>();
+                for (int i = 0; i < index_list.Count; i++)
                 {
-                    for (int i = 0; i < best_pl_list[0].Count; i++)
-                    {
-                        var line = "";
-                        var total_pl_tmp = 0.0;
-                        for (int j = 0; j < best_pl_list.Count; j++)
-                        {
-                            line += best_pl_list[j][i].ToString() + ",";
-                            total_pl_tmp += best_pl_list[j][i];
-                        }
-                        var ave_total_pl = total_pl_tmp / Convert.ToDouble(best_pl_list.Count);
-                        conbined_pl.Add(ave_total_pl);
-                        sw.WriteLine(line+","+ave_total_pl.ToString());
-                    }
-                    LineChart.DisplayLineChart(conbined_pl, "Combined PL Ratio - " + sim_from.ToString() + " - " + sim_to.ToString() + ", dt:" + MarketData.Dt[sim_from].ToString() + " - " + MarketData.Dt[sim_to - 1]);
+                    id_list.Add(i);
+                    nn_threshold_list.Add(nn_threshold);
                 }
-                */
                 doMultiSim(from, to, max_amount, id_list, index_list, true, nn_threshold_list);
             }
             stopWatch.Stop();

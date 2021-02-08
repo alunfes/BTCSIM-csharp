@@ -20,6 +20,8 @@ namespace BTCSIM
         public double unrealized_pl { get; set; }
         public List<double> unrealized_pl_list { get; set; } //record unrealided pl during holding period for NN input data
         public double total_pl_ratio { get; set; }
+        public List<double> buy_pl_ratio_list { get; set; }
+        public List<double> sell_pl_ratio_list { get; set; }
 
         public int num_trade { get; set; }
         public int num_buy { get; set; }
@@ -38,6 +40,8 @@ namespace BTCSIM
             realized_pl_list = new List<double>();
             buy_pl_list = new List<double>();
             sell_pl_list = new List<double>();
+            buy_pl_ratio_list = new List<double>();
+            sell_pl_ratio_list = new List<double>();
             unrealized_pl = 0;
             unrealized_pl_list = new List<double>();
             num_trade = 0;
@@ -499,9 +503,15 @@ namespace BTCSIM
             performance_data.num_trade++;
             if (pl > 0) { performance_data.num_win++; }
             if (holding_data.holding_side == "buy")
+            {
                 performance_data.buy_pl_list.Add(Math.Round(pl, 6));
+                performance_data.buy_pl_ratio_list.Add(Math.Round(pl, 6) / MarketData.Close[i]);
+            }
             else
+            {
                 performance_data.sell_pl_list.Add(Math.Round(pl, 6));
+                performance_data.sell_pl_ratio_list.Add(Math.Round(pl, 6) / MarketData.Close[i]);
+            }
         }
 
 

@@ -193,6 +193,7 @@ namespace BTCSIM
             ac = sim.sim_ga(from, to, chromo, ac);
             Console.WriteLine("pl=" + ac.performance_data.total_pl);
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
+            Console.WriteLine("num market order=" + ac.performance_data.num_maker_order);
             Console.WriteLine("win rate=" + ac.performance_data.win_rate);
             Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
             Console.WriteLine("num_buy=" + ac.performance_data.num_buy);
@@ -210,6 +211,7 @@ namespace BTCSIM
             ac = sim.sim_ga_limit(from, to, max_amount, chromo, ac, index);
             Console.WriteLine("pl=" + ac.performance_data.total_pl);
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
+            Console.WriteLine("num market order=" + ac.performance_data.num_maker_order);
             Console.WriteLine("win rate=" + ac.performance_data.win_rate);
             Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
             Console.WriteLine("num_buy=" + ac.performance_data.num_buy);
@@ -229,6 +231,7 @@ namespace BTCSIM
             Console.WriteLine("pl=" + ac.performance_data.total_pl);
             Console.WriteLine("pl ratio=" + ac.performance_data.total_pl_ratio);
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
+            Console.WriteLine("num market order=" + ac.performance_data.num_maker_order);
             Console.WriteLine("win rate=" + ac.performance_data.win_rate);
             Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
             Console.WriteLine("num_buy=" + ac.performance_data.num_buy);
@@ -246,6 +249,7 @@ namespace BTCSIM
             ac = sim.sim_ga_limit(from, to, max_amount, chromo, ac, index);
             Console.WriteLine("pl=" + ac.performance_data.total_pl);
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
+            Console.WriteLine("num market order=" + ac.performance_data.num_maker_order);
             Console.WriteLine("win rate=" + ac.performance_data.win_rate);
             Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
             Console.WriteLine("num_buy=" + ac.performance_data.num_buy);
@@ -270,6 +274,7 @@ namespace BTCSIM
                 Console.WriteLine("Chromo-"+i.ToString()+":");
                 Console.WriteLine("pl=" + ac.performance_data.total_pl);
                 Console.WriteLine("num trade=" + ac.performance_data.num_trade);
+                Console.WriteLine("num market order=" + ac.performance_data.num_maker_order);
                 Console.WriteLine("win rate=" + ac.performance_data.win_rate);
                 Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
                 Console.WriteLine("num_buy=" + ac.performance_data.num_buy);
@@ -310,10 +315,11 @@ namespace BTCSIM
                 ac_master.total_pl_list[i] = ac_master.total_pl_list[i] / Convert.ToDouble(ac_list.Count);
                 ac_master.total_pl_ratio_list[i] = ac_master.total_pl_ratio_list[i] / Convert.ToDouble(ac_list.Count);
             }
-
+            Console.WriteLine("");
             Console.WriteLine("Master Results:");
             Console.WriteLine("pl=" + ac_master.performance_data.total_pl / Convert.ToDouble(ac_list.Count));
             Console.WriteLine("num trade=" + ac_master.performance_data.num_trade / Convert.ToDouble(ac_list.Count));
+            Console.WriteLine("num market order=" + ac_master.performance_data.num_maker_order);
             Console.WriteLine("win rate=" + ac_master.performance_data.num_win / ac_master.performance_data.num_trade);
             Console.WriteLine("num_buy=" + ac_master.performance_data.num_buy);
             Console.WriteLine("num_sell=" + ac_master.performance_data.num_sell);
@@ -428,7 +434,13 @@ namespace BTCSIM
                 ac = sim.sim_ga_market_limit(from, to, max_amount, chro, ac, nn_threshold, index);
             else
                 Console.WriteLine("GA-evaluation: Invalid Sim Type!");
-            return (ac.performance_data.total_pl_ratio * ac.performance_data.num_buy * ac.performance_data.num_sell / calcSquareError(ac.total_pl_ratio_list, ac.performance_data.num_trade), ac);
+            //var min_pl_buy_sell = Math.Min(ac.performance_data.buy_pl_list.Sum(), ac.performance_data.sell_pl_list.Sum());
+            //var eva = (ac.performance_data.buy_pl_list.Sum() + ac.performance_data.sell_pl_list.Sum()) * ac.performance_data.total_pl_ratio * ac.performance_data.num_buy * ac.performance_data.num_sell / calcSquareError(ac.total_pl_ratio_list, ac.performance_data.num_trade);
+            var sm = calcSquareError(ac.total_pl_ratio_list, ac.performance_data.num_trade);
+            var eva = ac.performance_data.total_pl * Math.Sqrt(ac.performance_data.num_buy * ac.performance_data.num_sell) / sm;
+            if (ac.performance_data.buy_pl_list.Sum() <= 0 || ac.performance_data.sell_pl_list.Sum() <= 0)
+                eva = 0;
+            return (eva, ac);
         }
 
         private double calcSquareError(List<double> data, int num_trade)
