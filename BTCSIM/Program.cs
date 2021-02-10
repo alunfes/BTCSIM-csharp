@@ -113,13 +113,13 @@ namespace BTCSIM
             stopWatch.Start();
             Console.WriteLine("started program.");
             List<int> terms = new List<int>();
-            for (int i = 10; i < 1000; i = i + 100) { terms.Add(i); }
+            for (int i = 5; i < 100; i = i + 10) { terms.Add(i); }
             MarketData.initializer(terms);
 
             var from = 1000;
-            var to = 200000;
+            var to = 500000;
             int max_amount = 1;
-            var index = new int[] { 0, 1, 0, 0 };
+            var index = new int[] { 1, 1, 1, 0 };
             double nn_threshold = 0.5;
             int best_island_id = 1;
             bool display_chart = true;
@@ -137,11 +137,12 @@ namespace BTCSIM
                 int num_chromos = 4;
                 int num_generations = 20;
                 int banned_move_period = 2;
-                var units = new int[] { 37, 10, 10, 5 };
+                var units = new int[] { 37, 5, 5, 5, 5 };
                 var mutation_rate = 0.5;
                 var move_ratio = 0.2;
                 best_island_id = doGA(from, to, max_amount, num_island, num_chromos, num_generations, banned_move_period, units, mutation_rate, move_ratio, index, display_chart, nn_threshold);
                 doSim(from, to, max_amount, sim_type, best_island_id, index, display_chart, nn_threshold);
+                doSim(to, MarketData.Close.Count-1, max_amount, sim_type, best_island_id, index, display_chart, nn_threshold);
             }
             //multi strategy combination sim
             else if (key == "mul ga")

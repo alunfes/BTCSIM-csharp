@@ -193,6 +193,9 @@ namespace BTCSIM
                 buysell_vol_ratio[t] = calcBuysellVolRatio(t);
                 Buysellvol_price_ratio[t] = calcBusellvolPriceRatio(t);
                 vol_ma_divergence[t] = calcVolMaDivergence(t);
+
+                if(vol_ma_divergence[t].GetRange(t+1, vol_ma_divergence[t].Count - t-1).Contains(double.NaN))
+                    Console.WriteLine("Nan in vol_ma_divergence!" + " - "+t.ToString());
             }
             calcVolakyoriMinMaxScaler();
             calcDivergenceMinMaxScaler();
@@ -234,6 +237,7 @@ namespace BTCSIM
                 for (int i = 0; i < price.Count; i++)
                 {
                     if (price[i] == double.NaN || ma[i] == double.NaN) { res.Add(double.NaN); }
+                    else if(price[i] == 0 && ma[i] == 0) { res.Add(0); }
                     else { res.Add((price[i] - ma[i]) / ma[i]); }
                 }
 

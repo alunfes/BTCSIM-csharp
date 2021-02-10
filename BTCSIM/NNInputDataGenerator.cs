@@ -89,42 +89,26 @@ namespace BTCSIM
                 foreach (var d in MarketData.Divergence_minmax_scale[i])
                     input_data.Add(d);
             }
+            //vola_kyori_minmax_scale
             if (index[1] == 1)
             {
-                //vola_kyori_minmax_scale
                 foreach (var d in MarketData.Volakyori_minmax_scale[i])
                     input_data.Add(d);
             }
+            //vol ma divergence minmax scale
             if (index[2] == 1)
             {
-                //vol ma divergence minmax scale
                 foreach (var d in MarketData.Vol_ma_divergence_minmax_scale[i])
                     input_data.Add(d);
             }
+            //buy sell vol ratio
             if (index[3] == 1)
             {
-                //buy sell vol ratio
                 foreach (var d in MarketData.Buysell_vol_ratio_minmax_scale[i])
                     input_data.Add(d);
             }
             if (input_data.Contains(Double.NaN))
                 Console.WriteLine("NNInputDataGenerator: Nan is included !");
-
-            //price raw data
-            /*
-            var term = 1000;
-            var num_sampling = 10;
-            var sampling_window = term / num_sampling;
-            List<double> sampled_data = new List<double>();
-            for (int j = 0; j < num_sampling; j++)
-                sampled_data.Add(MarketData.Close[i-j* num_sampling]);
-            var minv = sampled_data.Min();
-            for (int j = 0; j < sampled_data.Count; j++)
-                sampled_data[j] = sampled_data[j] - minv;
-            var maxv = sampled_data.Max();
-            for (int j = 0; j < sampled_data.Count; j++)
-                input_data.Add(sampled_data[j] / maxv);
-            */
 
             //order side
             if (ac.order_data.order_side.Count > 0)
@@ -189,24 +173,6 @@ namespace BTCSIM
             else
                 input_data.Add(1.0 / ac.holding_data.holding_period);
 
-            //unrealized pl / holding period
-            if (ac.holding_data.holding_period == 0)
-                input_data.Add(0);
-            else
-                input_data.Add(ac.performance_data.unrealized_pl / (ac.holding_data.holding_period * ac.holding_data.holding_size));
-
-
-            
-            
-
-            //holding size
-            /*
-            if (ac.holding_data.holding_size == 0)
-                input_data.Add(0);
-            else
-                input_data.Add(ac.holding_data.holding_size / 10.0);
-            */
-            //unrealize pl change
             
 
             return input_data.ToArray();
