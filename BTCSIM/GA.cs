@@ -434,11 +434,12 @@ namespace BTCSIM
                 ac = sim.sim_ga_market_limit(from, to, max_amount, chro, ac, nn_threshold, index);
             else
                 Console.WriteLine("GA-evaluation: Invalid Sim Type!");
-            //var min_pl_buy_sell = Math.Min(ac.performance_data.buy_pl_list.Sum(), ac.performance_data.sell_pl_list.Sum());
-            //var eva = (ac.performance_data.buy_pl_list.Sum() + ac.performance_data.sell_pl_list.Sum()) * ac.performance_data.total_pl_ratio * ac.performance_data.num_buy * ac.performance_data.num_sell / calcSquareError(ac.total_pl_ratio_list, ac.performance_data.num_trade);
-            var sm = calcSquareError(ac.total_pl_ratio_list, ac.performance_data.num_trade);
-            var eva = ac.performance_data.total_pl * Math.Sqrt(ac.performance_data.num_buy * ac.performance_data.num_sell) / sm;
-            if (ac.performance_data.buy_pl_list.Sum() <= 0 || ac.performance_data.sell_pl_list.Sum() <= 0)
+            //var sm = calcSquareError(ac.total_pl_ratio_list, ac.performance_data.num_trade);
+            //var eva = ac.performance_data.total_pl * Math.Sqrt(ac.performance_data.num_buy * ac.performance_data.num_sell) / sm;
+            var eva = ac.performance_data.total_pl_ratio;
+            //if (ac.performance_data.buy_pl_list.Sum() <= 0 || ac.performance_data.sell_pl_list.Sum() <= 0)
+            //    eva = 0;
+            if (eva == double.NaN)
                 eva = 0;
             return (eva, ac);
         }

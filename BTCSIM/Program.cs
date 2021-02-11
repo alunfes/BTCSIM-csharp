@@ -119,7 +119,7 @@ namespace BTCSIM
             var from = 1000;
             var to = 500000;
             int max_amount = 1;
-            var index = new int[] { 1, 1, 1, 0 };
+            var index = new int[] { 1, 1, 1, 0 ,1};
             double nn_threshold = 0.5;
             int best_island_id = 1;
             bool display_chart = true;
@@ -137,7 +137,7 @@ namespace BTCSIM
                 int num_chromos = 4;
                 int num_generations = 20;
                 int banned_move_period = 2;
-                var units = new int[] { 37, 5, 5, 5, 5 };
+                var units = new int[] { 46, 5, 5, 5, 5 };
                 var mutation_rate = 0.5;
                 var move_ratio = 0.2;
                 best_island_id = doGA(from, to, max_amount, num_island, num_chromos, num_generations, banned_move_period, units, mutation_rate, move_ratio, index, display_chart, nn_threshold);
