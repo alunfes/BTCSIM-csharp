@@ -479,9 +479,9 @@ namespace BTCSIM
                 var up = up_list.Sum() / Convert.ToDouble(term);
                 var down = -down_list.Sum() / Convert.ToDouble(term);
                 var r = up / (up + down);
-                if (r == Double.NaN)
-                    Console.WriteLine("nan in rsi");
-                res.Add( up/ (up + down));
+                if (up == 0 && down == 0)
+                    r = 0;
+                res.Add(r);
             }
             return res;
         }
