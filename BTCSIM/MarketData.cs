@@ -33,7 +33,10 @@ namespace BTCSIM
         static private Dictionary<int, List<double>> buysellvol_price_ratio;
         static private Dictionary<int, List<double>> rsi;
         static private Dictionary<int, List<double>> rsi_scale;
-
+        static private Dictionary<int, List<double>> uwahige;
+        static private Dictionary<int, List<double>> shitahige;
+        static private Dictionary<int, List<double>> uwahige_scale;
+        static private Dictionary<int, List<double>> shitahige_scale;
 
         static public ref List<double> UnixTime
         {
@@ -123,6 +126,23 @@ namespace BTCSIM
         {
             get { return ref rsi_scale; }
         }
+        static public ref Dictionary<int, List<double>> Uwahige
+        {
+            get { return ref uwahige; }
+        }
+        static public ref Dictionary<int, List<double>> Shitahige
+        {
+            get { return ref shitahige; }
+        }
+        static public ref Dictionary<int, List<double>> Uwahige_scale
+        {
+            get { return ref uwahige_scale; }
+        }
+        static public ref Dictionary<int, List<double>> Shitahige_scale
+        {
+            get { return ref shitahige_scale; }
+        }
+
         static public void initializer(List<int> terms_list)
         {
             Stopwatch stopWatch = new Stopwatch();
@@ -152,6 +172,8 @@ namespace BTCSIM
             buysellvol_price_ratio = new Dictionary<int, List<double>>();
             rsi = new Dictionary<int, List<double>>();
             rsi_scale = new Dictionary<int, List<double>>();
+            uwahige = new Dictionary<int, List<double>>();
+            shitahige = new Dictionary<int, List<double>>();
             read_data();
             calc_index(terms_list);
             
@@ -205,6 +227,8 @@ namespace BTCSIM
                 Buysellvol_price_ratio[t] = calcBusellvolPriceRatio(t);
                 vol_ma_divergence[t] = calcVolMaDivergence(t);
                 rsi[t] = calcRsi(t);
+                uwahige[t] = calcUwahige(t);
+                shitahige[t] = calcShitahige(t);
                 if(vol_ma_divergence[t].GetRange(t+1, vol_ma_divergence[t].Count - t-1).Contains(double.NaN))
                     Console.WriteLine("Nan in vol_ma_divergence!" + " - "+t.ToString());
             }
@@ -213,6 +237,8 @@ namespace BTCSIM
             calcVolMaDivergenceMinMaxScaler();
             calcBuySellVolRatioMinmaxScaler();
             calcRsiScaler();
+            calcUwahigeScale();
+            calcShitahigeScale();
         }
 
         //use to calc sma in MarketData for other index
@@ -490,5 +516,57 @@ namespace BTCSIM
         {
             rsi_scale = calc_minmax_scale(rsi);
         }
+
+        static private List<double> calcUwahige(int term)
+        {
+            var res = new List<double>();
+            var close_list = close.GetRange(0, term);
+            for (int i = 0; i < term; i++)
+                res.Add(double.NaN);
+            for(int i=term; i<close.Count; i++)
+            {
+                if (close_list[0] > close_list[close_list.Count-1]) //insen
+                    res.Add( 1000.0 * (close_list.Max() - close_list[0]) / close_list[close_list.Count-1] / Convert.ToDouble(term));
+                else //yosen
+                    res.Add( 1000.0 * (close_list.Max() - close_list[close_list.Count-1]) / close_list[close_list.Count - 1] / Convert.ToDouble(term));
+                close_list.RemoveAt(0);
+                close_list.Add(close[i]);
+            }
+            var min = res.Min();
+            var max = res.Max();
+            return res;
+        }
+
+        static private List<double> calcShitahige(int term)
+        {
+            var res = new List<double>();
+            var close_list = close.GetRange(0, term);
+            for (int i = 0; i < term; i++)
+                res.Add(double.NaN);
+            for (int i = term; i < close.Count; i++)
+            {
+                if (close_list[0] > close_list[close_list.Count - 1]) //insen
+                    res.Add(1000.0 * (close_list[close_list.Count-1] - close_list.Min()) / close_list[close_list.Count - 1] / Convert.ToDouble(term));
+                else //yosen
+                    res.Add(1000.0 * (close_list[0] - close_list.Min()) / close_list[close_list.Count - 1] / Convert.ToDouble(term));
+                close_list.RemoveAt(0);
+                close_list.Add(close[i]);
+            }
+            var min = res.Min();
+            var max = res.Max();
+            return res;
+        }
+
+        static private void calcUwahigeScale()
+        {
+            uwahige_scale = calc_minmax_scale(uwahige);
+        }
+
+        static private void calcShitahigeScale()
+        {
+            shitahige_scale = calc_minmax_scale(shitahige);
+        }
+
+
     }
 }

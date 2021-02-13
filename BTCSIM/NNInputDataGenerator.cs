@@ -113,6 +113,18 @@ namespace BTCSIM
                 foreach (var d in MarketData.Rsi_scale[i])
                     input_data.Add(d);
             }
+            //uwahige
+            if (index[5] == 1)
+            {
+                foreach (var d in MarketData.Uwahige_scale[i])
+                    input_data.Add(d);
+            }
+            //shitahige
+            if (index[6] == 1)
+            {
+                foreach (var d in MarketData.Shitahige_scale[i])
+                    input_data.Add(d);
+            }
 
             if (input_data.Contains(Double.NaN))
                 Console.WriteLine("NNInputDataGenerator: Nan is included !");
