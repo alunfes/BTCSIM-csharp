@@ -361,7 +361,7 @@ namespace BTCSIM
             //cross over
             crossover(selected_chro_ind_list, 0.3);
             //mutation
-            mutation(mutation_rate, -1, 1);
+            mutation(mutation_rate, -10, 10);
             write_best_chromo();
             eva_dic = null;
             ac_dic = null;

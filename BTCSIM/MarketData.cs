@@ -490,7 +490,7 @@ namespace BTCSIM
             res.Add(up_list.Sum() / (up_list.Sum() + down_list.Sum()));
             for (int i = term; i < close.Count; i++)
             {
-                if (close[i] - close[i - 1] > 0)
+                if (close[i] - close[i - 1] > 0) //yosen
                 {
                     up_list.Add(close[i] - close[i - 1]);
                     down_list.Add(0);

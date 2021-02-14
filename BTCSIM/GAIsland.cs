@@ -97,7 +97,7 @@ namespace BTCSIM
                         {
                             for (int l = 0; l < gas[selected_island].chromos[selected_target_chromo].weight_gene[k].Count; l++) //for units
                             {
-                                for (int m = 0; m < gas[selected_island].chromos[selected_target_chromo].weight_gene[k][l][m]; m++) //for weights
+                                for (int m = 0; m < gas[selected_island].chromos[selected_target_chromo].weight_gene[k][l].Length; m++) //for weights
                                     tmp_chrom.weight_gene[k][l][m] = gas[selected_island].chromos[selected_target_chromo].weight_gene[k][l][m];
                             }
                         }
@@ -112,7 +112,7 @@ namespace BTCSIM
                         {
                             for (int l = 0; l < gas[selected_island].chromos[selected_target_chromo].weight_gene[k].Count; l++) //for units
                             {
-                                for (int m = 0; m < gas[selected_island].chromos[selected_target_chromo].weight_gene[k][l][m]; m++) //for weights
+                                for (int m = 0; m < gas[selected_island].chromos[selected_target_chromo].weight_gene[k][l].Length; m++) //for weights
                                     gas[selected_island].chromos[selected_target_chromo].weight_gene[k][l][m] = gas[i].chromos[selected_id].weight_gene[k][l][m];
                             }
                         }
@@ -127,7 +127,7 @@ namespace BTCSIM
                         {
                             for (int l = 0; l < gas[selected_island].chromos[selected_target_chromo].weight_gene[k].Count; l++) //for units
                             {
-                                for (int m = 0; m < gas[selected_island].chromos[selected_target_chromo].weight_gene[k][l][m]; m++) //for weights
+                                for (int m = 0; m < gas[selected_island].chromos[selected_target_chromo].weight_gene[k][l].Length; m++) //for weights
                                     gas[i].chromos[selected_id].weight_gene[k][l][m] = tmp_chrom.weight_gene[k][l][m];
                             }
                         }
