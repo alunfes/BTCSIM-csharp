@@ -473,38 +473,41 @@ namespace BTCSIM
             var res = new List<double>();
             var up_list = new List<double>();
             var down_list = new List<double>();
-            for (int i = 1; i < term; i++)
+            for (int i = 0; i < term-1; i++)
             {
-                if (close[i] - close[i - 1] > 0)
+                if (close[i+1] - close[i] > 0)
                 {
-                    up_list.Add(close[i] - close[i - 1]);
+                    up_list.Add(close[i+1] - close[i]);
                     down_list.Add(0);
                 }
                 else
                 {
-                    down_list.Add(close[i] - close[i - 1]);
+                    down_list.Add(close[i+1] - close[i]);
                     up_list.Add(0);
                 }
                 res.Add(double.NaN);
             }
-            res.Add(up_list.Sum() / (up_list.Sum() + down_list.Sum()));
-            for (int i = term; i < close.Count; i++)
+            var up = up_list.Sum() / Convert.ToDouble(term);
+            var down = -down_list.Sum() / Convert.ToDouble(term);
+            var r = up / (up + down);
+            res.Add(r);
+            for (int i = term-1; i < close.Count-1; i++)
             {
-                if (close[i] - close[i - 1] > 0) //yosen
+                if (close[i+1] - close[i] > 0) //yosen
                 {
-                    up_list.Add(close[i] - close[i - 1]);
+                    up_list.Add(close[i+1] - close[i]);
                     down_list.Add(0);
                 }
                 else
                 {
-                    down_list.Add(close[i] - close[i - 1]);
+                    down_list.Add(close[i+1] - close[i]);
                     up_list.Add(0);
                 }
                 up_list.RemoveAt(0);
                 down_list.RemoveAt(0);
-                var up = up_list.Sum() / Convert.ToDouble(term);
-                var down = -down_list.Sum() / Convert.ToDouble(term);
-                var r = up / (up + down);
+                up = up_list.Sum() / Convert.ToDouble(term);
+                down = -down_list.Sum() / Convert.ToDouble(term);
+                r = up / (up + down);
                 if (up == 0 && down == 0)
                     r = 0;
                 res.Add(r);
