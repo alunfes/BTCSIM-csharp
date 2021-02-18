@@ -535,8 +535,6 @@ namespace BTCSIM
                 close_list.RemoveAt(0);
                 close_list.Add(close[i]);
             }
-            var min = res.Min();
-            var max = res.Max();
             return res;
         }
 

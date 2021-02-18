@@ -113,11 +113,11 @@ namespace BTCSIM
             stopWatch.Start();
             Console.WriteLine("started program.");
             List<int> terms = new List<int>();
-            for (int i = 5; i < 100; i = i + 10) { terms.Add(i); }
+            for (int i = 10; i < 3000; i = i + 100) { terms.Add(i); }
             MarketData.initializer(terms);
 
             var from = 1000;
-            var to = 500000;
+            var to = 501000;
             int max_amount = 1;
             var index = new int[] { 1, 1, 1, 0 ,1, 1, 1};
             double nn_threshold = 0.5;
@@ -135,9 +135,9 @@ namespace BTCSIM
             {
                 int num_island = 2;
                 int num_chromos = 4;
-                int num_generations = 20;
+                int num_generations = 10;
                 int banned_move_period = 2;
-                var units = new int[] { 66, 5, 5, 5, 5 };
+                var units = new int[] { 186, 5, 5, 5, 5, 5 };
                 var mutation_rate = 0.5;
                 var move_ratio = 0.2;
                 best_island_id = doGA(from, to, max_amount, num_island, num_chromos, num_generations, banned_move_period, units, mutation_rate, move_ratio, index, display_chart, nn_threshold);

@@ -73,7 +73,7 @@ namespace BTCSIM
         }
 
 
-        public SimAccount sim_ga_market_limit(int from, int to, int max_amount, Gene2 chromo, SimAccount ac, double nn_threshold, int[] index)
+        public SimAccount sim_ga_market_limit(int from, int to, int max_amount, Gene2 chromo, SimAccount ac, double nn_threshold, int[] index, bool stop_no_trade)
         {
             var nn = new NN();
             var strategy = new Strategy();
@@ -84,7 +84,7 @@ namespace BTCSIM
             for (int i = from; i < to; i++)
             {
                 //check num trade=0 discontinue sim
-                if (i - from > ((to - from) * zero_trade_check_point) && ac.performance_data.num_trade == 0)
+                if (stop_no_trade && i - from > ((to - from) * zero_trade_check_point) && ac.performance_data.num_trade == 0)
                 {
                     //Console.WriteLine("Stopped sim due to zero trade.");
                     break;

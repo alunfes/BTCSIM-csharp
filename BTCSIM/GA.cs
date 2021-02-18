@@ -227,7 +227,7 @@ namespace BTCSIM
         {
             var sim = new Sim();
             var ac = new SimAccount();
-            ac = sim.sim_ga_market_limit(from, to, max_amount, chromo, ac, nn_threshold, index);
+            ac = sim.sim_ga_market_limit(from, to, max_amount, chromo, ac, nn_threshold, index, false);
             Console.WriteLine("pl=" + ac.performance_data.total_pl);
             Console.WriteLine("pl ratio=" + ac.performance_data.total_pl_ratio);
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
@@ -269,7 +269,7 @@ namespace BTCSIM
             {
                 var sim = new Sim();
                 var ac = new SimAccount();
-                ac = sim.sim_ga_market_limit(from, to, max_amount, chromo[i], ac, nn_threshold[i], index[i]);
+                ac = sim.sim_ga_market_limit(from, to, max_amount, chromo[i], ac, nn_threshold[i], index[i], false);
                 ac_list.Add(ac);
                 Console.WriteLine("Chromo-"+i.ToString()+":");
                 Console.WriteLine("pl=" + ac.performance_data.total_pl);
@@ -431,11 +431,12 @@ namespace BTCSIM
             if (sim_type == 0)
                 ac = sim.sim_ga_limit(from, to, max_amount, chro, ac, index);
             else if (sim_type == 1)
-                ac = sim.sim_ga_market_limit(from, to, max_amount, chro, ac, nn_threshold, index);
+                ac = sim.sim_ga_market_limit(from, to, max_amount, chro, ac, nn_threshold, index, true);
             else
                 Console.WriteLine("GA-evaluation: Invalid Sim Type!");
             var sm = calcSquareError(ac.total_pl_ratio_list, ac.performance_data.num_trade);
-            var eva = ac.performance_data.total_pl * Math.Sqrt(ac.performance_data.num_buy * ac.performance_data.num_sell) / sm;
+            //var eva = ac.performance_data.total_pl * Math.Sqrt(ac.performance_data.num_buy * ac.performance_data.num_sell) / sm;
+            var eva = ac.performance_data.sharp_ratio * Math.Sqrt(Math.Sqrt(ac.performance_data.num_buy * ac.performance_data.num_sell));
             if (ac.performance_data.buy_pl_list.Sum() <= 0 || ac.performance_data.sell_pl_list.Sum() <= 0)
                 eva = 0;
             if (eva.ToString().Contains("N"))
