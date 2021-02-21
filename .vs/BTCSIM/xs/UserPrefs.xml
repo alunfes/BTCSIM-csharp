@@ -1,13 +1,13 @@
 ﻿<Properties GitUserInfo="UsingGIT" StartupConfiguration="{3C1E82C7-9D21-4A51-B1E2-6C8D37DD4747}|Default">
   <MonoDevelop.Ide.ItemProperties.BTCSIM PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="BTCSIM/Program.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="BTCSIM/NNInputDataGenerator.cs">
     <Files>
-      <File FileName="BTCSIM/Program.cs" Line="127" Column="1" />
+      <File FileName="BTCSIM/Program.cs" Line="164" Column="59" />
       <File FileName="BTCSIM/RandomGenerator.cs" />
       <File FileName="BTCSIM/Strategy.cs" />
       <File FileName="BTCSIM/SimAccount.cs" />
       <File FileName="BTCSIM/MarketData.cs" />
-      <File FileName="BTCSIM/NNInputDataGenerator.cs" />
+      <File FileName="BTCSIM/NNInputDataGenerator.cs" Line="180" Column="35" />
       <File FileName="BTCSIM/NN.cs" />
       <File FileName="BTCSIM/GA.cs" />
       <File FileName="BTCSIM/GAIsland.cs" />
@@ -23,7 +23,8 @@
     <BreakpointStore>
       <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/MarketData.cs" relfile="BTCSIM/MarketData.cs" line="301" column="1" />
       <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/MarketData.cs" relfile="BTCSIM/MarketData.cs" line="233" column="1" />
-      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/MarketData.cs" relfile="BTCSIM/MarketData.cs" line="242" column="1" />
+      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/NNInputDataGenerator.cs" relfile="BTCSIM/NNInputDataGenerator.cs" line="167" column="1" />
+      <Breakpoint file="/Users/alun/Projects/BTCSIM/BTCSIM/NNInputDataGenerator.cs" relfile="BTCSIM/NNInputDataGenerator.cs" line="162" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MultiItemStartupConfigurations />
