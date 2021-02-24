@@ -44,11 +44,13 @@ namespace BTCSIM
         public double[] weight_gene2 { get; set; } //double[second layer units * third layer units]
         public double[] bias_gene2 { get; set; }
         public int[] num_units { get; set; }
+        public int[] num_index { get; set; }
 
-        public Gene(int[] units)
+        public Gene(int[] units, int[] index)
         {
             var random_generator = new RandomGenerator();
             this.num_units = units;
+            this.num_index = index;
             weight_gene1 = new double[units[0] * units[1]];
             bias_gene1 = new double[units[1]];
             weight_gene2 = new double[units[1] * units[2]];
@@ -66,11 +68,13 @@ namespace BTCSIM
         public List<Dictionary<int, double[]>> weight_gene { get; set; } //weight_gene[layer][output unit][input unit] -> [<inputs units id as key, double[num middle units-1]>, <middle units id as key, double[num middle units-2>, ..]
         public List<double[]> bias_gene { get; set; } //bias_gene[layer][output unit]  ->  [num_unit[1], num_unit[2], .. num_unit[num_layers - 1]]
         public int[] num_units { get; set; } //[num_inputs, num_middle, num_middle2... , num_output]
+        public int[] num_index { get; set; }
 
-        public Gene2(int[] units)
+        public Gene2(int[] units, int[] index)
         {
             var random_generator = new RandomGenerator();
             this.num_units = units;
+            this.num_index = index;
             weight_gene = new List<Dictionary<int, double[]>>();
             bias_gene = new List<double[]>();
             //initialize weight / bias
@@ -138,6 +142,7 @@ namespace BTCSIM
             {
                 var data = new List<string>();
                 var units = new List<int>();
+                var index = new List<int>();
                 var bias = new List<double[]>();
                 var　weights = new List<Dictionary<int, double[]>>();
                 var layer_id_list = new List<int>();
@@ -154,6 +159,11 @@ namespace BTCSIM
                         {
                             var ele = line.Split(',').ToList();
                             units = ele.GetRange(1, ele.Count - 1).Select(int.Parse).ToList();
+                        }
+                        else if (line.Contains("index"))
+                        {
+                            var ele = line.Split(',').ToList();
+                            index = ele.GetRange(1, ele.Count - 1).Select(int.Parse).ToList();
                         }
                         else if (line.Contains("bias"))
                         {
@@ -178,10 +188,11 @@ namespace BTCSIM
                     }
                 }
                 data.RemoveAt(data.Count - 1); //remove null
-                var chrom = new Gene2(units.ToArray());
+                var chrom = new Gene2(units.ToArray(),index.ToArray());
                 chrom.bias_gene = bias;
                 chrom.weight_gene = weights;
                 chrom.num_units = units.ToArray();
+                chrom.num_index = index.ToArray();
                 return chrom;
             }
         }
@@ -204,11 +215,11 @@ namespace BTCSIM
             return ac;
         }
 
-        public SimAccount sim_ga_limit(int from, int to, int max_amount, Gene2 chromo, string title, bool chart, int[] index)
+        public SimAccount sim_ga_limit(int from, int to, int max_amount, Gene2 chromo, string title, bool chart)
         {
             var sim = new Sim();
             var ac = new SimAccount();
-            ac = sim.sim_ga_limit(from, to, max_amount, chromo, ac, index);
+            ac = sim.sim_ga_limit(from, to, max_amount, chromo, ac);
             Console.WriteLine("pl=" + ac.performance_data.total_pl);
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
             Console.WriteLine("num market order=" + ac.performance_data.num_maker_order);
@@ -223,11 +234,11 @@ namespace BTCSIM
             return ac;
         }
 
-        public SimAccount sim_ga_market_limit(int from, int to, int max_amount, Gene2 chromo, string title, bool chart, double nn_threshold, int[] index)
+        public SimAccount sim_ga_market_limit(int from, int to, int max_amount, Gene2 chromo, string title, bool chart, double nn_threshold)
         {
             var sim = new Sim();
             var ac = new SimAccount();
-            ac = sim.sim_ga_market_limit(from, to, max_amount, chromo, ac, nn_threshold, index, false);
+            ac = sim.sim_ga_market_limit(from, to, max_amount, chromo, ac, nn_threshold, false);
             Console.WriteLine("pl=" + ac.performance_data.total_pl);
             Console.WriteLine("pl ratio=" + ac.performance_data.total_pl_ratio);
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
@@ -243,10 +254,10 @@ namespace BTCSIM
             return ac;
         }
 
-        public SimAccount sim_ga_limit_conti(int from, int to, int max_amount, Gene2 chromo, string title, SimAccount ac, bool chart, int[] index)
+        public SimAccount sim_ga_limit_conti(int from, int to, int max_amount, Gene2 chromo, string title, SimAccount ac, bool chart)
         {
             var sim = new Sim();
-            ac = sim.sim_ga_limit(from, to, max_amount, chromo, ac, index);
+            ac = sim.sim_ga_limit(from, to, max_amount, chromo, ac);
             Console.WriteLine("pl=" + ac.performance_data.total_pl);
             Console.WriteLine("num trade=" + ac.performance_data.num_trade);
             Console.WriteLine("num market order=" + ac.performance_data.num_maker_order);
@@ -262,14 +273,14 @@ namespace BTCSIM
         }
 
         //複数chromを使ったsimを行い、それらの結果の総合したパフォーマンスを表示する。
-        public SimAccount sim_ga_multi_chromo(int from, int to, int max_amount, List<Gene2> chromo, string title, bool chart, List<double> nn_threshold, List<int[]> index)
+        public SimAccount sim_ga_multi_chromo(int from, int to, int max_amount, List<Gene2> chromo, string title, bool chart, List<double> nn_threshold)
         {
             var ac_list = new List<SimAccount>();
             for(int i=0; i<chromo.Count; i++)
             {
                 var sim = new Sim();
                 var ac = new SimAccount();
-                ac = sim.sim_ga_market_limit(from, to, max_amount, chromo[i], ac, nn_threshold[i], index[i], false);
+                ac = sim.sim_ga_market_limit(from, to, max_amount, chromo[i], ac, nn_threshold[i], false);
                 ac_list.Add(ac);
                 Console.WriteLine("Chromo-"+i.ToString()+":");
                 Console.WriteLine("pl=" + ac.performance_data.total_pl);
@@ -334,7 +345,7 @@ namespace BTCSIM
         public void start_island_ga(int from, int to, int max_amount, int num_chromos, int generation_ind, int[] units, double mutation_rate, int sim_type, double nn_threshold, int[] index)
         {
             if (generation_ind == 0)
-                generate_chromos(num_chromos, units);
+                generate_chromos(num_chromos, units, index);
             var eva_dic = new ConcurrentDictionary<int, double>();
             var ac_dic = new ConcurrentDictionary<int, SimAccount>();
             var option = new ParallelOptions();
@@ -350,7 +361,7 @@ namespace BTCSIM
             //Console.WriteLine("island No."+island_id.ToString() + ", eva time="+sw.Elapsed.Seconds.ToString());
             for (int k = 0; k < chromos.Length; k++)
             {
-                (double total_pl, SimAccount ac) res = evaluation(from, to, max_amount, k, chromos[k], sim_type, nn_threshold, index);
+                (double total_pl, SimAccount ac) res = evaluation(from, to, max_amount, k, chromos[k], sim_type, nn_threshold);
                 eva_dic.GetOrAdd(k, res.total_pl);
                 ac_dic.GetOrAdd(k, res.ac);
             }
@@ -372,7 +383,7 @@ namespace BTCSIM
         {
             //initialize chromos
             Console.WriteLine("started GA");
-            generate_chromos(num_chromos, units);
+            generate_chromos(num_chromos, units, index);
             for (int i = 0; i < num_generations; i++)
             {
                 Stopwatch generationWatch = new Stopwatch();
@@ -385,7 +396,7 @@ namespace BTCSIM
                 option.MaxDegreeOfParallelism = System.Environment.ProcessorCount;
                 Parallel.For(0, chromos.Length, option, j =>
                 {
-                    (double total_pl, SimAccount ac) res = evaluation(from, to, max_amount, j, chromos[j], sim_type, nn_threshold, index);
+                    (double total_pl, SimAccount ac) res = evaluation(from, to, max_amount, j, chromos[j], sim_type, nn_threshold);
                     eva_dic.GetOrAdd(j, res.total_pl);
                     ac_dic.GetOrAdd(j, res.ac);
                 });
@@ -416,22 +427,22 @@ namespace BTCSIM
             Console.WriteLine("Completed GA.");
         }
 
-        private void generate_chromos(int num_chrom, int[] num_units_layer)
+        private void generate_chromos(int num_chrom, int[] num_units_layer, int[] index)
         {
             chromos = new Gene2[num_chrom];
             for (int i = 0; i < num_chrom; i++)
-                chromos[i] = new Gene2(num_units_layer);
+                chromos[i] = new Gene2(num_units_layer, index);
         }
 
-        private (double, SimAccount) evaluation(int from, int to, int max_amount, int chro_id, Gene2 chro, int sim_type, double nn_threshold, int[] index)
+        private (double, SimAccount) evaluation(int from, int to, int max_amount, int chro_id, Gene2 chro, int sim_type, double nn_threshold)
         {
             var ac = new SimAccount();
             var sim = new Sim();
             //ac = sim.sim_ga(from, to, chro, ac);
             if (sim_type == 0)
-                ac = sim.sim_ga_limit(from, to, max_amount, chro, ac, index);
+                ac = sim.sim_ga_limit(from, to, max_amount, chro, ac);
             else if (sim_type == 1)
-                ac = sim.sim_ga_market_limit(from, to, max_amount, chro, ac, nn_threshold, index, true);
+                ac = sim.sim_ga_market_limit(from, to, max_amount, chro, ac, nn_threshold, true);
             else
                 Console.WriteLine("GA-evaluation: Invalid Sim Type!");
             var sm = calcSquareError(ac.total_pl_ratio_list, ac.performance_data.num_trade);
@@ -591,7 +602,7 @@ namespace BTCSIM
         public void resetChromos()
         {
             for (int i = 0; i < chromos.Length; i++)
-                chromos[i] = new Gene2(chromos[i].num_units);
+                chromos[i] = new Gene2(chromos[i].num_units, chromos[i].num_index);
         }
 
 
@@ -602,7 +613,7 @@ namespace BTCSIM
 
             //deep copy chromos
             for (int i = 0; i < new_chromos.Length; i++)
-                new_chromos[i] = new Gene2(chromos[0].num_units);
+                new_chromos[i] = new Gene2(chromos[0].num_units, chromos[0].num_index);
 
             for (int i = 0; i < new_chromos.Length; i++)
             {
@@ -674,6 +685,8 @@ namespace BTCSIM
                 //units
                 var units = "units," + string.Join(",", chromos[best_chromo].num_units);
                 sw.WriteLine(units);
+                //index
+                var index = "index," + string.Join(",", chromos[best_chromo].num_index);
                 //bias
                 for (int i = 0; i < chromos[best_chromo].bias_gene.Count; i++)
                 {

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.IO;
 using System.Text;
+using System.Threading;
 
 
 namespace BTCSIM
@@ -66,9 +67,10 @@ namespace BTCSIM
             var ga = new GA(0);
             var chromo = ga.readWeights(best_island_id, false);
             if (sim_type == 0)
-                return ga.sim_ga_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString() + ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1] + ", Best Island=" + best_island_id.ToString(), display_chart, index);
+                return ga.sim_ga_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString() + ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1] + ", Best Island=" + best_island_id.ToString(), display_chart);
             else
-                return ga.sim_ga_market_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString() + ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1] + ", Best Island=" + best_island_id.ToString(), display_chart, nn_threshold, index);
+                return ga.sim_ga_market_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString() + ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1] + ", Best Island=" + best_island_id.ToString(), display_chart, nn_threshold);
+            Thread.Sleep(3);
         }
 
         private static int doGA(int from, int to, int max_amount,  int num_island, int num_chromo, int num_generation, int banned_move_period, int[] units, double mutation_rate, double move_ratio,  int[] index, bool display_chart, double nn_threshold)
@@ -90,7 +92,7 @@ namespace BTCSIM
                 chromos[i] = ga.readWeights(best_chrom_log_id[i], true);
             }
             var title = "Combined PL Ratio - " + from.ToString() + " - " + to.ToString() + ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1];
-            return ga.sim_ga_multi_chromo(from, to, max_amount, chromos.ToList(), title, display_chart, nn_threshold, index);
+            return ga.sim_ga_multi_chromo(from, to, max_amount, chromos.ToList(), title, display_chart, nn_threshold);
         }
 
         public static void Main(string[] args)
@@ -119,7 +121,7 @@ namespace BTCSIM
             var from = 1000;
             var to = 501000;
             int max_amount = 1;
-            var index = new int[] { 0, 0, 0, 0 ,1, 0, 0};
+            var index = new int[] { 0, 0, 0, 1 ,1, 0, 0};
             double nn_threshold = 0.5;
             int best_island_id = 1;
             bool display_chart = true;
@@ -135,9 +137,9 @@ namespace BTCSIM
             {
                 int num_island = 2;
                 int num_chromos = 4;
-                int num_generations = 10;
+                int num_generations = 3;
                 int banned_move_period = 2;
-                var units = new int[] { 56, 5, 5, 5, 5 };
+                var units = new int[] { 66, 5, 5, 5, 5 };
                 var mutation_rate = 0.5;
                 var move_ratio = 0.2;
                 best_island_id = doGA(from, to, max_amount, num_island, num_chromos, num_generations, banned_move_period, units, mutation_rate, move_ratio, index, display_chart, nn_threshold);

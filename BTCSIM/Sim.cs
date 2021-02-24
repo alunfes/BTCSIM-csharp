@@ -35,7 +35,7 @@ namespace BTCSIM
             return ac;
         }
 
-        public SimAccount sim_ga_limit(int from, int to, int max_amount, Gene2 chromo, SimAccount ac, int[] index)
+        public SimAccount sim_ga_limit(int from, int to, int max_amount, Gene2 chromo, SimAccount ac)
         {
             var nn = new NN();
             var strategy = new Strategy();
@@ -44,7 +44,7 @@ namespace BTCSIM
 
             for (int i = from; i < to; i++)
             {
-                var nn_inputs = nn_input_data_generator.generateNNInputDataLimit(ac, i, index);
+                var nn_inputs = nn_input_data_generator.generateNNInputDataLimit(ac, i, chromo.num_index);
                 var nn_outputs = nn.calcNN(nn_inputs, chromo.num_units, chromo, 1);
                 var pred = nn.getActivatedUnit(nn_outputs);
                 var actions = strategy.GALimitStrategy2(i, pred, amount, max_amount, ac);
@@ -73,7 +73,7 @@ namespace BTCSIM
         }
 
 
-        public SimAccount sim_ga_market_limit(int from, int to, int max_amount, Gene2 chromo, SimAccount ac, double nn_threshold, int[] index, bool stop_no_trade)
+        public SimAccount sim_ga_market_limit(int from, int to, int max_amount, Gene2 chromo, SimAccount ac, double nn_threshold, bool stop_no_trade)
         {
             var nn = new NN();
             var strategy = new Strategy();
@@ -90,7 +90,7 @@ namespace BTCSIM
                     break;
                 }
 
-                var nn_inputs = nn_input_data_generator.generateNNInputDataLimit(ac, i, index);
+                var nn_inputs = nn_input_data_generator.generateNNInputDataLimit(ac, i, chromo.num_index);
                 var nn_outputs = nn.calcNN(nn_inputs, chromo.num_units, chromo, 1);
                 var pred = nn.getActivatedUnitLimitMarket(nn_outputs, nn_threshold);
                 var actions = strategy.GALimitMarketStrategy(i, pred, amount, max_amount, ac);

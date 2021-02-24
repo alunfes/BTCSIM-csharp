@@ -87,7 +87,7 @@ namespace BTCSIM
 
                         //exchange chromo
                         //copy targe chromo to tmp chromo
-                        var tmp_chrom = new Gene2(gas[selected_island].chromos[selected_target_chromo].num_units);
+                        var tmp_chrom = new Gene2(gas[selected_island].chromos[selected_target_chromo].num_units, gas[selected_island].chromos[selected_target_chromo].num_index);
                         for (int k = 0; k < gas[selected_island].chromos[selected_target_chromo].bias_gene.Count; k++) //for layers
                         {
                             for (int l = 0; l < gas[selected_island].chromos[selected_target_chromo].bias_gene[k].Length; l++) //for weights
