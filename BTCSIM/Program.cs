@@ -82,7 +82,7 @@ namespace BTCSIM
             return ga_island.best_island;
         }
 
-        private static SimAccount doMultiSim(int from, int to, int max_amount, List<int> best_chrom_log_id, List<int[]> index, bool display_chart, List<double> nn_threshold)
+        private static SimAccount doMultiSim(int from, int to, int max_amount, List<int> best_chrom_log_id, bool display_chart, List<double> nn_threshold)
         {
             Console.WriteLine("Started Multi SIM");
             var chromos = new Gene2[best_chrom_log_id.Count];
@@ -120,7 +120,7 @@ namespace BTCSIM
 
             var from = 1000;
             var to = 501000;
-            int max_amount = 1;
+            int max_amount = 5;
             var index = new int[] { 0, 0, 0, 1 ,1, 0, 0};
             double nn_threshold = 0.5;
             int best_island_id = 1;
@@ -137,9 +137,9 @@ namespace BTCSIM
             {
                 int num_island = 2;
                 int num_chromos = 4;
-                int num_generations = 3;
+                int num_generations = 20;
                 int banned_move_period = 2;
-                var units = new int[] { 66, 5, 5, 5, 5 };
+                var units = new int[] { 69, 5, 5, 5, 5 };
                 var mutation_rate = 0.5;
                 var move_ratio = 0.2;
                 best_island_id = doGA(from, to, max_amount, num_island, num_chromos, num_generations, banned_move_period, units, mutation_rate, move_ratio, index, display_chart, nn_threshold);
@@ -149,10 +149,8 @@ namespace BTCSIM
             //multi strategy combination sim
             else if (key == "mul ga")
             {
-                var index_list = new List<int[]> { new int[] { 1, 1, 1, 0 }, new int[] { 0, 1, 0, 0 }, new int[] { 0, 0, 1, 0 }, new int[] { 1, 1, 1, 0 }, new int[] { 1, 0, 1, 0 } };
-                var units_list = new List<int[]> { new int[] { 37, 5, 5, 5, 5 }, new int[] { 17, 5, 5, 5 }, new int[] { 17, 5, 5, 5 }, new int[] { 37, 10, 10, 5 }, new int[] { 27, 7, 7, 5 } };
-                //var index_list = new List<int[]> { new int[] { 1, 0, 0, 0 }, new int[] { 0, 1, 0, 0 }};
-                //var units_list = new List<int[]> { new int[] { 17, 5, 5, 5 }, new int[] { 17, 5, 5, 5 } };
+                var index_list = new List<int[]> { new int[] { 0, 0, 0, 1, 1, 0, 0 }, new int[] { 0, 0, 0, 1, 1, 0, 0 } };
+                var units_list = new List<int[]> { new int[] { 37, 5, 5, 5, 5 }, new int[] { 17, 5, 5, 5 }};
                 var best_pl_list = new List<List<double>>();
                 var best_ac_list = new List<SimAccount>();
                 int num_island = 2;
@@ -175,22 +173,21 @@ namespace BTCSIM
                     id_list.Add(i);
                     nn_threshold_list.Add(nn_threshold);
                 }
-                doMultiSim(from, to, max_amount, id_list, index_list, true, nn_threshold_list);
+                doMultiSim(from, to, max_amount, id_list, true, nn_threshold_list);
+                doMultiSim(to, MarketData.Close.Count-1, max_amount, id_list, true, nn_threshold_list);
+
             }
             else if (key == "mul sim")
             {
-                //var index_list = new List<int[]> { new int[] { 1, 0, 0, 0 }, new int[] { 0, 1, 0, 0 }, new int[] { 0, 0, 1, 0 }, new int[] { 1, 1, 1, 0 }, new int[] { 1, 0, 1, 0 } };
-                //var units_list = new List<int[]> { new int[] { 17, 5, 5, 5 }, new int[] { 17, 5, 5, 5 }, new int[] { 17, 5, 5, 5 }, new int[] { 37, 10, 10, 5 }, new int[] { 27, 7, 7, 5 } };
-                var index_list = new List<int[]> { new int[] { 1, 0, 0, 0 }, new int[] { 0, 1, 0, 0 } };
-                var units_list = new List<int[]> { new int[] { 17, 5, 5, 5 }, new int[] { 17, 5, 5, 5 } };
+                var num_best_chromo = 4;
                 var id_list = new List<int>();
                 var nn_threshold_list = new List<double>();
-                for (int i = 0; i < index_list.Count; i++)
+                for (int i = 0; i < num_best_chromo; i++)
                 {
                     id_list.Add(i);
                     nn_threshold_list.Add(nn_threshold);
                 }
-                doMultiSim(from, to, max_amount, id_list, index_list, true, nn_threshold_list);
+                doMultiSim(from, to, max_amount, id_list, true, nn_threshold_list);
             }
             stopWatch.Stop();
             Console.WriteLine("Completed all processes.");

@@ -687,6 +687,7 @@ namespace BTCSIM
                 sw.WriteLine(units);
                 //index
                 var index = "index," + string.Join(",", chromos[best_chromo].num_index);
+                sw.WriteLine(index);
                 //bias
                 for (int i = 0; i < chromos[best_chromo].bias_gene.Count; i++)
                 {

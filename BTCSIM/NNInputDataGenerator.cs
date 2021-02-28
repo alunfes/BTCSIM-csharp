@@ -172,15 +172,26 @@ namespace BTCSIM
                 input_data.Add(0);
             }
 
+            //holding size
+            //assumed max amount = 5
+            var max_amount = 5;
+            for (int j=0; j<max_amount; j++)
+            {
+                if (ac.holding_data.holding_size > j)
+                    input_data.Add(1);
+                else
+                    input_data.Add(0);
+            }
+
 
             //unrealized_pl = amount * (price - holding_price)
             //(price - holding_price) / holding_price  <-目的式
             //(unrealized_pl / amount) / holding_price
-            //1-20%の損益率を20unitで表現する。
+            //-20 - 20%の損益率を20unitで表現する。
             var pl_ratio = 100.0 * (ac.performance_data.unrealized_pl / ac.holding_data.holding_size) / (ac.holding_data.holding_price);
             for(int j=1; j<21; j++)
             {
-                if (pl_ratio >= j * 1.0)
+                if (pl_ratio >= -20 + (j * 2.0))
                     input_data.Add(1);
                 else
                     input_data.Add(0);
