@@ -4,6 +4,9 @@ using System.IO;
 using System.Diagnostics;
 using System.Linq;
 
+using System.Text;
+
+
 namespace BTCSIM
 {
     static public class MarketData
@@ -569,5 +572,23 @@ namespace BTCSIM
         }
 
 
+
+        static public void writeData()
+        {
+            Console.WriteLine("Writing MarketData to MarketData.csv");
+            using (StreamWriter sw = new StreamWriter(@"./MarketData.csv", false, Encoding.UTF8))
+            {
+                var cols = new string[] { "Divergence_minmax_scale", "vola_kyori_minmax_scale", "vol_ma_divergence_minmax_scale", "buysell_vol_ratio_minmax_scale", "rsi_scale", "uwahige_scale", "shitahige_scale" };
+                sw.WriteLine("dt,"+string.Join(",", cols));
+                for (int i=0; i<100; i++)
+                {
+                    var num = dt.Count - 100 + i;
+                    var line = Dt[num].ToString() + "," + Divergence_minmax_scale[num][0].ToString() + ","+Volakyori_minmax_scale[num][0].ToString() + "," + vol_ma_divergence_minmax_scale[num][0].ToString() +
+                        "," + Buysell_vol_ratio_minmax_scale[num][0].ToString() + "," + Rsi_scale[num][0].ToString() + "," + Uwahige_scale[num][0].ToString() + "," + Shitahige_scale[num][0].ToString();
+                    sw.WriteLine(line);
+                }
+            }
+            Console.WriteLine("Completed Write MarketData.");
+        }
     }
 }

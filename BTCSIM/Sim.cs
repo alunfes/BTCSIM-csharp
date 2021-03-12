@@ -21,7 +21,7 @@ namespace BTCSIM
             for (int i = from; i < to; i++)
             {
                 var nn_inputs = nn_input_data_generator.generateNNInputData(ac, i);
-                var nn_outputs = nn.calcNN(nn_inputs, chromo.num_units, chromo, 1);
+                var nn_outputs = nn.calcNN(nn_inputs, chromo, 1);
                 var pred = nn.getActivatedUnit(nn_outputs);
                 var actions = strategy.GAStrategy(pred, amount, ac);
                 for (int j = 0; j < actions.action.Count; j++)
@@ -45,7 +45,7 @@ namespace BTCSIM
             for (int i = from; i < to; i++)
             {
                 var nn_inputs = nn_input_data_generator.generateNNInputDataLimit(ac, i, chromo.num_index);
-                var nn_outputs = nn.calcNN(nn_inputs, chromo.num_units, chromo, 1);
+                var nn_outputs = nn.calcNN(nn_inputs, chromo, 1);
                 var pred = nn.getActivatedUnit(nn_outputs);
                 var actions = strategy.GALimitStrategy2(i, pred, amount, max_amount, ac);
 
@@ -91,7 +91,7 @@ namespace BTCSIM
                 }
 
                 var nn_inputs = nn_input_data_generator.generateNNInputDataLimit(ac, i, chromo.num_index);
-                var nn_outputs = nn.calcNN(nn_inputs, chromo.num_units, chromo, 1);
+                var nn_outputs = nn.calcNN(nn_inputs, chromo, 1);
                 var pred = nn.getActivatedUnitLimitMarket(nn_outputs, nn_threshold);
                 var actions = strategy.GALimitMarketStrategy(i, pred, amount, max_amount, ac);
 

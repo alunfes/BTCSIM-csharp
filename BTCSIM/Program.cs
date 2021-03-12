@@ -70,7 +70,6 @@ namespace BTCSIM
                 return ga.sim_ga_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString() + ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1] + ", Best Island=" + best_island_id.ToString(), display_chart);
             else
                 return ga.sim_ga_market_limit(from, to, max_amount, chromo, from.ToString() + " - " + to.ToString() + ", dt:" + MarketData.Dt[from].ToString() + " - " + MarketData.Dt[to - 1] + ", Best Island=" + best_island_id.ToString(), display_chart, nn_threshold);
-            Thread.Sleep(3);
         }
 
         private static int doGA(int from, int to, int max_amount,  int num_island, int num_chromo, int num_generation, int banned_move_period, int[] units, double mutation_rate, double move_ratio,  int[] index, bool display_chart, double nn_threshold)
@@ -106,8 +105,9 @@ namespace BTCSIM
                 Console.WriteLine("\"sim\" : read sim");
                 Console.WriteLine("\"mul ga\" : multi strategy ga");
                 Console.WriteLine("\"mul sim\" : multi strategy sim");
+                Console.WriteLine("\"write\" : write MarketData");
                 key = Console.ReadLine();
-                if (key == "ga" || key == "sim" || key == "mul ga" || key == "mul sim")
+                if (key == "ga" || key == "sim" || key == "mul ga" || key == "mul sim" || key == "write")
                     break;
             }
 
@@ -118,12 +118,12 @@ namespace BTCSIM
             for (int i = 10; i < 1000; i = i + 100) { terms.Add(i); }
             MarketData.initializer(terms);
 
-            var from = 1000;
-            var to = 501000;
-            int max_amount = 5;
+            var from = 501000;
+            var to = MarketData.Close.Count-1;
+            int max_amount = 3;
             var index = new int[] { 0, 0, 0, 1 ,1, 0, 0};
             double nn_threshold = 0.5;
-            int best_island_id = 1;
+            int best_island_id = 4;
             bool display_chart = true;
             var sim_type = 1; //0:limit, 1:market/limit
 
@@ -139,7 +139,7 @@ namespace BTCSIM
                 int num_chromos = 4;
                 int num_generations = 20;
                 int banned_move_period = 2;
-                var units = new int[] { 69, 5, 5, 5, 5 };
+                var units = new int[] { 67, 5, 5, 5, 5 };
                 var mutation_rate = 0.5;
                 var move_ratio = 0.2;
                 best_island_id = doGA(from, to, max_amount, num_island, num_chromos, num_generations, banned_move_period, units, mutation_rate, move_ratio, index, display_chart, nn_threshold);
@@ -149,13 +149,13 @@ namespace BTCSIM
             //multi strategy combination sim
             else if (key == "mul ga")
             {
-                var index_list = new List<int[]> { new int[] { 0, 0, 0, 1, 1, 0, 0 }, new int[] { 0, 0, 0, 1, 1, 0, 0 } };
-                var units_list = new List<int[]> { new int[] { 37, 5, 5, 5, 5 }, new int[] { 17, 5, 5, 5 }};
+                var index_list = new List<int[]> { new int[] { 0, 0, 0, 1, 1, 0, 0 }, new int[] { 0, 0, 0, 0, 1, 1, 1 } };
+                var units_list = new List<int[]> { new int[] { 77, 5, 5, 5, 5 }, new int[] { 77, 5, 5, 5, 5 }};
                 var best_pl_list = new List<List<double>>();
                 var best_ac_list = new List<SimAccount>();
                 int num_island = 2;
                 int num_chromos = 4;
-                int num_generations = 60;
+                int num_generations = 3;
                 int banned_move_period = 2;
                 var mutation_rate = 0.5;
                 var move_ratio = 0.2;
@@ -189,6 +189,11 @@ namespace BTCSIM
                 }
                 doMultiSim(from, to, max_amount, id_list, true, nn_threshold_list);
             }
+            else if (key == "write")
+            {
+                MarketData.writeData();
+            }
+
             stopWatch.Stop();
             Console.WriteLine("Completed all processes.");
             Console.WriteLine("Time Elapsed (sec)=" + stopWatch.Elapsed.TotalSeconds.ToString());

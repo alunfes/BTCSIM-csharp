@@ -225,7 +225,7 @@ namespace BTCSIM
             var otype = nn_output[1] == 0 ? "market" : "limit";
             var buy_entry_price = MarketData.Bid[i]; //- 0.5;
             var sell_entry_price = MarketData.Ask[i];// + 0.5;
-            var update_price_kijun = 50;
+            var update_price_kijun = 10;
 
             //check invalid situation
             if (ac.holding_data.holding_size > max_amount)

@@ -331,7 +331,10 @@ namespace BTCSIM
             Console.WriteLine("pl=" + ac_master.performance_data.total_pl / Convert.ToDouble(ac_list.Count));
             Console.WriteLine("num trade=" + ac_master.performance_data.num_trade / Convert.ToDouble(ac_list.Count));
             Console.WriteLine("num market order=" + ac_master.performance_data.num_maker_order);
-            Console.WriteLine("win rate=" + ac_master.performance_data.num_win / ac_master.performance_data.num_trade);
+            if (ac_master.performance_data.num_trade > 0)
+                Console.WriteLine("win rate=" + ac_master.performance_data.num_win / ac_master.performance_data.num_trade);
+            else
+                Console.WriteLine("win rate=" + "0");
             Console.WriteLine("num_buy=" + ac_master.performance_data.num_buy);
             Console.WriteLine("num_sell=" + ac_master.performance_data.num_sell);
             Console.WriteLine("buy_pl=" + buy_pl_sum);

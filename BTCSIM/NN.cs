@@ -33,7 +33,9 @@ namespace BTCSIM
             return res;
         }
 
-        public double[] calcNN(double[] input_vals, int[] num_units, Gene2 chromo, int activation)
+
+
+        public double[] calcNN(double[] input_vals, Gene2 chromo, int activation)
         {
             if (input_vals.Contains(Double.NaN))
             {
@@ -49,6 +51,8 @@ namespace BTCSIM
             }
             return calcWeights(inputs, chromo, chromo.weight_gene.Count - 1, 0);
         }
+
+
 
         public int getActivatedUnit(double[] output_vals)
         {
@@ -68,6 +72,7 @@ namespace BTCSIM
             }
             return max_ind;
         }
+
 
         //nn_output = "no", "buy", "sell", "cancel", "Market / Limit"
         /*int[action, order_type]
