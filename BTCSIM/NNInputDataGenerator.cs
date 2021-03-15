@@ -16,7 +16,7 @@ namespace BTCSIM
             //foreach (var d in MarketData.Divergence_minmax_scale[i])
             //    input_data.Add(d);
             //vola_kyori
-            
+
             //ac holding side
             if (ac.holding_data.holding_side == "buy")
             {
@@ -49,7 +49,7 @@ namespace BTCSIM
                 //unrealized_pl = amount * (price - holding_price)
                 //(price - holding_price) / holding_price  <-目的式
                 //(unrealized_pl / amount) / holding_price
-                input_data.Add((ac.performance_data.unrealized_pl / ac.holding_data.holding_size) / (ac.holding_data.holding_price) );
+                input_data.Add((ac.performance_data.unrealized_pl / ac.holding_data.holding_size) / (ac.holding_data.holding_price));
                 input_data.Add(0);
             }
             else
@@ -132,7 +132,7 @@ namespace BTCSIM
             //order side
             if (ac.order_data.order_side.Count > 0)
             {
-                if (ac.order_data.getLastOrderSide()=="buy")
+                if (ac.order_data.getLastOrderSide() == "buy")
                 {
                     input_data.Add(1);
                     input_data.Add(0);
@@ -175,7 +175,7 @@ namespace BTCSIM
             //holding size
             //assumed max amount = 5
             var max_amount = 3;
-            for (int j=0; j<max_amount; j++)
+            for (int j = 0; j < max_amount; j++)
             {
                 if (ac.holding_data.holding_size > j)
                     input_data.Add(1);
@@ -189,7 +189,7 @@ namespace BTCSIM
             //(unrealized_pl / amount) / holding_price
             //-20 - 20%の損益率を20unitで表現する。
             var pl_ratio = ac.holding_data.holding_size > 0 ? 100.0 * (ac.performance_data.unrealized_pl / ac.holding_data.holding_size) / (ac.holding_data.holding_price) : 0;
-            for(int j=1; j<21; j++)
+            for (int j = 1; j < 21; j++)
             {
                 if (pl_ratio >= -20 + (j * 2.0))
                     input_data.Add(1);
@@ -198,7 +198,7 @@ namespace BTCSIM
             }
 
             //holding period
-            for (int j =1; j<21; j++)
+            for (int j = 1; j < 21; j++)
             {
                 if (ac.holding_data.holding_period >= j * 10)
                     input_data.Add(1);
@@ -207,6 +207,16 @@ namespace BTCSIM
             }
 
             return input_data.ToArray();
+        }
+
+
+        /*
+         * 直近一定期間のraw dataをminmax scaleしたデータを入力に使う。
+         */
+        public double[] generateNNInputRawData(SimAccount ac, int i, int[] index)
+        {
+            var input_data = new List<double>();
+            return input_data.ToArray(); ;
         }
     }
 }

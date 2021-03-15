@@ -41,6 +41,11 @@ namespace BTCSIM
             {
                 Console.WriteLine("NN-calcNN: nan in included in input_vals !");
             }
+            if(input_vals.Length != chromo.num_units[0])
+            {
+                Console.WriteLine("NN-calcNN: # of input_data is not matched with # of first layer units !");
+                Console.WriteLine("input_vals=" + input_vals.Length.ToString() + ",  units=" + chromo.num_units[0].ToString());
+            }
             //input layer
             var inputs = calcWeights(input_vals, chromo, 0, activation);
             //middle layers

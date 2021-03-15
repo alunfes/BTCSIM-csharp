@@ -1,13 +1,13 @@
 ﻿<Properties GitUserInfo="UsingGIT" StartupConfiguration="{3C1E82C7-9D21-4A51-B1E2-6C8D37DD4747}|Default">
   <MonoDevelop.Ide.ItemProperties.BTCSIM PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="BTCSIM/SimAccount.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="BTCSIM/NNInputDataGenerator.cs">
     <Files>
-      <File FileName="BTCSIM/Program.cs" Line="203" Column="1" />
+      <File FileName="BTCSIM/Program.cs" Line="142" Column="54" />
       <File FileName="BTCSIM/RandomGenerator.cs" />
       <File FileName="BTCSIM/Strategy.cs" />
-      <File FileName="BTCSIM/SimAccount.cs" Line="12" Column="1" />
+      <File FileName="BTCSIM/SimAccount.cs" />
       <File FileName="BTCSIM/MarketData.cs" />
-      <File FileName="BTCSIM/NNInputDataGenerator.cs" />
+      <File FileName="BTCSIM/NNInputDataGenerator.cs" Line="195" Column="39" />
       <File FileName="BTCSIM/NN.cs" />
       <File FileName="BTCSIM/GA.cs" />
       <File FileName="BTCSIM/GAIsland.cs" />

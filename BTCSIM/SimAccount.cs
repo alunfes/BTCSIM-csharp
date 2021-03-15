@@ -284,6 +284,23 @@ namespace BTCSIM
             total_pl_ratio_list.Add(performance_data.total_pl_ratio);
         }
 
+        public void last_day(int i, string dt, double close)
+        {
+            if (holding_data.holding_side !== "")
+            {
+                calc_executed_pl(close, holding_data.holding_size, i);
+                holding_data = new HoldingData();
+                order_data = new OrderData();
+                performance_data.total_pl = performance_data.realized_pl + performance_data.unrealized_pl - performance_data.total_fee;
+                performance_data.total_pl_ratio = performance_data.total_pl / close;
+                if (performance_data.num_trade > 0)
+                    performance_data.win_rate = Math.Round(Convert.ToDouble(performance_data.num_win) / Convert.ToDouble(performance_data.num_trade), 4);
+                total_pl_list.Add(performance_data.total_pl);
+                total_pl_ratio_list.Add(performance_data.total_pl_ratio);
+            }
+
+        }
+
         public void entry_order(string type, string side, double size, double price, int i, string dt, string message)
         {
             if (size > 0 && (side =="buy" || side=="sell"))
