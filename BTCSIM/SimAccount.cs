@@ -286,11 +286,12 @@ namespace BTCSIM
 
         public void last_day(int i, string dt, double close)
         {
-            if (holding_data.holding_side !== "")
+            if (holding_data.holding_side != "")
             {
                 calc_executed_pl(close, holding_data.holding_size, i);
                 holding_data = new HoldingData();
                 order_data = new OrderData();
+                performance_data.unrealized_pl = 0;
                 performance_data.total_pl = performance_data.realized_pl + performance_data.unrealized_pl - performance_data.total_fee;
                 performance_data.total_pl_ratio = performance_data.total_pl / close;
                 if (performance_data.num_trade > 0)

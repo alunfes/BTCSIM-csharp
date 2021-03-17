@@ -105,9 +105,10 @@ namespace BTCSIM
                 Console.WriteLine("\"sim\" : read sim");
                 Console.WriteLine("\"mul ga\" : multi strategy ga");
                 Console.WriteLine("\"mul sim\" : multi strategy sim");
+                Console.WriteLine("\"conti\" : do ga / sim continuously");
                 Console.WriteLine("\"write\" : write MarketData");
                 key = Console.ReadLine();
-                if (key == "ga" || key == "sim" || key == "mul ga" || key == "mul sim" || key == "write")
+                if (key == "ga" || key == "sim" || key == "mul ga" || key == "mul sim" || key == "conti" || key == "write")
                     break;
             }
 
@@ -188,6 +189,33 @@ namespace BTCSIM
                     nn_threshold_list.Add(nn_threshold);
                 }
                 doMultiSim(from, to, max_amount, id_list, true, nn_threshold_list);
+            }
+            else if (key == "conti")
+            {
+                int num_island = 2;
+                int num_chromos = 4;
+                int num_generations = 20;
+                int banned_move_period = 2;
+                var units = new int[] { 67, 5, 5, 5, 5 };
+                var mutation_rate = 0.5;
+                var move_ratio = 0.2;
+                var sim_period = 5000;
+                var ga_period = 10000;
+                var conti_from = from;
+                var ac_list = new List<SimAccount>();
+                var all_pl_list = new List<double>();
+                var all_num_trade = 0;
+
+                while(to > sim_period + ga_period + conti_from)
+                {
+                    best_island_id = doGA(conti_from, conti_from+ga_period, max_amount, num_island, num_chromos, num_generations, banned_move_period, units, mutation_rate, move_ratio, index, display_chart, nn_threshold);
+                    ac_list.Add(doSim(conti_from + ga_period, conti_from + ga_period + sim_period, max_amount, sim_type, best_island_id, index, true, nn_threshold));
+                    foreach (var p in ac_list.Last().total_pl_list)
+                        all_pl_list.Add(all_pl_list.Last() + p);
+                    all_num_trade += ac_list.Last().performance_data.num_trade;
+                }
+                Console.WriteLine("Total pl =" + all_pl_list.Last().ToString() + ", num trade=" + all_num_trade.ToString());
+                LineChart.DisplayLineChart(all_pl_list, "from=" + (from + ga_period).ToString() + ", to="+(conti_from + ga_period + sim_period).ToString() + ", Total pl =" + all_pl_list.Last().ToString() + ", num trade="+all_num_trade.ToString());
             }
             else if (key == "write")
             {

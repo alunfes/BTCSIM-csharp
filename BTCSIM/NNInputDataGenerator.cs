@@ -212,6 +212,7 @@ namespace BTCSIM
 
         /*
          * 直近一定期間のraw dataをminmax scaleしたデータを入力に使う。
+         * 
          */
         public double[] generateNNInputRawData(SimAccount ac, int i, int[] index)
         {
