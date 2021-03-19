@@ -117,6 +117,7 @@
     <Compile Include="NNInputDataGenerator.cs" />
     <Compile Include="SImGA.cs" />
     <Compile Include="GAIsland.cs" />
+    <Compile Include="WinSim.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

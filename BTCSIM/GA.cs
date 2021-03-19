@@ -345,6 +345,43 @@ namespace BTCSIM
         }
 
 
+        public void start_island_win_ga(int from, int to, List<int[]> sim_windows, int num_chromos, int generation_ind, int[] units, double mutation_rate, double nn_threshold, int[] index)
+        {
+            if (generation_ind == 0)
+                generate_chromos(num_chromos, units, index);
+            var eva_dic = new ConcurrentDictionary<int, double>();
+            var ac_dic = new ConcurrentDictionary<int, SimAccount>();
+            var option = new ParallelOptions();
+            option.MaxDegreeOfParallelism = System.Environment.ProcessorCount;
+            /*
+            Parallel.For(0, chromos.Length, option, j =>
+            {
+                (double total_pl, SimAccount ac) res = evaluation(from, to, max_amount, j, chromos[j], sim_type, nn_threshold, index);
+                eva_dic.GetOrAdd(j, res.total_pl);
+                ac_dic.GetOrAdd(j, res.ac);
+            });
+            */
+            //Console.WriteLine("island No."+island_id.ToString() + ", eva time="+sw.Elapsed.Seconds.ToString());
+            for (int k = 0; k < chromos.Length; k++)
+            {
+                (double total_pl, SimAccount ac) res = evaluationSimWin(from, to, sim_windows, k, chromos[k], nn_threshold);
+                eva_dic.GetOrAdd(k, res.total_pl);
+                ac_dic.GetOrAdd(k, res.ac);
+            }
+            //check best eva
+            check_best_eva(eva_dic, ac_dic);
+            //roulette selection
+            var selected_chro_ind_list = roulette_selection(eva_dic);
+            //cross over
+            crossover(selected_chro_ind_list, 0.3);
+            //mutation
+            mutation(mutation_rate, -10, 10);
+            write_best_chromo();
+            eva_dic = null;
+            ac_dic = null;
+        }
+
+
         public void start_island_ga(int from, int to, int max_amount, int num_chromos, int generation_ind, int[] units, double mutation_rate, int sim_type, double nn_threshold, int[] index)
         {
             if (generation_ind == 0)
@@ -458,7 +495,16 @@ namespace BTCSIM
             return (eva, ac);
         }
 
-        private double calcSquareError(List<double> data, int num_trade)
+        private (double, SimAccount) evaluationSimWin(int from, int to, List<int[]> sim_windows, int chro_id, Gene2 chro, double nn_threshold)
+        {
+            var ac = new SimAccount();
+            var sim_win = new WinSim();
+            ac = sim_win.sim_win_market(from, to, sim_windows, chro, ac, nn_threshold);
+            return (ac.performance_data.total_pl, ac);
+        }
+
+
+            private double calcSquareError(List<double> data, int num_trade)
         {
             var res = 0.0;
             if (num_trade > 0)

@@ -81,6 +81,15 @@ namespace BTCSIM
             return ga_island.best_island;
         }
 
+        private static int doWinGA(int from, int to, int num_random_windows, int num_island, int num_chromo, int num_generation, int banned_move_period, int[] units, double mutation_rate, double move_ratio, int[] index, bool display_chart, double nn_threshold)
+        {
+            Console.WriteLine("Started Island Win GA SIM");
+            RandomSeed.initialize();
+            var ga_island = new GAIsland();
+            ga_island.start_win_ga_island(from, to, num_random_windows, num_island, banned_move_period, move_ratio, num_chromo, num_generation, units, mutation_rate, nn_threshold, index);
+            return ga_island.best_island;
+        }
+
         private static SimAccount doMultiSim(int from, int to, int max_amount, List<int> best_chrom_log_id, bool display_chart, List<double> nn_threshold)
         {
             Console.WriteLine("Started Multi SIM");
@@ -106,11 +115,22 @@ namespace BTCSIM
                 Console.WriteLine("\"mul ga\" : multi strategy ga");
                 Console.WriteLine("\"mul sim\" : multi strategy sim");
                 Console.WriteLine("\"conti\" : do ga / sim continuously");
+                Console.WriteLine("\"win ga\" : do win ga");
                 Console.WriteLine("\"write\" : write MarketData");
+                Console.WriteLine("\"test\" : test");
                 key = Console.ReadLine();
-                if (key == "ga" || key == "sim" || key == "mul ga" || key == "mul sim" || key == "conti" || key == "write")
+                if (key == "ga" || key == "sim" || key == "mul ga" || key == "mul sim" || key == "win ga" || key == "conti" || key == "win ga" || key == "write" || key == "test")
                     break;
             }
+
+            if (key=="test")
+            {
+                RandomSeed.initialize();
+                for(int i=0; i<100; i++)
+                    Console.WriteLine(RandomSeed.rnd.Next());
+                Environment.Exit(0);
+            }
+
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
@@ -119,11 +139,11 @@ namespace BTCSIM
             for (int i = 10; i < 1000; i = i + 100) { terms.Add(i); }
             MarketData.initializer(terms);
 
-            var from = 501000;
-            var to = MarketData.Close.Count-1;
+            var from = 1000;
+            var to = 50100;//MarketData.Close.Count-1;
             int max_amount = 3;
             var index = new int[] { 0, 0, 0, 1 ,1, 0, 0};
-            double nn_threshold = 0.5;
+            double nn_threshold = 0.3;
             int best_island_id = 4;
             bool display_chart = true;
             var sim_type = 1; //0:limit, 1:market/limit
@@ -190,6 +210,22 @@ namespace BTCSIM
                 }
                 doMultiSim(from, to, max_amount, id_list, true, nn_threshold_list);
             }
+            else if (key == "win ga")
+            {
+                int num_island = 2;
+                int num_chromos = 4;
+                int num_generations = 20;
+                int banned_move_period = 2;
+                int num_random_windows = 10;
+                index = new int[] { 0, 0, 0, 1, 0, 0, 0 };
+                var units = new int[] { 10, 30, 5, 3 };
+                var mutation_rate = 0.5;
+                var move_ratio = 0.2;
+
+                best_island_id = doWinGA(from, to, num_random_windows, num_island, num_chromos, num_generations, banned_move_period, units, mutation_rate, move_ratio, index, display_chart, nn_threshold);
+                //doSim(from, to, max_amount, sim_type, best_island_id, index, display_chart, nn_threshold);
+                //doSim(to, MarketData.Close.Count - 1, max_amount, sim_type, best_island_id, index, display_chart, nn_threshold);
+            }
             else if (key == "conti")
             {
                 int num_island = 2;
@@ -204,6 +240,7 @@ namespace BTCSIM
                 var conti_from = from;
                 var ac_list = new List<SimAccount>();
                 var all_pl_list = new List<double>();
+                all_pl_list.Add(0);
                 var all_num_trade = 0;
 
                 while(to > sim_period + ga_period + conti_from)
@@ -213,6 +250,7 @@ namespace BTCSIM
                     foreach (var p in ac_list.Last().total_pl_list)
                         all_pl_list.Add(all_pl_list.Last() + p);
                     all_num_trade += ac_list.Last().performance_data.num_trade;
+                    conti_from += sim_period;
                 }
                 Console.WriteLine("Total pl =" + all_pl_list.Last().ToString() + ", num trade=" + all_num_trade.ToString());
                 LineChart.DisplayLineChart(all_pl_list, "from=" + (from + ga_period).ToString() + ", to="+(conti_from + ga_period + sim_period).ToString() + ", Total pl =" + all_pl_list.Last().ToString() + ", num trade="+all_num_trade.ToString());

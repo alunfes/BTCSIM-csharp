@@ -126,8 +126,7 @@ namespace BTCSIM
                     input_data.Add(d);
             }
 
-            if (input_data.Contains(Double.NaN))
-                Console.WriteLine("NNInputDataGenerator: Nan is included !");
+            
 
             //order side
             if (ac.order_data.order_side.Count > 0)
@@ -206,18 +205,64 @@ namespace BTCSIM
                     input_data.Add(0);
             }
 
+            if (input_data.Contains(Double.NaN))
+                Console.WriteLine("NNInputDataGenerator: Nan is included !");
             return input_data.ToArray();
         }
 
 
-        /*
-         * 直近一定期間のraw dataをminmax scaleしたデータを入力に使う。
-         * 
-         */
-        public double[] generateNNInputRawData(SimAccount ac, int i, int[] index)
+
+        //
+        public double[] generateNNWinGA(int i, int[] index)
         {
             var input_data = new List<double>();
-            return input_data.ToArray(); ;
+
+            //Divergence_minmax_scale
+            if (index[0] == 1)
+            {
+                foreach (var d in MarketData.Divergence_minmax_scale[i])
+                    input_data.Add(d);
+            }
+            //vola_kyori_minmax_scale
+            if (index[1] == 1)
+            {
+                foreach (var d in MarketData.Volakyori_minmax_scale[i])
+                    input_data.Add(d);
+            }
+            //vol ma divergence minmax scale
+            if (index[2] == 1)
+            {
+                foreach (var d in MarketData.Vol_ma_divergence_minmax_scale[i])
+                    input_data.Add(d);
+            }
+            //buy sell vol ratio
+            if (index[3] == 1)
+            {
+                foreach (var d in MarketData.Buysell_vol_ratio_minmax_scale[i])
+                    input_data.Add(d);
+            }
+            //rsi
+            if (index[4] == 1)
+            {
+                foreach (var d in MarketData.Rsi_scale[i])
+                    input_data.Add(d);
+            }
+            //uwahige
+            if (index[5] == 1)
+            {
+                foreach (var d in MarketData.Uwahige_scale[i])
+                    input_data.Add(d);
+            }
+            //shitahige
+            if (index[6] == 1)
+            {
+                foreach (var d in MarketData.Shitahige_scale[i])
+                    input_data.Add(d);
+            }
+
+            if (input_data.Contains(Double.NaN))
+                Console.WriteLine("NNInputDataGenerator: Nan is included !");
+            return input_data.ToArray();
         }
     }
 }

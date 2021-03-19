@@ -30,6 +30,44 @@ namespace BTCSIM
             move_ban_flg = true;
         }
 
+
+        public void start_win_ga_island(int from, int to, int num_random_windows, int num_island, int move_ban_period, double move_ratio, int num_chromos, int num_generations, int[] units, double mutation_rate, double nn_threshold, int[] index)
+        {
+            //generate sim_windows
+            var mid = Convert.ToInt32(Math.Round((to - from) / 2.0));
+            var quarter = Convert.ToInt32(Math.Round((to - from) / 4.0));
+            var sim_window = new List<int[]>() { new int[] { from, to }, new int[] { from, from + mid }, new int[] { from + mid, to }, new int[] { from, from + quarter }, new int[] { from + quarter, from + quarter * 2 }, new int[] { from + quarter * 2, from + quarter * 3 }, new int[] { from + quarter * 3, to } };
+            for (int i = 0; i < num_random_windows; i++)
+            {
+                var start = RandomSeed.rnd.Next(from, to - 500);
+                sim_window.Add(new int[] { start, RandomSeed.rnd.Next(start, to + 1) });
+            }
+
+            var sww = new Stopwatch();
+            this.move_ban_period = move_ban_period;
+            //initialize GS in each island
+            for (int i = 0; i < num_island; i++)
+                gas.Add(new GA(i));
+            //do GA calc for move_ban_period
+            for (int i = 0; i < num_generations; i++)
+            {
+                sww.Start();
+                for (int j = 0; j < num_island; j++)
+                {
+                    gas[j].start_island_win_ga(from, to, sim_window, num_chromos, i, units, mutation_rate, nn_threshold, index);
+                }
+                checkBestIsland();
+                sww.Stop();
+                display_info(i, sww);
+                resetIslandsMoveBanControl(i);
+                if (move_ban_flg == false)
+                    moveBetweenIsland(move_ratio);
+                sww.Reset();
+            }
+            Console.WriteLine("Completed Win GA");
+        }
+
+
         /*それぞれのislandでchromosを初期化する
          *0番目のislandからGA計算を開始して、全ての染色体の評価と次世代生成までを行う
          *全てのislandの計算が終わったら同じように次世代の計算を0番目のislandから行う。

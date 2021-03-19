@@ -109,5 +109,27 @@ namespace BTCSIM
             res.Add(otype);
             return res;
         }
+
+        //nn_output = 0:"no", 1:"market buy", 2:"market sell"
+        public int getActivatedUnitOnlyBuySell(double[] output_vals, double threshold)
+        {
+            double maxv = 0.0;
+            int max_ind = -1;
+            for (int i = 0; i < output_vals.Length - 1; i++)
+            {
+                if (maxv < output_vals[i])
+                {
+                    maxv = output_vals[i];
+                    max_ind = i;
+                }
+            }
+            if (max_ind < 0)
+            {
+                Console.WriteLine("NN-getActivatedUnit: Invalid output val !");
+            }
+            if (output_vals[max_ind] < threshold)
+                max_ind = 0;
+            return max_ind;
+        }
     }
 }

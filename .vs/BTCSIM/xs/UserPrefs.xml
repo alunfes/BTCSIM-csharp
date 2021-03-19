@@ -1,18 +1,19 @@
 ﻿<Properties GitUserInfo="UsingGIT" StartupConfiguration="{3C1E82C7-9D21-4A51-B1E2-6C8D37DD4747}|Default">
   <MonoDevelop.Ide.ItemProperties.BTCSIM PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="BTCSIM/Program.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="BTCSIM/WInSIm.cs">
     <Files>
-      <File FileName="BTCSIM/Program.cs" Line="214" Column="1" />
+      <File FileName="BTCSIM/Program.cs" Line="199" Column="34" />
       <File FileName="BTCSIM/RandomGenerator.cs" />
-      <File FileName="BTCSIM/Strategy.cs" />
+      <File FileName="BTCSIM/Strategy.cs" Line="228" Column="41" />
       <File FileName="BTCSIM/SimAccount.cs" />
       <File FileName="BTCSIM/MarketData.cs" />
-      <File FileName="BTCSIM/NNInputDataGenerator.cs" />
-      <File FileName="BTCSIM/NN.cs" />
-      <File FileName="BTCSIM/GA.cs" />
-      <File FileName="BTCSIM/GAIsland.cs" />
+      <File FileName="BTCSIM/NNInputDataGenerator.cs" Line="215" Column="11" />
+      <File FileName="BTCSIM/NN.cs" Line="114" Column="56" />
+      <File FileName="BTCSIM/GA.cs" Line="434" Column="10" />
+      <File FileName="BTCSIM/GAIsland.cs" Line="26" Column="27" />
       <File FileName="BTCSIM/Sim.cs" />
       <File FileName="BTCSIM/LineChart.cs" Line="11" Column="44" />
+      <File FileName="BTCSIM/WInSIm.cs" Line="1" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
@@ -20,7 +21,7 @@
           <Node name="BTCSIM" expanded="True">
             <Node name="Solution Items" expanded="True" />
             <Node name="BTCSIM" expanded="True">
-              <Node name="Program.cs" selected="True" />
+              <Node name="WInSIm.cs" selected="True" />
             </Node>
           </Node>
         </State>
