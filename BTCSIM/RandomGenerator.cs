@@ -21,7 +21,7 @@ namespace BTCSIM
         {
             double[] res = new double[num];
             for (int i = 0; i < num; i++)
-                res[i] = (RandomSeed.rnd.Next(-100000, 100000)) / 10000.0;
+                res[i] = (RandomSeed.rnd.Next(-10000, 10000)) / 10000.0;
             //res[i] = (RandomSeed.rnd.NextDouble() * 2.0) - 1.0;
             return res;
         }

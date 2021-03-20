@@ -61,7 +61,7 @@ namespace BTCSIM
 
     class MainClass
     {
-        private static SimAccount doSim(int from, int to, int max_amount, int sim_type, int best_island_id, int[] index, bool display_chart, double nn_threshold)
+        private static SimAccount doSim(int from, int to, int max_amount, int sim_type, int best_island_id, bool display_chart, double nn_threshold)
         {
             Console.WriteLine("Started Read Weight SIM");
             var ga = new GA(0);
@@ -88,6 +88,31 @@ namespace BTCSIM
             var ga_island = new GAIsland();
             ga_island.start_win_ga_island(from, to, num_random_windows, num_island, banned_move_period, move_ratio, num_chromo, num_generation, units, mutation_rate, nn_threshold, index);
             return ga_island.best_island;
+        }
+
+        private static SimAccount doWinSim(int from, int to, int best_island_id, bool display_chart, double nn_threshold)
+        {
+            Console.WriteLine("Started Read Weight Win SIM");
+            var ga = new GA(0);
+            var chromo = ga.readWeights(best_island_id, false);
+            var sim = new Sim();
+            var ac = new SimAccount();
+            ac = sim.sim_win_ga_market(from, to, chromo, ac, nn_threshold);
+
+            Console.WriteLine("pl=" + ac.performance_data.total_pl);
+            Console.WriteLine("pl ratio=" + ac.performance_data.total_pl_ratio);
+            Console.WriteLine("num trade=" + ac.performance_data.num_trade);
+            Console.WriteLine("num market order=" + ac.performance_data.num_maker_order);
+            Console.WriteLine("win rate=" + ac.performance_data.win_rate);
+            Console.WriteLine("sharp_ratio=" + ac.performance_data.sharp_ratio);
+            Console.WriteLine("num_buy=" + ac.performance_data.num_buy);
+            Console.WriteLine("num_sell=" + ac.performance_data.num_sell);
+            Console.WriteLine("buy_pl=" + ac.performance_data.buy_pl_list.Sum());
+            Console.WriteLine("sell_pl=" + ac.performance_data.sell_pl_list.Sum());
+            if (display_chart)
+                LineChart.DisplayLineChart(ac.total_pl_list, "from=" + from.ToString() + ", to=" + to.ToString() + ", pl=" + ac.performance_data.total_pl.ToString() + ", num_trade="+ac.performance_data.num_trade.ToString()) ;
+            return ac;
+
         }
 
         private static SimAccount doMultiSim(int from, int to, int max_amount, List<int> best_chrom_log_id, bool display_chart, List<double> nn_threshold)
@@ -140,8 +165,8 @@ namespace BTCSIM
             MarketData.initializer(terms);
 
             var from = 1000;
-            var to = 50100;//MarketData.Close.Count-1;
-            int max_amount = 3;
+            var to = 501000;//MarketData.Close.Count-1;
+            int max_amount = 1;
             var index = new int[] { 0, 0, 0, 1 ,1, 0, 0};
             double nn_threshold = 0.3;
             int best_island_id = 4;
@@ -151,7 +176,7 @@ namespace BTCSIM
             //read weight sim
             if (key == "sim")
             {
-                var ac = doSim(from, to, max_amount, sim_type, best_island_id, index, display_chart, nn_threshold);
+                var ac = doSim(from, to, max_amount, sim_type, best_island_id, display_chart, nn_threshold);
             }
             //island ga
             else if (key == "ga")
@@ -164,8 +189,8 @@ namespace BTCSIM
                 var mutation_rate = 0.5;
                 var move_ratio = 0.2;
                 best_island_id = doGA(from, to, max_amount, num_island, num_chromos, num_generations, banned_move_period, units, mutation_rate, move_ratio, index, display_chart, nn_threshold);
-                doSim(from, to, max_amount, sim_type, best_island_id, index, display_chart, nn_threshold);
-                doSim(to, MarketData.Close.Count-1, max_amount, sim_type, best_island_id, index, display_chart, nn_threshold);
+                doSim(from, to, max_amount, sim_type, best_island_id, display_chart, nn_threshold);
+                doSim(to, MarketData.Close.Count-1, max_amount, sim_type, best_island_id, display_chart, nn_threshold);
             }
             //multi strategy combination sim
             else if (key == "mul ga")
@@ -185,7 +210,7 @@ namespace BTCSIM
                 for (int i = 0; i < index_list.Count; i++)
                 {
                     best_island_id = doGA(from, to, max_amount, num_island, num_chromos, num_generations, banned_move_period, units_list[i], mutation_rate, move_ratio, index_list[i], display_chart, nn_threshold);
-                    var ac = doSim(from, to, max_amount, sim_type, best_island_id, index_list[i], display_chart, nn_threshold);
+                    var ac = doSim(from, to, max_amount, sim_type, best_island_id, display_chart, nn_threshold);
                     best_pl_list.Add(ac.total_pl_ratio_list);
                     best_ac_list.Add(ac);
                     if (File.Exists(@"./log_best_weight_ID-" + i.ToString() + ".csv"))
@@ -223,8 +248,8 @@ namespace BTCSIM
                 var move_ratio = 0.2;
 
                 best_island_id = doWinGA(from, to, num_random_windows, num_island, num_chromos, num_generations, banned_move_period, units, mutation_rate, move_ratio, index, display_chart, nn_threshold);
-                //doSim(from, to, max_amount, sim_type, best_island_id, index, display_chart, nn_threshold);
-                //doSim(to, MarketData.Close.Count - 1, max_amount, sim_type, best_island_id, index, display_chart, nn_threshold);
+                doWinSim(from, to, best_island_id, true, nn_threshold);
+                doWinSim(to, MarketData.Close.Count-1, best_island_id, true, nn_threshold);
             }
             else if (key == "conti")
             {
@@ -246,7 +271,7 @@ namespace BTCSIM
                 while(to > sim_period + ga_period + conti_from)
                 {
                     best_island_id = doGA(conti_from, conti_from+ga_period, max_amount, num_island, num_chromos, num_generations, banned_move_period, units, mutation_rate, move_ratio, index, display_chart, nn_threshold);
-                    ac_list.Add(doSim(conti_from + ga_period, conti_from + ga_period + sim_period, max_amount, sim_type, best_island_id, index, true, nn_threshold));
+                    ac_list.Add(doSim(conti_from + ga_period, conti_from + ga_period + sim_period, max_amount, sim_type, best_island_id, true, nn_threshold));
                     foreach (var p in ac_list.Last().total_pl_list)
                         all_pl_list.Add(all_pl_list.Last() + p);
                     all_num_trade += ac_list.Last().performance_data.num_trade;

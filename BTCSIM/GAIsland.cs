@@ -217,10 +217,11 @@ namespace BTCSIM
                 + ", Best chromo No." + gas[best_island].best_chromo.ToString() + ", Best pl=" + gas[best_island].best_ac.performance_data.total_pl.ToString()
                 + ", Best num trade=" + gas[best_island].best_ac.performance_data.num_trade.ToString()
                 + ", Best win rate=" + gas[best_island].best_ac.performance_data.win_rate.ToString()
+                + ", Best ave pl=" + (gas[best_island].best_ac.performance_data.total_pl / gas[best_island].best_ac.performance_data.num_trade).ToString()
                 + ", Best sharp ratio = " + gas[best_island].best_ac.performance_data.sharp_ratio.ToString()
                 + ", Best buy pl = " + gas[best_island].best_ac.performance_data.buy_pl_list.Sum().ToString()
                 + ", Best sell pl = " + gas[best_island].best_ac.performance_data.sell_pl_list.Sum().ToString()
-                + ", Best num market order = " + gas[best_island].best_ac.performance_data.num_maker_order.ToString());
+                + ", Best num market order = " + gas[best_island].best_ac.performance_data.num_maker_order.ToString()) ;
             Console.WriteLine("Time Elapsed (sec)=" + sw.Elapsed.TotalSeconds.ToString());
             Console.WriteLine("---------------------------------------------------");
         }

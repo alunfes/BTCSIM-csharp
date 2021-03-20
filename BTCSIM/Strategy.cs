@@ -304,5 +304,34 @@ namespace BTCSIM
             }
             return ad;
         }
+
+
+        /*
+         buy / sellでエントリー or exitして、常にpositionを保有し続ける。
+        orderは全てmarket order
+         */
+        public StrategyActionData GAWinMarketStrategy(int i, int nn_output, SimAccount ac)
+        {
+            var ad = new StrategyActionData();
+            var output_action_list = new string[] { "no", "buy", "sell"};
+            var pred_side = output_action_list[nn_output];
+            var buy_entry_price = MarketData.Bid[i]; //- 0.5;
+            var sell_entry_price = MarketData.Ask[i];// + 0.5;
+            var otype = "market";
+            var amount = 1;
+
+
+            //1. New Entry
+            if (pred_side != "no" && ac.holding_data.holding_side == "")
+            {
+                ad.add_action("entry", pred_side, otype, pred_side == "buy" ? buy_entry_price : sell_entry_price, amount, -1, "1. New Entry");
+            }
+            //2.Exit Order
+            else if (pred_side != "no" && (ac.holding_data.holding_side != pred_side))
+            {
+                ad.add_action("entry", "", otype, pred_side == "buy" ? buy_entry_price : sell_entry_price, ac.holding_data.holding_size + amount, -1, "2. Eixt and Entry");
+            }
+            return ad;
+        }
     }
 }

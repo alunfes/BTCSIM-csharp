@@ -18,7 +18,7 @@ namespace BTCSIM
             int amount = 1;
             var nn_input_data_generator = new NNInputDataGenerator();
 
-            for (int i = from; i < to-1; i++)
+            for (int i = from; i < to - 1; i++)
             {
                 var nn_inputs = nn_input_data_generator.generateNNInputData(ac, i);
                 var nn_outputs = nn.calcNN(nn_inputs, chromo, 0);
@@ -43,7 +43,7 @@ namespace BTCSIM
             int amount = 1;
             var nn_input_data_generator = new NNInputDataGenerator();
 
-            for (int i = from; i < to-1; i++)
+            for (int i = from; i < to - 1; i++)
             {
                 var nn_inputs = nn_input_data_generator.generateNNInputDataLimit(ac, i, chromo.num_index);
                 var nn_outputs = nn.calcNN(nn_inputs, chromo, 0);
@@ -83,7 +83,7 @@ namespace BTCSIM
             var nn_input_data_generator = new NNInputDataGenerator();
             var zero_trade_check_point = 0.1; //to - fromの間のx%進捗した時にnum trade=0だったらsimを打ち切る。
 
-            for (int i = from; i < to-1; i++)
+            for (int i = from; i < to - 1; i++)
             {
                 //check num trade=0 discontinue sim
                 if (stop_no_trade && i - from > ((to - from) * zero_trade_check_point) && ac.performance_data.num_trade == 0)
@@ -122,5 +122,28 @@ namespace BTCSIM
         }
 
 
+        public SimAccount sim_win_ga_market(int from, int to, Gene2 chromo, SimAccount ac, double nn_threshold)
+        {
+            var nn = new NN();
+            var strategy = new Strategy();
+            var nn_input_data_generator = new NNInputDataGenerator();
+
+            for (int i = from; i < to - 1; i++)
+            {
+                var nn_inputs = nn_input_data_generator.generateNNWinGA(i, chromo.num_index);
+                var nn_outputs = nn.calcNN(nn_inputs, chromo, 0);
+                var pred = nn.getActivatedUnitOnlyBuySell(nn_outputs, nn_threshold);
+                var actions = strategy.GAWinMarketStrategy(i, pred, ac);
+                for (int j = 0; j < actions.action.Count; j++)
+                {
+                    if (actions.action[j] == "entry")
+                        ac.entry_order(actions.order_type[j], actions.order_side[j], actions.order_size[j], actions.order_price[j], i, MarketData.Dt[i].ToString(), actions.order_message[j]);
+                }
+                ac.move_to_next(i + 1, MarketData.Dt[i + 1].ToString(), MarketData.Open[i + 1], MarketData.High[i + 1], MarketData.Low[i + 1], MarketData.Close[i + 1]);
+            }
+            ac.last_day(to, MarketData.Dt[to].ToString(), MarketData.Close[to]);
+            ac.calc_sharp_ratio();
+            return ac;
+        }
     }
 }
